@@ -23,10 +23,12 @@ interface _GlobalComponents {
   PaddleStepper: typeof import("../../components/booking/PaddleStepper.vue")['default']
   PaymentMethodCard: typeof import("../../components/booking/PaymentMethodCard.vue")['default']
   TimeSlotList: typeof import("../../components/booking/TimeSlotList.vue")['default']
+  TimeSlotModal: typeof import("../../components/booking/TimeSlotModal.vue")['default']
   AppBar: typeof import("../../components/ui/AppBar.vue")['default']
   AppHeader: typeof import("../../components/ui/AppHeader.vue")['default']
   BottomCta: typeof import("../../components/ui/BottomCta.vue")['default']
   HoldTimer: typeof import("../../components/ui/HoldTimer.vue")['default']
+  PriceTotalBar: typeof import("../../components/ui/PriceTotalBar.vue")['default']
   NuxtWelcome: typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']
   NuxtLayout: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
   NuxtErrorBoundary: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -59,10 +61,12 @@ interface _GlobalComponents {
   LazyPaddleStepper: LazyComponent<typeof import("../../components/booking/PaddleStepper.vue")['default']>
   LazyPaymentMethodCard: LazyComponent<typeof import("../../components/booking/PaymentMethodCard.vue")['default']>
   LazyTimeSlotList: LazyComponent<typeof import("../../components/booking/TimeSlotList.vue")['default']>
+  LazyTimeSlotModal: LazyComponent<typeof import("../../components/booking/TimeSlotModal.vue")['default']>
   LazyAppBar: LazyComponent<typeof import("../../components/ui/AppBar.vue")['default']>
   LazyAppHeader: LazyComponent<typeof import("../../components/ui/AppHeader.vue")['default']>
   LazyBottomCta: LazyComponent<typeof import("../../components/ui/BottomCta.vue")['default']>
   LazyHoldTimer: LazyComponent<typeof import("../../components/ui/HoldTimer.vue")['default']>
+  LazyPriceTotalBar: LazyComponent<typeof import("../../components/ui/PriceTotalBar.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
   LazyNuxtLayout: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
   LazyNuxtErrorBoundary: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

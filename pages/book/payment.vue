@@ -45,7 +45,7 @@ import BottomCTA from '~/components/ui/BottomCTA.vue'
 useHead({ title: 'Pay for your booking — DINK' })
 
 const store = useBookingStore()
-if (store.courtId === null) {
+if (store.courtId === null && store.courtIds.length === 0) {
   navigateTo('/book/court')
 }
 

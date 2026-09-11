@@ -20,7 +20,11 @@
     <BottomCTA
       :label="store.paddleCount > 0 ? 'Continue' : 'Skip paddles'"
       @click="goNext"
-    />
+    >
+      <template #above>
+        <PriceTotalBar :show="true" />
+      </template>
+    </BottomCTA>
   </div>
 </template>
 
@@ -28,11 +32,12 @@
 import { useBookingStore, PADDLES } from '~/stores/booking'
 import PaddleStepper from '~/components/booking/PaddleStepper.vue'
 import BottomCTA from '~/components/ui/BottomCTA.vue'
+import PriceTotalBar from '~/components/ui/PriceTotalBar.vue'
 
-useHead({ title: 'Paddle rental — DINK' })
+useHead({ title: 'Paddle rental — PickleBook' })
 
 const store = useBookingStore()
-if (store.courtId === null) {
+if (store.courtId === null && store.courtIds.length === 0) {
   navigateTo('/book/court')
 }
 

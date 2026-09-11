@@ -62,12 +62,34 @@ export interface TimeSlot {
   open: number
 }
 
+// 8 AM to 11 PM hourly slots
+export const TIME_SLOT_LABELS = [
+  '8:00 AM',
+  '9:00 AM',
+  '10:00 AM',
+  '11:00 AM',
+  '12:00 PM',
+  '1:00 PM',
+  '2:00 PM',
+  '3:00 PM',
+  '4:00 PM',
+  '5:00 PM',
+  '6:00 PM',
+  '7:00 PM',
+  '8:00 PM',
+  '9:00 PM',
+  '10:00 PM',
+  '11:00 PM',
+]
+
 interface BookingState {
   year: number
   month: number // 0-indexed (8 = September)
   day: number
-  slotIndex: number | null
-  courtId: number | null
+  selectedSlots: number[] // array of selected slot indices
+  slotIndex: number | null // kept for compatibility (first selected or null)
+  courtIds: number[] // array of selected court IDs
+  courtId: number | null // kept for compatibility (first selected court or null)
   paddleQty: Record<string, number>
   foodQty: Record<string, number>
   payMethod: PaymentMethod
@@ -75,12 +97,33 @@ interface BookingState {
   bookingRef: string | null
 }
 
-function seededVals(day: number): [number, number, number] {
-  if (day === 15) return [3, 2, 1]
-  const a = (day * 13) % 4
-  const b = (day * 7) % 4
-  const c = (day * 5) % 3
-  return [a, b, c]
+function seededVals(day: number): number[] {
+  return TIME_SLOT_LABELS.map((_, i) => {
+    // Predictable and realistic court availability (0 to 3)
+    const seed = (day * 19 + i * 11 + 7) % 17
+    if (seed === 0) return 0 // Full
+    if (seed <= 3) return 1  // 1 court open
+    if (seed <= 9) return 2  // 2 courts open
+    return 3                 // 3 courts open
+  })
+}
+
+function formatEndHour(label: string): string {
+  const [time, period] = label.split(' ')
+  const [hourStr, minStr] = time.split(':')
+  const hour = parseInt(hourStr)
+  let nextHour = hour + 1
+  let nextPeriod = period
+  if (hour === 11 && period === 'AM') {
+    nextHour = 12
+    nextPeriod = 'PM'
+  } else if (hour === 11 && period === 'PM') {
+    nextHour = 12
+    nextPeriod = 'AM'
+  } else if (hour === 12) {
+    nextHour = 1
+  }
+  return `${nextHour}:${minStr} ${nextPeriod}`
 }
 
 export const useBookingStore = defineStore('booking', {
@@ -88,7 +131,9 @@ export const useBookingStore = defineStore('booking', {
     year: 2026,
     month: 8, // September
     day: 15,
+    selectedSlots: [],
     slotIndex: null,
+    courtIds: [],
     courtId: null,
     paddleQty: { standard: 0, premium: 0, pro: 0 },
     foodQty: { chicken: 0, burger: 0, fries: 0, water: 0 },
@@ -100,26 +145,59 @@ export const useBookingStore = defineStore('booking', {
   getters: {
     slots: (s): TimeSlot[] => {
       const vals = seededVals(s.day)
-      const labels = ['6:00 PM', '7:00 PM', '8:00 PM']
-      return labels.map((label, i) => ({ label, open: vals[i] }))
+      return TIME_SLOT_LABELS.map((label, i) => ({ label, open: vals[i] }))
     },
 
     selectedSlot: (s): TimeSlot | null => {
-      if (s.slotIndex === null) return null
+      if (s.selectedSlots.length === 0 && s.slotIndex === null) return null
+      const idx = s.selectedSlots[0] ?? s.slotIndex
       const vals = seededVals(s.day)
-      const labels = ['6:00 PM', '7:00 PM', '8:00 PM']
-      return { label: labels[s.slotIndex], open: vals[s.slotIndex] }
+      return { label: TIME_SLOT_LABELS[idx], open: vals[idx] }
+    },
+
+    selectedSlotsList: (s): TimeSlot[] => {
+      const vals = seededVals(s.day)
+      return s.selectedSlots.map(idx => ({ label: TIME_SLOT_LABELS[idx], open: vals[idx] }))
     },
 
     selectedCourt: (s): Court | null => {
-      return COURTS.find(c => c.id === s.courtId) || null
+      const id = s.courtIds[0] ?? s.courtId
+      return COURTS.find(c => c.id === id) || null
+    },
+
+    selectedCourts: (s): Court[] => {
+      if (s.courtIds.length > 0) {
+        return COURTS.filter(c => s.courtIds.includes(c.id))
+      }
+      if (s.courtId !== null) {
+        const c = COURTS.find(x => x.id === s.courtId)
+        return c ? [c] : []
+      }
+      return []
+    },
+
+    courtNamesLabel: (s): string => {
+      const courts = COURTS.filter(c => s.courtIds.includes(c.id))
+      if (courts.length === 0) {
+        const c = COURTS.find(x => x.id === s.courtId)
+        return c ? c.name : ''
+      }
+      const names = courts.map(c => c.name)
+      if (names.length === 1) return names[0]
+      if (names.length === 2) return `${names[0]} & ${names[1]}`
+      return names.join(', ')
     },
 
     courtsStatusMap: (s): Record<number, 'open' | 'low' | 'full'> => {
-      const slot = s.slotIndex !== null ? seededVals(s.day)[s.slotIndex] : 3
-      if (slot >= 3) return { 1: 'open', 2: 'open', 3: 'low' }
-      if (slot === 2) return { 1: 'open', 2: 'open', 3: 'full' }
-      if (slot === 1) return { 1: 'open', 2: 'full', 3: 'full' }
+      const vals = seededVals(s.day)
+      const selectedCounts = s.selectedSlots.length > 0
+        ? s.selectedSlots.map(idx => vals[idx] ?? 3)
+        : (s.slotIndex !== null ? [vals[s.slotIndex] ?? 3] : [3])
+      const minOpen = Math.min(...selectedCounts)
+
+      if (minOpen >= 3) return { 1: 'open', 2: 'open', 3: 'low' }
+      if (minOpen === 2) return { 1: 'open', 2: 'open', 3: 'full' }
+      if (minOpen === 1) return { 1: 'open', 2: 'full', 3: 'full' }
       return { 1: 'full', 2: 'full', 3: 'full' }
     },
 
@@ -139,14 +217,33 @@ export const useBookingStore = defineStore('booking', {
       return ALL_FOOD.reduce((sum, f) => sum + (s.foodQty[f.id] || 0), 0)
     },
 
+    slotHours: (s): number => {
+      return s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 0)
+    },
+
     courtTotal: (s): number => {
-      const c = COURTS.find(x => x.id === s.courtId)
-      return c ? c.price : 0
+      const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 0)
+      if (s.courtIds.length > 0) {
+        const selected = COURTS.filter(c => s.courtIds.includes(c.id))
+        return selected.reduce((sum, c) => sum + (c.price * hours), 0)
+      }
+      if (s.courtId !== null) {
+        const c = COURTS.find(x => x.id === s.courtId)
+        return c ? c.price * hours : 0
+      }
+      return 0
     },
 
     grandTotal: (s): number => {
-      const c = COURTS.find(x => x.id === s.courtId)
-      const courtPrice = c ? c.price : 0
+      const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 0)
+      let courtPrice = 0
+      if (s.courtIds.length > 0) {
+        const selected = COURTS.filter(c => s.courtIds.includes(c.id))
+        courtPrice = selected.reduce((sum, c) => sum + (c.price * hours), 0)
+      } else if (s.courtId !== null) {
+        const c = COURTS.find(x => x.id === s.courtId)
+        courtPrice = c ? c.price * hours : 0
+      }
       const pTotal = PADDLES.reduce((sum, p) => sum + p.price * (s.paddleQty[p.id] || 0), 0)
       const fTotal = ALL_FOOD.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0)
       return courtPrice + pTotal + fTotal
@@ -167,19 +264,47 @@ export const useBookingStore = defineStore('booking', {
     },
 
     slotRangeLabel: (s): string => {
-      if (s.slotIndex === null) return ''
-      const labels = ['6:00 PM', '7:00 PM', '8:00 PM']
-      const label = labels[s.slotIndex]
-      const startHour = parseInt(label)
-      const endHour = startHour + 1
-      return `${label} – ${endHour}:00 PM`
+      const count = s.selectedSlots.length
+      if (count === 0) {
+        if (s.slotIndex === null) return ''
+        const start = TIME_SLOT_LABELS[s.slotIndex]
+        return `${start} – ${formatEndHour(start)} (1 hr)`
+      }
+
+      if (count === 1) {
+        const start = TIME_SLOT_LABELS[s.selectedSlots[0]]
+        return `${start} – ${formatEndHour(start)} (1 hr)`
+      }
+
+      // Check if contiguous block
+      const sorted = [...s.selectedSlots].sort((a, b) => a - b)
+      let isContiguous = true
+      for (let i = 0; i < sorted.length - 1; i++) {
+        if (sorted[i + 1] !== sorted[i] + 1) {
+          isContiguous = false
+          break
+        }
+      }
+
+      const hrsText = `${count} hrs`
+      if (isContiguous) {
+        const start = TIME_SLOT_LABELS[sorted[0]]
+        const end = formatEndHour(TIME_SLOT_LABELS[sorted[sorted.length - 1]])
+        return `${start} – ${end} (${hrsText})`
+      }
+
+      // Non-contiguous list
+      return `${sorted.map(i => TIME_SLOT_LABELS[i]).join(', ')} (${hrsText})`
     },
   },
 
   actions: {
     setDay(day: number) {
       this.day = day
+      this.selectedSlots = []
       this.slotIndex = null
+      this.courtIds = []
+      this.courtId = null
     },
 
     prevMonth() {
@@ -189,7 +314,10 @@ export const useBookingStore = defineStore('booking', {
         this.year -= 1
       }
       this.day = 1
+      this.selectedSlots = []
       this.slotIndex = null
+      this.courtIds = []
+      this.courtId = null
     },
 
     nextMonth() {
@@ -199,15 +327,56 @@ export const useBookingStore = defineStore('booking', {
         this.year += 1
       }
       this.day = 1
+      this.selectedSlots = []
       this.slotIndex = null
+      this.courtIds = []
+      this.courtId = null
+    },
+
+    toggleSlot(idx: number) {
+      if (this.selectedSlots.includes(idx)) {
+        this.selectedSlots = this.selectedSlots.filter(i => i !== idx)
+      } else {
+        this.selectedSlots = [...this.selectedSlots, idx].sort((a, b) => a - b)
+      }
+      this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null
     },
 
     setSlot(idx: number) {
-      this.slotIndex = idx
+      this.toggleSlot(idx)
+    },
+
+    setSlots(indices: number[]) {
+      this.selectedSlots = [...indices].sort((a, b) => a - b)
+      this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null
+    },
+
+    clearSlots() {
+      this.selectedSlots = []
+      this.slotIndex = null
+    },
+
+    toggleCourt(id: number) {
+      if (this.courtIds.includes(id)) {
+        this.courtIds = this.courtIds.filter(x => x !== id)
+      } else {
+        this.courtIds = [...this.courtIds, id].sort((a, b) => a - b)
+      }
+      this.courtId = this.courtIds.length > 0 ? this.courtIds[0] : null
     },
 
     setCourt(id: number) {
-      this.courtId = id
+      this.toggleCourt(id)
+    },
+
+    setCourts(ids: number[]) {
+      this.courtIds = [...ids].sort((a, b) => a - b)
+      this.courtId = this.courtIds.length > 0 ? this.courtIds[0] : null
+    },
+
+    clearCourts() {
+      this.courtIds = []
+      this.courtId = null
     },
 
     setPaddleQty(id: string, dir: number) {
@@ -243,7 +412,9 @@ export const useBookingStore = defineStore('booking', {
     },
 
     reset() {
+      this.selectedSlots = []
       this.slotIndex = null
+      this.courtIds = []
       this.courtId = null
       this.paddleQty = { standard: 0, premium: 0, pro: 0 }
       this.foodQty = { chicken: 0, burger: 0, fries: 0, water: 0 }

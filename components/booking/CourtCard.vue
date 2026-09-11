@@ -14,7 +14,10 @@
 
     <!-- Sub-line -->
     <div class="text-[14px] mb-[14px]" style="color: var(--ink-soft)">
-      ₱{{ court.price }} / hour · {{ court.type }}
+      <span>₱{{ court.price }} / hour · {{ court.type }}</span>
+      <span v-if="hours && hours > 1" class="font-semibold text-[var(--ink)]">
+        · ₱{{ court.price * hours }} total ({{ hours }} hrs)
+      </span>
     </div>
 
     <!-- CTA button -->
@@ -41,6 +44,7 @@ const props = defineProps<{
   court: Court
   status: 'open' | 'low' | 'full'
   isSelected: boolean
+  hours?: number
 }>()
 
 defineEmits<{

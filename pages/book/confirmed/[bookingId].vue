@@ -3,8 +3,8 @@
     <div class="flex-1 pb-6">
       <BookingQR
         :booking-ref="bookingRef"
-        :court-name="store.selectedCourt?.name || 'Court 2'"
-        :slot-range="store.slotRangeLabel || '7:00 – 8:00 PM'"
+        :court-name="store.courtNamesLabel || store.selectedCourt?.name || 'Court 1'"
+        :slot-range="store.slotRangeLabel || '8:00 AM – 10:00 AM'"
         :date-label="store.dateLabel || 'Tue, Sep 15'"
         :pay-method="store.payMethod"
         :paddle-count="store.paddleCount"

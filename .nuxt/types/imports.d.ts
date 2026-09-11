@@ -6,6 +6,7 @@ declare global {
   const FOOD_GROUPS: typeof import('../../stores/booking').FOOD_GROUPS
   const HOLD_DURATION_MS: typeof import('../../stores/booking').HOLD_DURATION_MS
   const PADDLES: typeof import('../../stores/booking').PADDLES
+  const TIME_SLOT_LABELS: typeof import('../../stores/booking').TIME_SLOT_LABELS
   const abortNavigation: typeof import('../../node_modules/nuxt/dist/app/composables/router').abortNavigation
   const acceptHMRUpdate: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').acceptHMRUpdate
   const addRouteMiddleware: typeof import('../../node_modules/nuxt/dist/app/composables/router').addRouteMiddleware
@@ -220,6 +221,7 @@ declare module 'vue' {
     readonly FOOD_GROUPS: UnwrapRef<typeof import('../../stores/booking')['FOOD_GROUPS']>
     readonly HOLD_DURATION_MS: UnwrapRef<typeof import('../../stores/booking')['HOLD_DURATION_MS']>
     readonly PADDLES: UnwrapRef<typeof import('../../stores/booking')['PADDLES']>
+    readonly TIME_SLOT_LABELS: UnwrapRef<typeof import('../../stores/booking')['TIME_SLOT_LABELS']>
     readonly abortNavigation: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['abortNavigation']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['acceptHMRUpdate']>
     readonly addRouteMiddleware: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['addRouteMiddleware']>

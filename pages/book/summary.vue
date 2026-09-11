@@ -12,9 +12,19 @@
 
       <!-- Court Card -->
       <div class="bg-[--cream-card] border border-[--line] rounded-card p-[18px] mb-4 shadow-[0_2px_12px_-4px_rgba(34,51,24,0.1)]">
-        <div class="font-display font-semibold text-[18px]">{{ store.selectedCourt?.name }}</div>
+        <div class="font-display font-semibold text-[19px]">{{ store.courtNamesLabel || store.selectedCourt?.name }}</div>
         <div class="text-ink-soft text-[14px] mt-0.5">
           {{ store.dateLabel }} · {{ store.slotRangeLabel }}
+        </div>
+        <!-- Court individual badges if multiple courts chosen -->
+        <div v-if="store.courtIds.length > 1" class="flex flex-wrap gap-1.5 mt-2.5">
+          <span
+            v-for="c in store.selectedCourts"
+            :key="c.id"
+            class="px-2.5 py-1 rounded-lg text-[12px] font-semibold bg-[var(--cream)] text-[var(--ink)] border border-[var(--line)]"
+          >
+            {{ c.name }} · ₱{{ c.price }}/hr
+          </span>
         </div>
       </div>
 
@@ -23,7 +33,10 @@
         <!-- Court rental -->
         <div class="flex justify-between items-start py-3 border-b border-line">
           <div>
-            <div class="text-[15px]">Court rental</div>
+            <div class="text-[15px] font-medium">Court rental</div>
+            <div class="text-gray text-[13px] mt-0.5">
+              {{ store.courtIds.length > 0 ? store.courtIds.length : 1 }} {{ (store.courtIds.length > 1) ? 'courts' : 'court' }} × {{ store.slotHours }} {{ store.slotHours === 1 ? 'hour' : 'hours' }}
+            </div>
           </div>
           <div class="font-semibold text-[15px]">₱{{ store.courtTotal }}</div>
         </div>
@@ -31,7 +44,7 @@
         <!-- Paddles if any -->
         <div v-if="store.paddleCount > 0" class="flex justify-between items-start py-3 border-b border-line">
           <div>
-            <div class="text-[15px]">{{ mainPaddleLine.main }}</div>
+            <div class="text-[15px] font-medium">{{ mainPaddleLine.main }}</div>
             <div v-if="mainPaddleLine.sub" class="text-gray text-[13px] mt-0.5">{{ mainPaddleLine.sub }}</div>
           </div>
           <div class="font-semibold text-[15px]">₱{{ store.paddleTotal }}</div>
@@ -40,7 +53,7 @@
         <!-- Food if any -->
         <div v-if="store.foodCount > 0" class="flex justify-between items-start py-3 border-b border-line">
           <div>
-            <div class="text-[15px]">{{ mainFoodLine.main }}</div>
+            <div class="text-[15px] font-medium">{{ mainFoodLine.main }}</div>
             <div v-if="mainFoodLine.sub" class="text-gray text-[13px] mt-0.5">{{ mainFoodLine.sub }}</div>
           </div>
           <div class="font-semibold text-[15px]">₱{{ store.foodTotal }}</div>
@@ -67,10 +80,10 @@ import { useBookingStore, PADDLES, ALL_FOOD } from '~/stores/booking'
 import HoldTimer from '~/components/ui/HoldTimer.vue'
 import BottomCTA from '~/components/ui/BottomCTA.vue'
 
-useHead({ title: 'Your booking — DINK' })
+useHead({ title: 'Your booking — PickleBook' })
 
 const store = useBookingStore()
-if (store.courtId === null) {
+if (store.courtId === null && store.courtIds.length === 0) {
   navigateTo('/book/court')
 }
 

@@ -47,7 +47,7 @@
         :key="'day-' + d"
         type="button"
         :disabled="isPast(d)"
-        @click="store.setDay(d)"
+        @click="selectDay(d)"
         class="cal-day"
         :class="[
           d === store.day
@@ -67,6 +67,7 @@
 import { computed } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 
+const emit = defineEmits<{ dateSelected: [] }>()
 const store = useBookingStore()
 
 const dows = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -88,6 +89,13 @@ const today = new Date(2026, 8, 10) // September 10, 2026 benchmark
 function isPast(d: number): boolean {
   const cellDate = new Date(store.year, store.month, d)
   return cellDate < today
+}
+
+function selectDay(d: number) {
+  if (store.day !== d) {
+    store.setDay(d)
+  }
+  emit('dateSelected')
 }
 </script>
 

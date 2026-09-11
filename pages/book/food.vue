@@ -5,7 +5,7 @@
         Pre-order food
       </h1>
       <p class="text-ink-soft text-[14.5px] m-0 mb-5 leading-[1.4]">
-        Ready by your {{ store.selectedSlot?.label || '7:00 PM' }} session
+        Ready by your {{ store.selectedSlot?.label || '8:00 AM' }} session
       </p>
 
       <template v-for="g in FOOD_GROUPS" :key="g.label">
@@ -25,7 +25,11 @@
     <BottomCTA
       :label="store.foodCount > 0 ? 'Review order' : 'Add food, or skip'"
       @click="goNext"
-    />
+    >
+      <template #above>
+        <PriceTotalBar :show="true" />
+      </template>
+    </BottomCTA>
   </div>
 </template>
 
@@ -33,11 +37,12 @@
 import { useBookingStore, FOOD_GROUPS } from '~/stores/booking'
 import FoodItemRow from '~/components/booking/FoodItemRow.vue'
 import BottomCTA from '~/components/ui/BottomCTA.vue'
+import PriceTotalBar from '~/components/ui/PriceTotalBar.vue'
 
-useHead({ title: 'Pre-order food — DINK' })
+useHead({ title: 'Pre-order food — PickleBook' })
 
 const store = useBookingStore()
-if (store.courtId === null) {
+if (store.courtId === null && store.courtIds.length === 0) {
   navigateTo('/book/court')
 }
 

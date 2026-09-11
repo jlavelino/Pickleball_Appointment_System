@@ -23,10 +23,12 @@ export const OrderSummary: typeof import("../components/booking/OrderSummary.vue
 export const PaddleStepper: typeof import("../components/booking/PaddleStepper.vue")['default']
 export const PaymentMethodCard: typeof import("../components/booking/PaymentMethodCard.vue")['default']
 export const TimeSlotList: typeof import("../components/booking/TimeSlotList.vue")['default']
+export const TimeSlotModal: typeof import("../components/booking/TimeSlotModal.vue")['default']
 export const AppBar: typeof import("../components/ui/AppBar.vue")['default']
 export const AppHeader: typeof import("../components/ui/AppHeader.vue")['default']
 export const BottomCta: typeof import("../components/ui/BottomCta.vue")['default']
 export const HoldTimer: typeof import("../components/ui/HoldTimer.vue")['default']
+export const PriceTotalBar: typeof import("../components/ui/PriceTotalBar.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
 export const NuxtErrorBoundary: typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -59,10 +61,12 @@ export const LazyOrderSummary: LazyComponent<typeof import("../components/bookin
 export const LazyPaddleStepper: LazyComponent<typeof import("../components/booking/PaddleStepper.vue")['default']>
 export const LazyPaymentMethodCard: LazyComponent<typeof import("../components/booking/PaymentMethodCard.vue")['default']>
 export const LazyTimeSlotList: LazyComponent<typeof import("../components/booking/TimeSlotList.vue")['default']>
+export const LazyTimeSlotModal: LazyComponent<typeof import("../components/booking/TimeSlotModal.vue")['default']>
 export const LazyAppBar: LazyComponent<typeof import("../components/ui/AppBar.vue")['default']>
 export const LazyAppHeader: LazyComponent<typeof import("../components/ui/AppHeader.vue")['default']>
 export const LazyBottomCta: LazyComponent<typeof import("../components/ui/BottomCta.vue")['default']>
 export const LazyHoldTimer: LazyComponent<typeof import("../components/ui/HoldTimer.vue")['default']>
+export const LazyPriceTotalBar: LazyComponent<typeof import("../components/ui/PriceTotalBar.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>
