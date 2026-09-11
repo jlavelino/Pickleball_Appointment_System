@@ -1,44 +1,43 @@
 <template>
-  <header class="flex items-center justify-between px-[22px] pt-[22px] pb-[6px]">
+  <header class="header-bar">
+
+    <!-- Back button -->
     <button
       type="button"
       @click="handleBack"
       aria-label="Back"
-      class="w-[34px] h-[34px] rounded-full border border-line bg-white flex items-center justify-center cursor-pointer text-base text-ink transition-opacity shadow-sm"
+      class="back-btn"
       :class="canGoBack ? 'opacity-100' : 'opacity-0 pointer-events-none'"
     >
       ←
     </button>
 
-    <NuxtLink to="/" class="font-display font-bold text-[21px] tracking-[0.5px] flex items-center gap-1.5 text-ink">
-      <!-- Pickleball Ball SVG -->
-      <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-        <path d="M6 24C6 14 14 6 24 6C32 6 36 12 34 20C32 29 22 36 12 34C7 33 5 29 6 24Z" fill="#96C33E" stroke="#38591A" stroke-width="2"/>
-        <circle cx="15.5" cy="20.5" r="1.5" fill="#38591A"/>
-        <circle cx="22" cy="15.5" r="1.5" fill="#38591A"/>
-        <circle cx="19.5" cy="25.5" r="1.5" fill="#38591A"/>
-        <circle cx="27" cy="21.5" r="1.5" fill="#38591A"/>
-      </svg>
-      <span>DI<span class="text-relish-dark">N</span>K</span>
+    <!-- Logo & Wordmark — centered -->
+    <NuxtLink to="/" class="logo-link">
+      <img
+        src="~/assets/images/pickle_logo.png"
+        alt="PickleBook icon"
+        class="logo-icon"
+        style="height:32px;width:auto;display:block;max-width:none;"
+      />
+      <img
+        src="~/assets/images/pickle_name.png"
+        alt="PickleBook"
+        class="logo-name"
+        style="height:22px;width:auto;display:block;max-width:none;"
+      />
     </NuxtLink>
 
-    <!-- Avatar with Pickleball Hole Ring -->
-    <div class="w-[32px] h-[32px] rounded-full bg-ink flex items-center justify-center flex-none">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="7" stroke="#96C33E" stroke-width="1.4"/>
-        <circle cx="5.6" cy="6" r="0.9" fill="#96C33E"/>
-        <circle cx="9.8" cy="5" r="0.9" fill="#96C33E"/>
-        <circle cx="8.6" cy="9.2" r="0.9" fill="#96C33E"/>
-        <circle cx="5.8" cy="10.4" r="0.9" fill="#96C33E"/>
-      </svg>
-    </div>
+    <!-- Spacer to balance back button -->
+    <div class="back-spacer" aria-hidden="true"></div>
+
   </header>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const route = useRoute()
+const route  = useRoute()
 const router = useRouter()
 
 const canGoBack = computed(() => {
@@ -50,3 +49,59 @@ function handleBack() {
   router.back()
 }
 </script>
+
+<style scoped>
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 6px;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  flex: none;
+}
+
+.logo-name {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+}
+
+.back-spacer {
+  width: 34px;
+  height: 34px;
+  flex: none;
+}
+
+.back-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+  box-shadow: none;
+  flex: none;
+}
+.back-btn:hover {
+  background: var(--ink);
+  color: var(--cream);
+}
+</style>

@@ -11,7 +11,7 @@
       <HoldTimer :seconds="store.holdSeconds" />
 
       <!-- Court Card -->
-      <div class="bg-white border border-line rounded-card p-[18px] mb-4">
+      <div class="bg-[--cream-card] border border-[--line] rounded-card p-[18px] mb-4 shadow-[0_2px_12px_-4px_rgba(34,51,24,0.1)]">
         <div class="font-display font-semibold text-[18px]">{{ store.selectedCourt?.name }}</div>
         <div class="text-ink-soft text-[14px] mt-0.5">
           {{ store.dateLabel }} · {{ store.slotRangeLabel }}
@@ -19,7 +19,7 @@
       </div>
 
       <!-- Line items breakdown -->
-      <div class="bg-white border border-line rounded-card p-[18px] mb-4">
+      <div class="bg-[--cream-card] border border-[--line] rounded-card p-[18px] mb-4 shadow-[0_2px_12px_-4px_rgba(34,51,24,0.1)]">
         <!-- Court rental -->
         <div class="flex justify-between items-start py-3 border-b border-line">
           <div>

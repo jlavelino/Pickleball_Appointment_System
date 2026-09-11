@@ -8,7 +8,7 @@
           type="button"
           @click="store.prevMonth"
           aria-label="Previous Month"
-          class="w-7 h-7 rounded-lg border border-line bg-white cursor-pointer text-[13px] text-ink flex items-center justify-center hover:bg-cream/50"
+          class="cal-nav-btn"
         >
           ‹
         </button>
@@ -16,7 +16,7 @@
           type="button"
           @click="store.nextMonth"
           aria-label="Next Month"
-          class="w-7 h-7 rounded-lg border border-line bg-white cursor-pointer text-[13px] text-ink flex items-center justify-center hover:bg-cream/50"
+          class="cal-nav-btn"
         >
           ›
         </button>
@@ -25,6 +25,7 @@
 
     <!-- Calendar Grid -->
     <div class="grid grid-cols-7 gap-y-1 gap-x-0.5 mb-[22px]">
+      <!-- Day-of-week headers -->
       <div
         v-for="d in dows"
         :key="d"
@@ -33,25 +34,27 @@
         {{ d }}
       </div>
 
+      <!-- Empty leading cells -->
       <div
         v-for="i in firstDow"
         :key="'empty-' + i"
         class="text-center py-[9px] text-[14.5px]"
       ></div>
 
+      <!-- Day cells -->
       <button
         v-for="d in daysInMonth"
         :key="'day-' + d"
         type="button"
         :disabled="isPast(d)"
         @click="store.setDay(d)"
-        class="text-center py-[9px] rounded-[10px] text-[14.5px] cursor-pointer transition-colors border-none"
+        class="cal-day"
         :class="[
           d === store.day
-            ? 'bg-ink text-white font-semibold'
+            ? 'cal-day--selected'
             : isPast(d)
-              ? 'text-[#C9C4B3] cursor-not-allowed bg-transparent'
-              : 'text-ink bg-transparent hover:bg-white'
+              ? 'cal-day--past'
+              : 'cal-day--available'
         ]"
       >
         {{ d }}
@@ -87,3 +90,65 @@ function isPast(d: number): boolean {
   return cellDate < today
 }
 </script>
+
+<style scoped>
+/* ── Month nav buttons ───────────────────────────────────────── */
+.cal-nav-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+}
+.cal-nav-btn:hover {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+/* ── Day cells ───────────────────────────────────────────────── */
+.cal-day {
+  text-align: center;
+  padding: 9px 0;
+  border-radius: 10px;
+  font-size: 14.5px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+}
+
+/* Available — visible ink text, subtle hover */
+.cal-day--available {
+  color: var(--ink);
+  background: transparent;
+}
+.cal-day--available:hover {
+  background: rgba(34, 51, 24, 0.10);   /* ink at 10% — clearly visible on cream */
+  font-weight: 600;
+}
+
+/* Selected — inverted, max contrast */
+.cal-day--selected {
+  background: var(--ink);
+  color: var(--cream);
+  font-weight: 700;
+  box-shadow: 0 3px 12px -3px rgba(34, 51, 24, 0.40);
+}
+
+/* Past / disabled */
+.cal-day--past {
+  color: #C0BC9E;   /* muted but still visible on cream */
+  background: transparent;
+  cursor: not-allowed;
+}
+</style>

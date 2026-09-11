@@ -2,7 +2,7 @@
   <div class="min-h-screen flex justify-center py-8 px-3 font-sans text-ink">
     <div class="app-shell flex flex-col">
       <AppHeader />
-      <main class="flex-1 px-[22px] pt-[14px] pb-0 overflow-y-auto">
+      <main class="flex-1 px-[22px] pt-[14px] pb-0 overflow-y-auto no-scrollbar">
         <NuxtPage />
       </main>
     </div>

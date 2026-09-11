@@ -2,7 +2,9 @@
   <div
     @click="$emit('select')"
     class="flex items-center gap-[14px] border-[1.5px] rounded-card p-4 mb-3 cursor-pointer transition-all"
-    :class="selected ? 'border-ink bg-white' : 'border-line bg-white hover:border-gray'"
+    :class="selected
+      ? 'border-ink bg-[--cream-card] shadow-[0_4px_16px_-4px_rgba(34,51,24,0.2)]'
+      : 'border-[--line] bg-[--cream-card] hover:border-[--ink-soft] hover:shadow-[0_2px_10px_-4px_rgba(34,51,24,0.12)]'"
   >
     <div
       class="w-[42px] h-[42px] rounded-[11px] flex items-center justify-center text-white font-bold text-[17px] flex-shrink-0"

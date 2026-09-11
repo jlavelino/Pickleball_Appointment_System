@@ -1,37 +1,34 @@
 <template>
   <div
-    class="border border-line bg-white rounded-card p-[18px] mb-4 transition-all"
+    class="court-card"
     :class="[
-      isSelected ? 'border-lime bg-lime-soft' : '',
-      isFull ? 'opacity-55' : ''
+      isSelected ? 'court-card--selected' : '',
+      isFull    ? 'court-card--full'     : ''
     ]"
   >
+    <!-- Header row -->
     <div class="flex justify-between items-start mb-1">
       <div class="font-display font-semibold text-[19px]">{{ court.name }}</div>
-      <span
-        class="text-[12.5px] font-semibold px-[11px] py-1 rounded-full"
-        :class="badgeClass"
-      >
-        {{ badgeText }}
-      </span>
+      <span class="badge" :class="badgeClass">{{ badgeText }}</span>
     </div>
-    <div class="text-ink-soft text-[14px] mb-[14px]">
+
+    <!-- Sub-line -->
+    <div class="text-[14px] mb-[14px]" style="color: var(--ink-soft)">
       ₱{{ court.price }} / hour · {{ court.type }}
     </div>
+
+    <!-- CTA button -->
     <button
       type="button"
       :disabled="isFull"
       @click="$emit('select', court.id)"
-      class="w-full p-[13px] rounded-[11px] font-semibold text-[15px] cursor-pointer transition-colors border"
+      class="court-btn btn-press"
       :class="[
-        isSelected
-          ? 'bg-ink text-white border-ink'
-          : isFull
-            ? 'cursor-not-allowed border-line text-gray bg-white'
-            : 'border-ink bg-white text-ink hover:bg-ink hover:text-white'
+        isSelected ? 'court-btn--chosen' :
+        isFull     ? 'court-btn--full'   : 'court-btn--idle'
       ]"
     >
-      {{ isSelected ? 'Selected' : isFull ? 'Full' : 'Select court' }}
+      {{ isSelected ? '✓ Selected' : isFull ? 'Full' : 'Select court' }}
     </button>
   </div>
 </template>
@@ -59,8 +56,84 @@ const badgeText = computed(() => {
 })
 
 const badgeClass = computed(() => {
-  if (props.status === 'open') return 'bg-lime-soft text-lime-text'
-  if (props.status === 'low') return 'bg-danger-bg text-danger-text'
-  return 'bg-[#EFEAE0] text-gray'
+  if (props.status === 'open') return 'badge--open'
+  if (props.status === 'low') return 'badge--low'
+  return 'badge--full'
 })
 </script>
+
+<style scoped>
+/* ── Card shell ───────────────────────────────────────────── */
+.court-card {
+  background: var(--cream-card, #FDFCF5);
+  border: 1.5px solid var(--line, #DDDDB8);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 10px -4px rgba(34, 51, 24, 0.10);
+}
+.court-card--selected {
+  border-color: #4C7A22;                      /* --orange (lime-green) */
+  background: #EAF1CE;                        /* lime-soft */
+  box-shadow: 0 4px 16px -4px rgba(76, 122, 34, 0.22);
+}
+.court-card--full {
+  opacity: 0.55;
+}
+
+/* ── Badge ────────────────────────────────────────────────── */
+.badge {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 3px 11px;
+  border-radius: 999px;
+}
+.badge--open { background: #EAF1CE; color: #3F6019; }
+.badge--low  { background: #F7E8D2; color: #B4661E; }
+.badge--full { background: #EFEAE0; color: #847E63; }
+
+/* ── CTA button ───────────────────────────────────────────── */
+.court-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 13px;
+  border-radius: 11px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+/* Idle — outlined ink, fills on hover */
+.court-btn--idle {
+  background: transparent;
+  color: var(--ink, #223318);
+  border-color: var(--ink, #223318);
+}
+.court-btn--idle:hover {
+  background: var(--ink, #223318);
+  color: var(--cream, #F5F1DE);
+  box-shadow: 0 4px 14px -4px rgba(34, 51, 24, 0.40);
+}
+
+/* Selected — solid ink, cream text — maximum contrast */
+.court-btn--chosen {
+  background: var(--ink, #223318);
+  color: var(--cream, #F5F1DE);
+  border-color: var(--ink, #223318);
+  box-shadow: 0 4px 14px -4px rgba(34, 51, 24, 0.45);
+}
+
+/* Full / disabled */
+.court-btn--full {
+  background: transparent;
+  color: var(--gray, #847E63);
+  border-color: var(--line, #DDDDB8);
+  cursor: not-allowed;
+}
+</style>

@@ -11,6 +11,7 @@ export default {
     extend: {
       colors: {
         cream: '#F5F1DE',
+        'cream-card': '#FDFCF5',
         ink: '#223318',
         'ink-soft': '#5E6B4E',
         line: '#E2E2BE',

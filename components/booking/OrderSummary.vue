@@ -1,13 +1,13 @@
 <template>
   <div>
     <!-- Court block -->
-    <div class="rounded-card border-[1.5px] border-line bg-white p-4 mb-3.5">
+    <div class="rounded-card border-[1.5px] border-[--line] bg-[--cream-card] p-4 mb-3.5 shadow-[0_2px_10px_-4px_rgba(34,51,24,0.08)]">
       <div class="font-display font-semibold text-[14px] mb-0.5">{{ court.name }}</div>
       <div class="text-[12px] text-slate">{{ dateLabel }} · {{ startTime }} – {{ endTime }}</div>
     </div>
 
     <!-- Line items -->
-    <div class="rounded-card border-[1.5px] border-line bg-white p-4">
+    <div class="rounded-card border-[1.5px] border-[--line] bg-[--cream-card] p-4 shadow-[0_2px_10px_-4px_rgba(34,51,24,0.08)]">
       <!-- Court -->
       <div class="flex justify-between text-[12.5px] py-1.5">
         <span>Court rental</span>
