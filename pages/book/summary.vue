@@ -118,6 +118,6 @@ const mainFoodLine = computed(() => {
 })
 
 function goNext() {
-  navigateTo('/book/payment')
+  navigateTo('/book/details')
 }
 </script>

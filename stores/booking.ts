@@ -82,6 +82,11 @@ export const TIME_SLOT_LABELS = [
   '11:00 PM',
 ]
 
+export interface PlayerEntry {
+  name: string
+  mobile: string
+}
+
 interface BookingState {
   year: number
   month: number // 0-indexed (8 = September)
@@ -95,6 +100,12 @@ interface BookingState {
   payMethod: PaymentMethod
   holdSeconds: number
   bookingRef: string | null
+  // Booker details
+  bookerName: string
+  bookerMobile: string
+  bookerFacebook: string
+  players: PlayerEntry[]
+  idPhotoName: string | null // just filename for display; file stays local
 }
 
 function seededVals(day: number): number[] {
@@ -140,6 +151,11 @@ export const useBookingStore = defineStore('booking', {
     payMethod: 'gcash',
     holdSeconds: 10 * 60,
     bookingRef: null,
+    bookerName: '',
+    bookerMobile: '',
+    bookerFacebook: '',
+    players: [],
+    idPhotoName: null,
   }),
 
   getters: {
@@ -421,6 +437,11 @@ export const useBookingStore = defineStore('booking', {
       this.payMethod = 'gcash'
       this.holdSeconds = 10 * 60
       this.bookingRef = null
+      this.bookerName = ''
+      this.bookerMobile = ''
+      this.bookerFacebook = ''
+      this.players = []
+      this.idPhotoName = null
     },
   },
 })

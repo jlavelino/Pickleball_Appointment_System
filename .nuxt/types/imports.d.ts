@@ -209,7 +209,7 @@ declare global {
   export type { Component, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from '../../node_modules/vue/index'
   import('../../node_modules/vue/index')
   // @ts-ignore
-  export type { Court, PaddleItem, FoodItem, PaymentMethod, TimeSlot } from '../../stores/booking'
+  export type { Court, PaddleItem, FoodItem, PaymentMethod, TimeSlot, PlayerEntry } from '../../stores/booking'
   import('../../stores/booking')
 }
 // for vue template auto import
