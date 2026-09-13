@@ -13,6 +13,7 @@
         :key="p.id"
         :paddle="p"
         :quantity="store.paddleQty[p.id] || 0"
+        :hours="store.slotHours"
         @step="(dir) => store.setPaddleQty(p.id, dir)"
       />
     </div>

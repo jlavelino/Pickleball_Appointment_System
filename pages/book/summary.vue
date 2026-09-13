@@ -45,7 +45,10 @@
         <div v-if="store.paddleCount > 0" class="flex justify-between items-start py-3 border-b border-line">
           <div>
             <div class="text-[15px] font-medium">{{ mainPaddleLine.main }}</div>
-            <div v-if="mainPaddleLine.sub" class="text-gray text-[13px] mt-0.5">{{ mainPaddleLine.sub }}</div>
+            <div class="text-gray text-[13px] mt-0.5">
+              <span v-if="mainPaddleLine.sub">{{ mainPaddleLine.sub }} · </span>
+              <span>{{ store.slotHours }} {{ store.slotHours === 1 ? 'hour' : 'hours' }}</span>
+            </div>
           </div>
           <div class="font-semibold text-[15px]">₱{{ store.paddleTotal }}</div>
         </div>

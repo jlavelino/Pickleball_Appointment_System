@@ -25,14 +25,13 @@ export interface FoodItem {
 }
 
 export const COURTS: Court[] = [
-  { id: 1, name: 'Court 1', price: 300, type: 'indoor' },
-  { id: 2, name: 'Court 2', price: 300, type: 'indoor' },
-  { id: 3, name: 'Court 3', price: 350, type: 'covered outdoor' },
+  { id: 1, name: 'Court 1', price: 300 },
+  { id: 2, name: 'Court 2', price: 300 },
 ]
 
 export const PADDLES: PaddleItem[] = [
-  { id: 'standard', name: 'Standard paddle', price: 100, stock: 13 },
-  { id: 'premium',  name: 'Premium paddle',  price: 150, stock: 6 },
+  { id: 'standard', name: 'Standard paddle', price: 100, stock: 4 },
+  { id: 'premium',  name: 'Premium paddle',  price: 150, stock: 4 },
   { id: 'pro',      name: 'Pro paddle',       price: 200, stock: 4 },
 ]
 
@@ -121,12 +120,11 @@ function seededVals(day: number, month = 8, year = 2026): number[] {
     return TIME_SLOT_LABELS.map(() => 0)
   }
   return TIME_SLOT_LABELS.map((_, i) => {
-    // Predictable and realistic court availability (0 to 3)
+    // Predictable and realistic court availability (0 to 2)
     const seed = (day * 19 + i * 11 + 7) % 17
     if (seed === 0) return 0 // Full
-    if (seed <= 3) return 1  // 1 court open
-    if (seed <= 9) return 2  // 2 courts open
-    return 3                 // 3 courts open
+    if (seed <= 5) return 1  // 1 court open
+    return 2                 // 2 courts open
   })
 }
 
@@ -222,18 +220,18 @@ export const useBookingStore = defineStore('booking', {
     courtsStatusMap: (s): Record<number, 'open' | 'low' | 'full'> => {
       const vals = seededVals(s.day, s.month, s.year)
       const selectedCounts = s.selectedSlots.length > 0
-        ? s.selectedSlots.map(idx => vals[idx] ?? 3)
-        : (s.slotIndex !== null ? [vals[s.slotIndex] ?? 3] : [3])
+        ? s.selectedSlots.map(idx => vals[idx] ?? 2)
+        : (s.slotIndex !== null ? [vals[s.slotIndex] ?? 2] : [2])
       const minOpen = Math.min(...selectedCounts)
 
-      if (minOpen >= 3) return { 1: 'open', 2: 'open', 3: 'low' }
-      if (minOpen === 2) return { 1: 'open', 2: 'open', 3: 'full' }
-      if (minOpen === 1) return { 1: 'open', 2: 'full', 3: 'full' }
-      return { 1: 'full', 2: 'full', 3: 'full' }
+      if (minOpen >= 2) return { 1: 'open', 2: 'open' }
+      if (minOpen === 1) return { 1: 'open', 2: 'full' }
+      return { 1: 'full', 2: 'full' }
     },
 
     paddleTotal: (s): number => {
-      return PADDLES.reduce((sum, p) => sum + p.price * (s.paddleQty[p.id] || 0), 0)
+      const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 1)
+      return PADDLES.reduce((sum, p) => sum + (p.price * hours) * (s.paddleQty[p.id] || 0), 0)
     },
 
     paddleCount: (s): number => {
@@ -275,7 +273,8 @@ export const useBookingStore = defineStore('booking', {
         const c = COURTS.find(x => x.id === s.courtId)
         courtPrice = c ? c.price * hours : 0
       }
-      const pTotal = PADDLES.reduce((sum, p) => sum + p.price * (s.paddleQty[p.id] || 0), 0)
+      const paddleHours = hours > 0 ? hours : 1
+      const pTotal = PADDLES.reduce((sum, p) => sum + (p.price * paddleHours) * (s.paddleQty[p.id] || 0), 0)
       const fTotal = ALL_FOOD.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0)
       return courtPrice + pTotal + fTotal
     },

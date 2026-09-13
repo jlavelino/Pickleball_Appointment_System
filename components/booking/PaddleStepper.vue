@@ -13,7 +13,10 @@
     <div class="flex-1 min-w-0">
       <div class="font-semibold text-[15.5px] truncate text-ink">{{ paddle.name }}</div>
       <div class="text-gray text-[13.5px] mt-[1px]">
-        ₱{{ paddle.price }} / session · {{ paddle.stock }} available
+        ₱{{ paddle.price }} / hour · {{ paddle.stock }} available
+        <span v-if="hours && hours > 1" class="font-medium text-[var(--ink)]">
+          · ₱{{ paddle.price * hours }} ({{ hours }} hrs)
+        </span>
       </div>
     </div>
 
@@ -48,6 +51,7 @@ import type { PaddleItem } from '~/stores/booking'
 defineProps<{
   paddle: PaddleItem
   quantity: number
+  hours?: number
 }>()
 
 defineEmits<{

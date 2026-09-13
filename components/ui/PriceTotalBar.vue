@@ -35,7 +35,11 @@ const breakdownText = computed(() => {
 
   // Paddles
   if (store.paddleCount > 0) {
-    parts.push(`${store.paddleCount} paddle${store.paddleCount > 1 ? 's' : ''}`)
+    if (hours > 1) {
+      parts.push(`${store.paddleCount} paddle${store.paddleCount > 1 ? 's' : ''} × ${hours} hrs`)
+    } else {
+      parts.push(`${store.paddleCount} paddle${store.paddleCount > 1 ? 's' : ''}`)
+    }
   }
 
   // Food

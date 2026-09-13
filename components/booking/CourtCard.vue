@@ -14,7 +14,7 @@
 
     <!-- Sub-line -->
     <div class="text-[14px] mb-[14px]" style="color: var(--ink-soft)">
-      <span>₱{{ court.price }} / hour · {{ court.type }}</span>
+      <span>₱{{ court.price }} / hour</span>
       <span v-if="hours && hours > 1" class="font-semibold text-[var(--ink)]">
         · ₱{{ court.price * hours }} total ({{ hours }} hrs)
       </span>
