@@ -85,9 +85,22 @@
     <button
       type="button"
       @click="$emit('restart')"
-      class="block w-full text-center text-ink-soft text-[13.5px] mt-4 underline cursor-pointer bg-transparent border-none font-sans hover:text-ink transition-colors"
+      class="w-full flex items-center justify-center gap-2.5 py-4 px-6 mt-5 rounded-2xl bg-[var(--ink)] text-[var(--cream)] font-bold text-[15px] shadow-[0_4px_16px_-4px_rgba(34,51,24,0.4)] hover:bg-[#2e4a1a] hover:shadow-[0_6px_22px_-4px_rgba(34,51,24,0.5)] active:scale-[0.98] transition-all cursor-pointer group"
     >
-      Book another court
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="transition-transform group-hover:scale-110 duration-150"
+      >
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      <span>Book another court</span>
     </button>
   </div>
 </template>

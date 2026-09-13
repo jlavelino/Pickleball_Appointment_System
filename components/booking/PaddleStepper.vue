@@ -1,14 +1,12 @@
 <template>
   <div class="flex items-center gap-[14px] py-[14px] border-b border-line last:border-none">
-    <!-- Lime-soft swatch with paddle SVG -->
-    <div class="w-12 h-12 rounded-[12px] bg-lime-soft flex-shrink-0 flex items-center justify-center">
-      <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
-        <ellipse cx="24" cy="17" rx="15" ry="15" fill="#3F6019"/>
-        <rect x="20" y="29" width="8" height="15" rx="3.5" fill="#3F6019"/>
-        <circle cx="18" cy="12" r="1.6" fill="#EAF1CE"/>
-        <circle cx="29" cy="14" r="1.6" fill="#EAF1CE"/>
-        <circle cx="23" cy="21" r="1.6" fill="#EAF1CE"/>
-      </svg>
+    <!-- Paddle image thumbnail -->
+    <div class="w-12 h-12 rounded-[14px] bg-[#F1F0D9] border border-[var(--line)] flex-shrink-0 flex items-center justify-center overflow-hidden p-0.5 shadow-xs">
+      <img
+        src="~/assets/images/pickle_paddle.png"
+        :alt="paddle.name"
+        class="w-full h-full object-contain"
+      />
     </div>
 
     <!-- Info -->

@@ -5,11 +5,24 @@
     <button
       type="button"
       @click="handleBack"
-      aria-label="Back"
+      aria-label="Go back"
       class="back-btn"
       :class="canGoBack ? 'opacity-100' : 'opacity-0 pointer-events-none'"
     >
-      ←
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="back-icon"
+      >
+        <path d="M19 12H5" />
+        <path d="M12 19l-7-7 7-7" />
+      </svg>
     </button>
 
     <!-- Logo & Wordmark — centered -->
@@ -79,29 +92,45 @@ function handleBack() {
 }
 
 .back-spacer {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex: none;
 }
 
 .back-btn {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  border: 1.5px solid var(--ink);
-  background: transparent;
+  border: 1px solid var(--line);
+  background: var(--cream-card);
   color: var(--ink);
-  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.12s, color 0.12s;
-  box-shadow: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(34, 51, 24, 0.08);
   flex: none;
+  padding: 0;
 }
+
+.back-icon {
+  transform: translateX(-0.5px);
+  transition: transform 0.15s ease;
+}
+
 .back-btn:hover {
-  background: var(--ink);
-  color: var(--cream);
+  background: var(--sold);
+  border-color: rgba(34, 51, 24, 0.25);
+  color: var(--relish-dark);
+  box-shadow: 0 2px 6px rgba(34, 51, 24, 0.12);
+}
+
+.back-btn:hover .back-icon {
+  transform: translateX(-2px);
+}
+
+.back-btn:active {
+  transform: scale(0.92);
 }
 </style>

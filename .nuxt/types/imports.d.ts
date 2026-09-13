@@ -41,6 +41,7 @@ declare global {
   const hasInjectionContext: typeof import('../../node_modules/vue/index').hasInjectionContext
   const inject: typeof import('../../node_modules/vue/index').inject
   const injectHead: typeof import('../../node_modules/nuxt/dist/app/composables/head').injectHead
+  const isDayFullyBooked: typeof import('../../stores/booking').isDayFullyBooked
   const isNuxtError: typeof import('../../node_modules/nuxt/dist/app/composables/error').isNuxtError
   const isPrerendered: typeof import('../../node_modules/nuxt/dist/app/composables/payload').isPrerendered
   const isProxy: typeof import('../../node_modules/vue/index').isProxy
@@ -256,6 +257,7 @@ declare module 'vue' {
     readonly hasInjectionContext: UnwrapRef<typeof import('../../node_modules/vue/index')['hasInjectionContext']>
     readonly inject: UnwrapRef<typeof import('../../node_modules/vue/index')['inject']>
     readonly injectHead: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/head')['injectHead']>
+    readonly isDayFullyBooked: UnwrapRef<typeof import('../../stores/booking')['isDayFullyBooked']>
     readonly isNuxtError: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/error')['isNuxtError']>
     readonly isPrerendered: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['isPrerendered']>
     readonly isProxy: UnwrapRef<typeof import('../../node_modules/vue/index')['isProxy']>

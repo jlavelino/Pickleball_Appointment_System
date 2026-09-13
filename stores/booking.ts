@@ -108,7 +108,18 @@ interface BookingState {
   idPhotoName: string | null // just filename for display; file stays local
 }
 
-function seededVals(day: number): number[] {
+export function isDayFullyBooked(year: number, month: number, day: number): boolean {
+  // Explicitly marked fully booked dates (September 11 benchmark requested by user)
+  if (month === 8 && day === 11) return true
+  // Day 11 benchmark across any month
+  if (day === 11) return true
+  return false
+}
+
+function seededVals(day: number, month = 8, year = 2026): number[] {
+  if (isDayFullyBooked(year, month, day)) {
+    return TIME_SLOT_LABELS.map(() => 0)
+  }
   return TIME_SLOT_LABELS.map((_, i) => {
     // Predictable and realistic court availability (0 to 3)
     const seed = (day * 19 + i * 11 + 7) % 17
@@ -159,20 +170,24 @@ export const useBookingStore = defineStore('booking', {
   }),
 
   getters: {
+    isCurrentDayFullyBooked: (s): boolean => {
+      return isDayFullyBooked(s.year, s.month, s.day)
+    },
+
     slots: (s): TimeSlot[] => {
-      const vals = seededVals(s.day)
+      const vals = seededVals(s.day, s.month, s.year)
       return TIME_SLOT_LABELS.map((label, i) => ({ label, open: vals[i] }))
     },
 
     selectedSlot: (s): TimeSlot | null => {
       if (s.selectedSlots.length === 0 && s.slotIndex === null) return null
       const idx = s.selectedSlots[0] ?? s.slotIndex
-      const vals = seededVals(s.day)
+      const vals = seededVals(s.day, s.month, s.year)
       return { label: TIME_SLOT_LABELS[idx], open: vals[idx] }
     },
 
     selectedSlotsList: (s): TimeSlot[] => {
-      const vals = seededVals(s.day)
+      const vals = seededVals(s.day, s.month, s.year)
       return s.selectedSlots.map(idx => ({ label: TIME_SLOT_LABELS[idx], open: vals[idx] }))
     },
 
@@ -205,7 +220,7 @@ export const useBookingStore = defineStore('booking', {
     },
 
     courtsStatusMap: (s): Record<number, 'open' | 'low' | 'full'> => {
-      const vals = seededVals(s.day)
+      const vals = seededVals(s.day, s.month, s.year)
       const selectedCounts = s.selectedSlots.length > 0
         ? s.selectedSlots.map(idx => vals[idx] ?? 3)
         : (s.slotIndex !== null ? [vals[s.slotIndex] ?? 3] : [3])

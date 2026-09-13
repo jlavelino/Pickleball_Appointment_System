@@ -33,6 +33,6 @@ export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useBooking } from '../composables/useBooking';
 export { useHoldTimer } from '../composables/useHoldTimer';
 export { useSupabase } from '../composables/useSupabase';
-export { HOLD_DURATION_MS, COURTS, PADDLES, FOOD_GROUPS, ALL_FOOD, TIME_SLOT_LABELS, useBookingStore, Court, PaddleItem, FoodItem, PaymentMethod, TimeSlot, PlayerEntry } from '../stores/booking';
+export { HOLD_DURATION_MS, COURTS, PADDLES, FOOD_GROUPS, ALL_FOOD, TIME_SLOT_LABELS, isDayFullyBooked, useBookingStore, Court, PaddleItem, FoodItem, PaymentMethod, TimeSlot, PlayerEntry } from '../stores/booking';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';
 export { useNuxtDevTools } from '../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';

@@ -16,15 +16,23 @@
               <div class="sheet-header-text">
                 <span class="sheet-eyebrow">{{ store.fullDateLabel.toUpperCase() }}</span>
                 <div class="flex items-center gap-2">
-                  <h3 class="sheet-title">Available Times</h3>
+                  <h3 class="sheet-title">{{ store.isCurrentDayFullyBooked ? 'Fully Booked' : 'Available Times' }}</h3>
                   <span
-                    v-if="store.selectedSlots.length > 0"
+                    v-if="store.isCurrentDayFullyBooked"
+                    class="px-2 py-0.5 rounded-full bg-[#FEECEB] text-[#E5484D] text-[11px] font-bold tracking-wide uppercase"
+                  >
+                    Sold out
+                  </span>
+                  <span
+                    v-else-if="store.selectedSlots.length > 0"
                     class="selected-count-badge"
                   >
                     {{ store.selectedSlots.length }} selected
                   </span>
                 </div>
-                <p class="sheet-subtitle">Select one or more hourly time slots (8:00 AM – 11:00 PM)</p>
+                <p class="sheet-subtitle whitespace-nowrap">
+                  {{ store.isCurrentDayFullyBooked ? 'No courts open for this date' : 'Hourly slots · 8 AM – 11 PM' }}
+                </p>
               </div>
               <button
                 type="button"
@@ -38,8 +46,16 @@
 
             <!-- Toolbar / Quick Select -->
             <div class="sheet-toolbar">
-              <span class="text-[12px] font-medium text-[var(--ink-soft)]">
-                {{ store.selectedSlots.length === 0 ? 'Tap to select multiple times' : `${store.selectedSlots.length} slot(s) chosen` }}
+              <span
+                class="text-[12px] font-medium"
+                :class="store.isCurrentDayFullyBooked ? 'text-[#E5484D] font-semibold' : 'text-[var(--ink-soft)]'"
+              >
+                {{ store.isCurrentDayFullyBooked
+                  ? 'All time slots are full for this day'
+                  : store.selectedSlots.length === 0
+                    ? 'Tap to select multiple times'
+                    : `${store.selectedSlots.length} slot(s) chosen`
+                }}
               </span>
               <button
                 v-if="store.selectedSlots.length > 0"
@@ -138,6 +154,7 @@ function isSelected(idx: number): boolean {
 }
 
 const confirmButtonText = computed(() => {
+  if (store.isCurrentDayFullyBooked) return 'Fully Booked — No Slots'
   const count = store.selectedSlots.length
   if (count === 0) return 'Select time slot(s)'
   if (count === 1) {
