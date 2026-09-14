@@ -41,8 +41,26 @@
       />
     </NuxtLink>
 
-    <!-- Spacer to balance back button -->
-    <div class="back-spacer" aria-hidden="true"></div>
+    <!-- Check booking link (right side) — only visible on the home page -->
+    <NuxtLink
+      to="/lookup"
+      aria-label="Check booking"
+      class="lookup-btn"
+      :class="isHomePage ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+    >
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+    </NuxtLink>
 
   </header>
 </template>
@@ -53,12 +71,24 @@ import { computed } from 'vue'
 const route  = useRoute()
 const router = useRouter()
 
+const isHomePage = computed(() => {
+  return route.path === '/' || route.path === '/book'
+})
+
 const canGoBack = computed(() => {
   const path = route.path
   return path !== '/' && path !== '/book' && !path.includes('/confirmed')
 })
 
 function handleBack() {
+  if (route.path === '/lookup') {
+    if (window.history.length > 1) {
+      router.back()
+    } else {
+      router.push('/')
+    }
+    return
+  }
   router.back()
 }
 </script>
@@ -91,10 +121,26 @@ function handleBack() {
   object-fit: contain;
 }
 
-.back-spacer {
+.lookup-btn {
   width: 36px;
   height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--cream-card);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
+  text-decoration: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(34, 51, 24, 0.08);
+}
+.lookup-btn:hover {
+  background: var(--sold);
+  border-color: rgba(34, 51, 24, 0.25);
+  color: var(--relish-dark);
+  box-shadow: 0 2px 6px rgba(34, 51, 24, 0.12);
 }
 
 .back-btn {
