@@ -11,6 +11,12 @@ export default defineNuxtConfig({
     '~/assets/css/tailwind.css',
   ],
   modules: ['@pinia/nuxt'],
+  runtimeConfig: {
+    public: {
+      supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL || 'https://unfevsmviabqvlffwzsc.supabase.co',
+      supabaseKey: process.env.NUXT_PUBLIC_SUPABASE_KEY || '',
+    },
+  },
   postcss: {
     plugins: {
       tailwindcss: {},
@@ -18,3 +24,4 @@ export default defineNuxtConfig({
     },
   },
 })
+

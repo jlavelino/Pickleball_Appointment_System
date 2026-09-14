@@ -19,7 +19,17 @@
         :selected="store.payMethod === 'maya'"
         @select="store.payMethod = 'maya'"
       />
+
+      <!-- Error alert -->
+      <div
+        v-if="errorMessage"
+        class="mt-4 p-3.5 rounded-xl bg-[#FEECEB] border border-[#FDB8B4] text-[#CE2C31] text-[13.5px] leading-snug flex items-start gap-2.5"
+      >
+        <span class="text-[16px] leading-none">⚠️</span>
+        <div class="flex-1 font-medium">{{ errorMessage }}</div>
+      </div>
     </div>
+
 
     <BottomCTA
       :label="paying ? 'Processing…' : `Pay ₱${store.grandTotal}`"
@@ -50,11 +60,20 @@ if (store.courtId === null && store.courtIds.length === 0) {
 }
 
 const paying = ref(false)
+const errorMessage = ref<string | null>(null)
 
 async function pay() {
   paying.value = true
-  await new Promise(r => setTimeout(r, 900))
-  const refId = store.generateBookingRef()
-  navigateTo(`/book/confirmed/${refId}`)
+  errorMessage.value = null
+  try {
+    const ref = await store.submitBookingToSupabase()
+    navigateTo(`/book/confirmed/${ref}`)
+  } catch (err: any) {
+    console.error('Booking submission failed:', err)
+    errorMessage.value = err.message || 'Payment or booking hold failed. Please try again.'
+  } finally {
+    paying.value = false
+  }
 }
 </script>
+

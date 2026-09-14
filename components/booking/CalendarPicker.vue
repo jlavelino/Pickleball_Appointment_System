@@ -87,7 +87,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useBookingStore, isDayFullyBooked } from '~/stores/booking'
+import { useBookingStore } from '~/stores/booking'
 
 const emit = defineEmits<{ dateSelected: [] }>()
 const store = useBookingStore()
@@ -113,8 +113,13 @@ function isPast(d: number): boolean {
   return cellDate < today
 }
 
+// Availability is only fetched for the selected day.
+// For other days we conservatively return false (not fully booked).
 function isFullyBooked(d: number): boolean {
-  return isDayFullyBooked(store.year, store.month, d)
+  if (d === store.day) {
+    return store.isCurrentDayFullyBooked
+  }
+  return false
 }
 
 function selectDay(d: number) {

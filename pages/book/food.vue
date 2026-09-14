@@ -8,7 +8,7 @@
         Ready by your {{ store.selectedSlot?.label || '8:00 AM' }} session
       </p>
 
-      <template v-for="g in FOOD_GROUPS" :key="g.label">
+      <template v-for="g in store.foodGroups" :key="g.label">
         <div class="text-[12.5px] tracking-[0.04em] uppercase text-gray font-bold mt-[18px] mb-1 first:mt-0">
           {{ g.label }}
         </div>
@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { useBookingStore, FOOD_GROUPS } from '~/stores/booking'
+import { useBookingStore } from '~/stores/booking'
 import FoodItemRow from '~/components/booking/FoodItemRow.vue'
 import BottomCTA from '~/components/ui/BottomCTA.vue'
 import PriceTotalBar from '~/components/ui/PriceTotalBar.vue'
@@ -45,6 +45,7 @@ const store = useBookingStore()
 if (store.courtId === null && store.courtIds.length === 0) {
   navigateTo('/book/court')
 }
+
 
 function goNext() {
   store.startHold()

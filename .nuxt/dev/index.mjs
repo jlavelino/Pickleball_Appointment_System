@@ -652,7 +652,10 @@ const _inlineRuntimeConfig = {
       }
     }
   },
-  "public": {}
+  "public": {
+    "supabaseUrl": "https://unfevsmviabqvlffwzsc.supabase.co",
+    "supabaseKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuZmV2c212aWFicXZsZmZ3enNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNzY0NTQsImV4cCI6MjEwNDg1MjQ1NH0.J5BSavpKvi7uJ-6T2xNGGuxPUCb00U5tMETf2m9v_og"
+  }
 };
 const envOptions = {
   prefix: "NITRO_",

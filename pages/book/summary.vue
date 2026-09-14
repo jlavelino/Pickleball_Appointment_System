@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from 'vue'
-import { useBookingStore, PADDLES, ALL_FOOD } from '~/stores/booking'
+import { useBookingStore } from '~/stores/booking'
 import HoldTimer from '~/components/ui/HoldTimer.vue'
 import BottomCTA from '~/components/ui/BottomCTA.vue'
 
@@ -103,8 +103,8 @@ onUnmounted(() => {
 })
 
 const mainPaddleLine = computed(() => {
-  const active = PADDLES.filter(p => store.paddleQty[p.id] > 0)
-    .sort((a, b) => (b.price * store.paddleQty[b.id]) - (a.price * store.paddleQty[a.id]))
+  const active = store.paddles.filter(p => (store.paddleQty[p.id] || 0) > 0)
+    .sort((a, b) => (b.price * (store.paddleQty[b.id] || 0)) - (a.price * (store.paddleQty[a.id] || 0)))
   if (!active.length) return { main: '', sub: '' }
   const main = `${store.paddleQty[active[0].id]} × ${active[0].name}`
   const sub = active.slice(1).map(p => `${store.paddleQty[p.id]} × ${p.name}`).join(', ')
@@ -112,13 +112,14 @@ const mainPaddleLine = computed(() => {
 })
 
 const mainFoodLine = computed(() => {
-  const active = ALL_FOOD.filter(f => store.foodQty[f.id] > 0)
-    .sort((a, b) => (b.price * store.foodQty[b.id]) - (a.price * store.foodQty[a.id]))
+  const active = store.allFood.filter(f => (store.foodQty[f.id] || 0) > 0)
+    .sort((a, b) => (b.price * (store.foodQty[b.id] || 0)) - (a.price * (store.foodQty[a.id] || 0)))
   if (!active.length) return { main: '', sub: '' }
   const main = `${store.foodQty[active[0].id]} × ${active[0].name}`
   const sub = active.slice(1).map(f => `${store.foodQty[f.id]} × ${f.name}`).join(', ')
   return { main, sub }
 })
+
 
 function goNext() {
   navigateTo('/book/details')

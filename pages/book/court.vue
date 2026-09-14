@@ -24,11 +24,11 @@
       </div>
 
       <CourtCard
-        v-for="c in COURTS"
+        v-for="c in store.courts"
         :key="c.id"
         :court="c"
-        :status="store.courtsStatusMap[c.id]"
-        :is-selected="store.courtIds.includes(c.id)"
+        :status="store.courtsStatusMap[c.id] || 'open'"
+        :is-selected="store.courtIds.map(String).includes(String(c.id))"
         :hours="store.slotHours"
         @select="selectCourt"
       />
@@ -48,7 +48,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useBookingStore, COURTS } from '~/stores/booking'
+import { useBookingStore } from '~/stores/booking'
 import CourtCard from '~/components/booking/CourtCard.vue'
 import BottomCTA from '~/components/ui/BottomCTA.vue'
 import PriceTotalBar from '~/components/ui/PriceTotalBar.vue'
@@ -67,9 +67,10 @@ const continueButtonLabel = computed(() => {
   return `Continue (${count} courts · ₱${store.courtTotal})`
 })
 
-function selectCourt(id: number) {
+function selectCourt(id: string | number) {
   store.toggleCourt(id)
 }
+
 
 function goNext() {
   if (store.courtIds.length > 0) {

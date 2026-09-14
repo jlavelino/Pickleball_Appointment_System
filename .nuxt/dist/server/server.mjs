@@ -1,4 +1,4 @@
-import { shallowReactive, reactive, effectScope, getCurrentScope, hasInjectionContext, getCurrentInstance, inject, toRef, shallowRef, isReadonly, isRef, isShallow, isReactive, toRaw, ref, markRaw, onScopeDispose, watch, nextTick, toRefs, computed, defineComponent, createElementBlock, provide, cloneVNode, h, resolveComponent, unref, isVNode, createCommentVNode, Suspense, Fragment, mergeProps, withCtx, createTextVNode, createVNode, useSSRContext, defineAsyncComponent, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, createApp } from "vue";
+import { shallowReactive, reactive, effectScope, getCurrentScope, hasInjectionContext, getCurrentInstance, inject, toRef, shallowRef, isReadonly, isRef, isShallow, isReactive, toRaw, ref, markRaw, onScopeDispose, watch, nextTick, toRefs, computed, defineComponent, createElementBlock, provide, cloneVNode, h, resolveComponent, unref, isVNode, createCommentVNode, Suspense, Fragment, mergeProps, withCtx, createVNode, useSSRContext, defineAsyncComponent, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, createApp } from "vue";
 import { $fetch } from "C:/Users/User/OneDrive/Desktop/PICKLE/dink/node_modules/ofetch/dist/node.mjs";
 import { baseURL } from "#internal/nuxt/paths";
 import { createHooks } from "C:/Users/User/OneDrive/Desktop/PICKLE/dink/node_modules/hookable/dist/index.mjs";
@@ -8,7 +8,8 @@ import { START_LOCATION, createMemoryHistory, createRouter, RouterView } from "v
 import { defu } from "C:/Users/User/OneDrive/Desktop/PICKLE/dink/node_modules/defu/dist/defu.mjs";
 import { hasProtocol, joinURL, parseURL, encodePath, decodePath, withQuery, isScriptProtocol, parseQuery, withTrailingSlash, withoutTrailingSlash } from "C:/Users/User/OneDrive/Desktop/PICKLE/dink/node_modules/ufo/dist/index.mjs";
 import "C:/Users/User/OneDrive/Desktop/PICKLE/dink/node_modules/klona/dist/index.mjs";
-import { ssrRenderAttrs, ssrRenderClass, ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from "vue/server-renderer";
+import { ssrRenderAttrs, ssrRenderClass, ssrRenderComponent, ssrRenderAttr, ssrRenderStyle, ssrRenderSuspense, ssrRenderVNode } from "vue/server-renderer";
+import { createClient } from "@supabase/supabase-js";
 import { useHead as useHead$1, headSymbol } from "C:/Users/User/OneDrive/Desktop/PICKLE/dink/node_modules/@unhead/vue/dist/index.mjs";
 if (!globalThis.$fetch) {
   globalThis.$fetch = $fetch.create({
@@ -571,42 +572,47 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import("./_nuxt/index-RvDxndOv.js")
+    component: () => import("./_nuxt/index-BGi2e_UW.js")
   },
   {
     name: "book-food",
     path: "/book/food",
-    component: () => import("./_nuxt/food-BlHr4aKj.js")
+    component: () => import("./_nuxt/food-DWQJr6Gq.js")
   },
   {
     name: "book-court",
     path: "/book/court",
-    component: () => import("./_nuxt/court-C8X0tttS.js")
+    component: () => import("./_nuxt/court-msCFhxbM.js")
   },
   {
     name: "book",
     path: "/book",
-    component: () => import("./_nuxt/index-CfNwnoP1.js")
+    component: () => import("./_nuxt/index-l1zNyQSJ.js")
+  },
+  {
+    name: "book-details",
+    path: "/book/details",
+    component: () => import("./_nuxt/details-DH4PfNdo.js")
   },
   {
     name: "book-paddles",
     path: "/book/paddles",
-    component: () => import("./_nuxt/paddles-oF3OSOZ3.js")
+    component: () => import("./_nuxt/paddles-fC8MV6B5.js")
   },
   {
     name: "book-payment",
     path: "/book/payment",
-    component: () => import("./_nuxt/payment-Bc15JMP0.js")
+    component: () => import("./_nuxt/payment-C96Ps-hy.js")
   },
   {
     name: "book-summary",
     path: "/book/summary",
-    component: () => import("./_nuxt/summary-DsOYxwPI.js")
+    component: () => import("./_nuxt/summary-DacqgJoT.js")
   },
   {
     name: "book-confirmed-bookingId",
     path: "/book/confirmed/:bookingId()",
-    component: () => import("./_nuxt/_bookingId_-BQyr5WTI.js")
+    component: () => import("./_nuxt/_bookingId_--wLS27Pu.js")
   }
 ];
 const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
@@ -1717,6 +1723,8 @@ function normalizeSlot(slot, data) {
   const slotContent = slot(data);
   return slotContent.length === 1 ? h(slotContent[0]) : h(Fragment, void 0, slotContent);
 }
+const _imports_0 = "" + __buildAssetsURL("pickle_logo.iqX0c5vQ.png");
+const _imports_1 = "" + __buildAssetsURL("pickle_name.CWKWs2hu.png");
 const _sfc_main$3 = /* @__PURE__ */ defineComponent({
   __name: "AppHeader",
   __ssrInlineRender: true,
@@ -1729,34 +1737,578 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
     });
     return (_ctx, _push, _parent, _attrs) => {
       const _component_NuxtLink = __nuxt_component_0$1;
-      _push(`<header${ssrRenderAttrs(mergeProps({ class: "flex items-center justify-between px-[22px] pt-[22px] pb-[6px]" }, _attrs))}><button type="button" aria-label="Back" class="${ssrRenderClass([canGoBack.value ? "opacity-100" : "opacity-0 pointer-events-none", "w-[34px] h-[34px] rounded-full border border-line bg-white flex items-center justify-center cursor-pointer text-base text-ink transition-opacity"])}"> ← </button>`);
+      _push(`<header${ssrRenderAttrs(mergeProps({ class: "header-bar" }, _attrs))} data-v-eb75dd39><button type="button" aria-label="Go back" class="${ssrRenderClass([canGoBack.value ? "opacity-100" : "opacity-0 pointer-events-none", "back-btn"])}" data-v-eb75dd39><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="back-icon" data-v-eb75dd39><path d="M19 12H5" data-v-eb75dd39></path><path d="M12 19l-7-7 7-7" data-v-eb75dd39></path></svg></button>`);
       _push(ssrRenderComponent(_component_NuxtLink, {
         to: "/",
-        class: "font-display font-bold text-[21px] tracking-[0.5px]"
+        class: "logo-link"
       }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(` DI<span class="text-orange-dark"${_scopeId}>N</span>K `);
+            _push2(`<img${ssrRenderAttr("src", _imports_0)} alt="PickleBook icon" class="logo-icon" style="${ssrRenderStyle({ "height": "32px", "width": "auto", "display": "block", "max-width": "none" })}" data-v-eb75dd39${_scopeId}><img${ssrRenderAttr("src", _imports_1)} alt="PickleBook" class="logo-name" style="${ssrRenderStyle({ "height": "22px", "width": "auto", "display": "block", "max-width": "none" })}" data-v-eb75dd39${_scopeId}>`);
           } else {
             return [
-              createTextVNode(" DI"),
-              createVNode("span", { class: "text-orange-dark" }, "N"),
-              createTextVNode("K ")
+              createVNode("img", {
+                src: _imports_0,
+                alt: "PickleBook icon",
+                class: "logo-icon",
+                style: { "height": "32px", "width": "auto", "display": "block", "max-width": "none" }
+              }),
+              createVNode("img", {
+                src: _imports_1,
+                alt: "PickleBook",
+                class: "logo-name",
+                style: { "height": "22px", "width": "auto", "display": "block", "max-width": "none" }
+              })
             ];
           }
         }),
         _: 1
       }, _parent));
-      _push(`<div class="w-[30px] h-[30px] rounded-full bg-ink flex-none"></div></header>`);
+      _push(`<div class="back-spacer" aria-hidden="true" data-v-eb75dd39></div></header>`);
     };
   }
 });
+const _export_sfc = (sfc, props) => {
+  const target = sfc.__vccOpts || sfc;
+  for (const [key, val] of props) {
+    target[key] = val;
+  }
+  return target;
+};
 const _sfc_setup$3 = _sfc_main$3.setup;
 _sfc_main$3.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/ui/AppHeader.vue");
   return _sfc_setup$3 ? _sfc_setup$3(props, ctx) : void 0;
 };
+const AppHeader = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-eb75dd39"]]);
+let _client = null;
+function useSupabase() {
+  if (_client) return _client;
+  const config = /* @__PURE__ */ useRuntimeConfig();
+  const url = config.public.supabaseUrl || "https://unfevsmviabqvlffwzsc.supabase.co";
+  const key = config.public.supabaseKey || "";
+  if (!key) {
+    console.warn("[Supabase] Missing credentials in runtimeConfig!");
+  }
+  _client = createClient(url, key);
+  return _client;
+}
+const DEFAULT_COURTS = [
+  { id: "7e96acc3-8ca9-4110-8895-fdb6330a1c70", name: "Court 1", price: 250, type: "indoor" },
+  { id: "0a31ed7d-f073-488d-aae9-9dc329c38149", name: "Court 2", price: 250, type: "indoor" }
+];
+const DEFAULT_PADDLES = [
+  { id: "cb5ee6e3-597f-4189-87b2-ad27c38885bd", name: "Standard paddle", price: 100, stock: 4 },
+  { id: "1ef13ffa-d836-4cfd-8336-f05fc20b8a2b", name: "Premium paddle", price: 150, stock: 4 },
+  { id: "6ad6b922-1b4c-4ba0-8ba6-ed9d16b10598", name: "Pro paddle", price: 200, stock: 4 }
+];
+const DEFAULT_FOOD_GROUPS = [
+  {
+    label: "Meals",
+    items: [
+      { id: "850c5356-a0c0-48fb-9708-67027609c433", name: "Chicken sandwich", price: 150, category: "Meals" },
+      { id: "3d2e6ba5-79a0-4a10-b115-3efcbd113d4a", name: "Burger", price: 180, category: "Meals" }
+    ]
+  },
+  {
+    label: "Snacks & drinks",
+    items: [
+      { id: "71ffd93e-0d0c-456d-9399-54fb9313adbe", name: "Fries", price: 80, category: "Snacks & drinks" },
+      { id: "7c08dd8f-5823-4e7f-a5a0-9fb4b9e59694", name: "Bottled water", price: 30, category: "Snacks & drinks" }
+    ]
+  }
+];
+const TIME_SLOT_LABELS = [
+  "8:00 AM",
+  "9:00 AM",
+  "10:00 AM",
+  "11:00 AM",
+  "12:00 PM",
+  "1:00 PM",
+  "2:00 PM",
+  "3:00 PM",
+  "4:00 PM",
+  "5:00 PM",
+  "6:00 PM",
+  "7:00 PM",
+  "8:00 PM",
+  "9:00 PM",
+  "10:00 PM",
+  "11:00 PM"
+];
+function slotToTimeString(idx) {
+  const hour = 8 + idx;
+  return `${String(hour).padStart(2, "0")}:00:00`;
+}
+function formatEndHour(label) {
+  const [time, period] = label.split(" ");
+  const [hourStr, minStr] = time.split(":");
+  const hour = parseInt(hourStr);
+  let nextHour = hour + 1;
+  let nextPeriod = period;
+  if (hour === 11 && period === "AM") {
+    nextHour = 12;
+    nextPeriod = "PM";
+  } else if (hour === 11 && period === "PM") {
+    nextHour = 12;
+    nextPeriod = "AM";
+  } else if (hour === 12) {
+    nextHour = 1;
+  }
+  return `${nextHour}:${minStr} ${nextPeriod}`;
+}
+const useBookingStore = /* @__PURE__ */ defineStore("booking", {
+  state: () => ({
+    year: 2026,
+    month: 8,
+    // September
+    day: 15,
+    selectedSlots: [],
+    slotIndex: null,
+    courtIds: [],
+    courtId: null,
+    paddleQty: {},
+    foodQty: {},
+    payMethod: "gcash",
+    holdSeconds: 10 * 60,
+    bookingRef: null,
+    createdBookingId: null,
+    bookerName: "",
+    bookerMobile: "",
+    bookerFacebook: "",
+    players: [],
+    idPhotoName: null,
+    idPhotoFile: null,
+    dbCourts: DEFAULT_COURTS,
+    dbPaddles: DEFAULT_PADDLES,
+    dbFoodItems: DEFAULT_FOOD_GROUPS.flatMap((g) => g.items),
+    isLoadingCatalog: false,
+    isSubmittingBooking: false,
+    dbSlotAvailability: {},
+    isLoadingAvailability: false
+  }),
+  getters: {
+    courts: (s) => {
+      return s.dbCourts.length > 0 ? s.dbCourts : DEFAULT_COURTS;
+    },
+    paddles: (s) => {
+      return s.dbPaddles.length > 0 ? s.dbPaddles : DEFAULT_PADDLES;
+    },
+    allFood: (s) => {
+      return s.dbFoodItems.length > 0 ? s.dbFoodItems : DEFAULT_FOOD_GROUPS.flatMap((g) => g.items);
+    },
+    foodGroups: (s) => {
+      const items = s.dbFoodItems.length > 0 ? s.dbFoodItems : DEFAULT_FOOD_GROUPS.flatMap((g) => g.items);
+      const meals = items.filter((f) => f.category === "Meals");
+      const snacks = items.filter((f) => f.category === "Snacks & drinks" || f.category !== "Meals");
+      return [
+        { label: "Meals", items: meals },
+        { label: "Snacks & drinks", items: snacks }
+      ];
+    },
+    isCurrentDayFullyBooked: (s) => {
+      if (Object.keys(s.dbSlotAvailability).length > 0) {
+        return TIME_SLOT_LABELS.every((_, idx) => (s.dbSlotAvailability[idx] ?? 0) === 0);
+      }
+      return false;
+    },
+    slots: (s) => {
+      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2;
+      return TIME_SLOT_LABELS.map((label, i) => {
+        const count = s.dbSlotAvailability[i] !== void 0 ? s.dbSlotAvailability[i] : totalCourts;
+        return { label, open: count };
+      });
+    },
+    selectedSlot: (s) => {
+      if (s.selectedSlots.length === 0 && s.slotIndex === null) return null;
+      const idx = s.selectedSlots[0] ?? s.slotIndex;
+      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2;
+      const count = s.dbSlotAvailability[idx] !== void 0 ? s.dbSlotAvailability[idx] : totalCourts;
+      return { label: TIME_SLOT_LABELS[idx], open: count };
+    },
+    selectedSlotsList: (s) => {
+      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2;
+      return s.selectedSlots.map((idx) => ({
+        label: TIME_SLOT_LABELS[idx],
+        open: s.dbSlotAvailability[idx] !== void 0 ? s.dbSlotAvailability[idx] : totalCourts
+      }));
+    },
+    selectedCourt: (s) => {
+      const id = s.courtIds[0] ?? s.courtId;
+      if (!id) return null;
+      return s.courts.find((c) => String(c.id) === String(id)) || null;
+    },
+    selectedCourts: (s) => {
+      if (s.courtIds.length > 0) {
+        return s.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
+      }
+      if (s.courtId !== null) {
+        const c = s.courts.find((x) => String(x.id) === String(s.courtId));
+        return c ? [c] : [];
+      }
+      return [];
+    },
+    courtNamesLabel: (s) => {
+      const courts = s.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
+      if (courts.length === 0) {
+        const c = s.courts.find((x) => String(x.id) === String(s.courtId));
+        return c ? c.name : "";
+      }
+      const names = courts.map((c) => c.name);
+      if (names.length === 1) return names[0];
+      if (names.length === 2) return `${names[0]} & ${names[1]}`;
+      return names.join(", ");
+    },
+    courtsStatusMap: (s) => {
+      const map = {};
+      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2;
+      s.courts.forEach((court) => {
+        const selectedCounts = s.selectedSlots.length > 0 ? s.selectedSlots.map((idx) => s.dbSlotAvailability[idx] ?? totalCourts) : s.slotIndex !== null ? [s.dbSlotAvailability[s.slotIndex] ?? totalCourts] : [totalCourts];
+        const minOpen = Math.min(...selectedCounts);
+        if (minOpen >= 2) map[String(court.id)] = "open";
+        else if (minOpen === 1) map[String(court.id)] = "open";
+        else map[String(court.id)] = "full";
+      });
+      return map;
+    },
+    paddleTotal: (s) => {
+      const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : s.slotIndex !== null ? 1 : 1;
+      return s.paddles.reduce((sum, p) => sum + p.price * hours * (s.paddleQty[p.id] || 0), 0);
+    },
+    paddleCount: (s) => {
+      return s.paddles.reduce((sum, p) => sum + (s.paddleQty[p.id] || 0), 0);
+    },
+    foodTotal: (s) => {
+      return s.allFood.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0);
+    },
+    foodCount: (s) => {
+      return s.allFood.reduce((sum, f) => sum + (s.foodQty[f.id] || 0), 0);
+    },
+    slotHours: (s) => {
+      return s.selectedSlots.length > 0 ? s.selectedSlots.length : s.slotIndex !== null ? 1 : 0;
+    },
+    courtTotal: (s) => {
+      const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : s.slotIndex !== null ? 1 : 0;
+      if (s.courtIds.length > 0) {
+        const selected = s.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
+        return selected.reduce((sum, c) => sum + c.price * hours, 0);
+      }
+      if (s.courtId !== null) {
+        const c = s.courts.find((x) => String(x.id) === String(s.courtId));
+        return c ? c.price * hours : 0;
+      }
+      return 0;
+    },
+    grandTotal: (s) => {
+      const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : s.slotIndex !== null ? 1 : 0;
+      let courtPrice = 0;
+      if (s.courtIds.length > 0) {
+        const selected = s.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
+        courtPrice = selected.reduce((sum, c) => sum + c.price * hours, 0);
+      } else if (s.courtId !== null) {
+        const c = s.courts.find((x) => String(x.id) === String(s.courtId));
+        courtPrice = c ? c.price * hours : 0;
+      }
+      const paddleHours = hours > 0 ? hours : 1;
+      const pTotal = s.paddles.reduce((sum, p) => sum + p.price * paddleHours * (s.paddleQty[p.id] || 0), 0);
+      const fTotal = s.allFood.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0);
+      return courtPrice + pTotal + fTotal;
+    },
+    dateLabel: (s) => {
+      const d = new Date(s.year, s.month, s.day);
+      const weekday = d.toLocaleDateString("en-US", { weekday: "short" });
+      const monthName = d.toLocaleDateString("en-US", { month: "short" });
+      return `${weekday}, ${monthName} ${s.day}`;
+    },
+    fullDateLabel: (s) => {
+      const d = new Date(s.year, s.month, s.day);
+      const weekday = d.toLocaleDateString("en-US", { weekday: "long" });
+      const monthName = d.toLocaleDateString("en-US", { month: "long" });
+      return `${weekday}, ${monthName} ${s.day}`;
+    },
+    slotRangeLabel: (s) => {
+      const count = s.selectedSlots.length;
+      if (count === 0) {
+        if (s.slotIndex === null) return "";
+        const start = TIME_SLOT_LABELS[s.slotIndex];
+        return `${start} – ${formatEndHour(start)} (1 hr)`;
+      }
+      if (count === 1) {
+        const start = TIME_SLOT_LABELS[s.selectedSlots[0]];
+        return `${start} – ${formatEndHour(start)} (1 hr)`;
+      }
+      const sorted = [...s.selectedSlots].sort((a, b) => a - b);
+      let isContiguous = true;
+      for (let i = 0; i < sorted.length - 1; i++) {
+        if (sorted[i + 1] !== sorted[i] + 1) {
+          isContiguous = false;
+          break;
+        }
+      }
+      const hrsText = `${count} hrs`;
+      if (isContiguous) {
+        const start = TIME_SLOT_LABELS[sorted[0]];
+        const end = formatEndHour(TIME_SLOT_LABELS[sorted[sorted.length - 1]]);
+        return `${start} – ${end} (${hrsText})`;
+      }
+      return `${sorted.map((i) => TIME_SLOT_LABELS[i]).join(", ")} (${hrsText})`;
+    }
+  },
+  actions: {
+    // ─── Fetch Catalogs from Supabase ──────────────────────────────────────
+    async fetchCatalogs() {
+      this.isLoadingCatalog = true;
+      try {
+        const supabase = useSupabase();
+        const [courtsRes, paddlesRes, foodRes] = await Promise.all([
+          supabase.from("courts").select("*").order("name"),
+          supabase.from("paddles").select("*").order("price"),
+          supabase.from("food_items").select("*").order("name")
+        ]);
+        if (courtsRes.data && courtsRes.data.length > 0) {
+          this.dbCourts = courtsRes.data.map((c) => ({
+            id: c.id,
+            name: c.name,
+            price: Number(c.price_per_hour),
+            type: c.type || "indoor",
+            status: c.status || "active"
+          }));
+        }
+        if (paddlesRes.data && paddlesRes.data.length > 0) {
+          this.dbPaddles = paddlesRes.data.map((p) => ({
+            id: p.id,
+            name: p.name,
+            price: Number(p.price),
+            stock: Number(p.available_quantity ?? p.total_quantity ?? 4),
+            total_quantity: p.total_quantity,
+            available_quantity: p.available_quantity
+          }));
+        }
+        if (foodRes.data && foodRes.data.length > 0) {
+          this.dbFoodItems = foodRes.data.map((f) => ({
+            id: f.id,
+            name: f.name,
+            price: Number(f.price),
+            category: f.category,
+            stock_quantity: f.stock_quantity,
+            is_available: f.is_available
+          }));
+        }
+      } catch (err) {
+        console.error("[Supabase] Failed to load catalogs, using defaults:", err);
+      } finally {
+        this.isLoadingCatalog = false;
+      }
+    },
+    // ─── Fetch Availability for Current Date from Supabase ─────────────────
+    async fetchAvailability() {
+      this.isLoadingAvailability = true;
+      try {
+        const supabase = useSupabase();
+        const dateStr = `${this.year}-${String(this.month + 1).padStart(2, "0")}-${String(this.day).padStart(2, "0")}`;
+        const totalCourts = this.dbCourts.length > 0 ? this.dbCourts.length : 2;
+        const availabilityMap = {};
+        const checks = TIME_SLOT_LABELS.map(async (_, idx) => {
+          const startTime = slotToTimeString(idx);
+          const endTime = slotToTimeString(idx + 1);
+          const { data, error } = await supabase.rpc("get_court_availability", {
+            p_date: dateStr,
+            p_start_time: startTime,
+            p_end_time: endTime
+          });
+          if (!error && Array.isArray(data)) {
+            const openCount = data.filter((c) => c.is_available).length;
+            availabilityMap[idx] = openCount;
+          } else {
+            availabilityMap[idx] = totalCourts;
+          }
+        });
+        await Promise.all(checks);
+        this.dbSlotAvailability = availabilityMap;
+      } catch (err) {
+        console.error("[Supabase] Failed to fetch availability:", err);
+      } finally {
+        this.isLoadingAvailability = false;
+      }
+    },
+    // ─── Submit Booking to Supabase via create_booking_hold & confirm ──────
+    async submitBookingToSupabase() {
+      this.isSubmittingBooking = true;
+      try {
+        const supabase = useSupabase();
+        const dateStr = `${this.year}-${String(this.month + 1).padStart(2, "0")}-${String(this.day).padStart(2, "0")}`;
+        const sortedSlots = (this.selectedSlots.length > 0 ? this.selectedSlots : [this.slotIndex ?? 0]).sort((a, b) => a - b);
+        const startSlotIdx = sortedSlots[0];
+        const endSlotIdx = sortedSlots[sortedSlots.length - 1];
+        const startTime = slotToTimeString(startSlotIdx);
+        const endTime = slotToTimeString(endSlotIdx + 1);
+        const courtIdsToBook = this.courtIds.length > 0 ? this.courtIds.map(String) : [String(this.courtId || this.courts[0].id)];
+        const guestPayload = {
+          full_name: this.bookerName || "Guest User",
+          mobile: this.bookerMobile || "09000000000",
+          facebook_account: this.bookerFacebook || null
+        };
+        const playersPayload = this.players.filter((p) => p.name.trim().length > 0).map((p) => ({
+          player_name: p.name.trim(),
+          player_mobile: p.mobile ? p.mobile.trim() : null
+        }));
+        const paddleSelections = Object.entries(this.paddleQty).filter(([_, qty]) => qty > 0).map(([id, qty]) => ({ id, quantity: qty }));
+        const foodSelections = Object.entries(this.foodQty).filter(([_, qty]) => qty > 0).map(([id, qty]) => ({ id, quantity: qty }));
+        const { data: holdData, error: holdError } = await supabase.rpc("create_booking_hold", {
+          p_court_ids: courtIdsToBook,
+          p_booking_date: dateStr,
+          p_start_time: startTime,
+          p_end_time: endTime,
+          p_guest: guestPayload,
+          p_players: playersPayload,
+          p_paddle_sels: paddleSelections,
+          p_food_sels: foodSelections
+        });
+        if (holdError || !holdData) {
+          console.error("[Supabase] create_booking_hold error:", holdError);
+          throw new Error(holdError?.message || "Failed to hold booking slots.");
+        }
+        const bookingId = holdData.booking_id;
+        const ref2 = holdData.reference;
+        this.createdBookingId = bookingId;
+        this.bookingRef = ref2;
+        const { error: confirmError } = await supabase.rpc("confirm_booking_payment", {
+          p_booking_id: bookingId,
+          p_payment_method: this.payMethod,
+          p_transaction_reference: `PAY-${Date.now()}`,
+          p_amount: this.grandTotal
+        });
+        if (confirmError) {
+          console.warn("[Supabase] confirm_booking_payment error (booking held):", confirmError);
+        }
+        return ref2;
+      } finally {
+        this.isSubmittingBooking = false;
+      }
+    },
+    setDay(day) {
+      this.day = day;
+      this.selectedSlots = [];
+      this.slotIndex = null;
+      this.courtIds = [];
+      this.courtId = null;
+      this.fetchAvailability();
+    },
+    prevMonth() {
+      this.month -= 1;
+      if (this.month < 0) {
+        this.month = 11;
+        this.year -= 1;
+      }
+      this.day = 1;
+      this.selectedSlots = [];
+      this.slotIndex = null;
+      this.courtIds = [];
+      this.courtId = null;
+      this.fetchAvailability();
+    },
+    nextMonth() {
+      this.month += 1;
+      if (this.month > 11) {
+        this.month = 0;
+        this.year += 1;
+      }
+      this.day = 1;
+      this.selectedSlots = [];
+      this.slotIndex = null;
+      this.courtIds = [];
+      this.courtId = null;
+      this.fetchAvailability();
+    },
+    toggleSlot(idx) {
+      if (this.selectedSlots.includes(idx)) {
+        this.selectedSlots = this.selectedSlots.filter((i) => i !== idx);
+      } else {
+        this.selectedSlots = [...this.selectedSlots, idx].sort((a, b) => a - b);
+      }
+      this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null;
+    },
+    setSlot(idx) {
+      this.toggleSlot(idx);
+    },
+    setSlots(indices) {
+      this.selectedSlots = [...indices].sort((a, b) => a - b);
+      this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null;
+    },
+    clearSlots() {
+      this.selectedSlots = [];
+      this.slotIndex = null;
+    },
+    toggleCourt(id) {
+      const strId = String(id);
+      const current = this.courtIds.map(String);
+      if (current.includes(strId)) {
+        this.courtIds = this.courtIds.filter((x) => String(x) !== strId);
+      } else {
+        this.courtIds = [...this.courtIds, id];
+      }
+      this.courtId = this.courtIds.length > 0 ? this.courtIds[0] : null;
+    },
+    setCourt(id) {
+      this.toggleCourt(id);
+    },
+    setCourts(ids) {
+      this.courtIds = [...ids];
+      this.courtId = this.courtIds.length > 0 ? this.courtIds[0] : null;
+    },
+    clearCourts() {
+      this.courtIds = [];
+      this.courtId = null;
+    },
+    setPaddleQty(id, dir) {
+      const p = this.paddles.find((x) => x.id === id);
+      if (!p) return;
+      let next = (this.paddleQty[id] || 0) + dir;
+      next = Math.max(0, Math.min(p.stock, next));
+      this.paddleQty[id] = next;
+    },
+    setFoodQty(id, dir) {
+      let next = (this.foodQty[id] || 0) + dir;
+      next = Math.max(0, Math.min(20, next));
+      this.foodQty[id] = next;
+    },
+    startHold() {
+      this.holdSeconds = 10 * 60;
+    },
+    decrementHold() {
+      this.holdSeconds = Math.max(0, this.holdSeconds - 1);
+    },
+    generateBookingRef() {
+      const d = new Date(this.year, this.month, this.day);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const rand = Math.floor(1e4 + Math.random() * 89999);
+      this.bookingRef = `PB-${y}${m}${day}-${rand}`;
+      return this.bookingRef;
+    },
+    reset() {
+      this.selectedSlots = [];
+      this.slotIndex = null;
+      this.courtIds = [];
+      this.courtId = null;
+      this.paddleQty = {};
+      this.foodQty = {};
+      this.payMethod = "gcash";
+      this.holdSeconds = 10 * 60;
+      this.bookingRef = null;
+      this.createdBookingId = null;
+      this.bookerName = "";
+      this.bookerMobile = "";
+      this.bookerFacebook = "";
+      this.players = [];
+      this.idPhotoName = null;
+      this.idPhotoFile = null;
+      this.fetchAvailability();
+    }
+  }
+});
 const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   __name: "app",
   __ssrInlineRender: true,
@@ -1767,11 +2319,12 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
         { name: "viewport", content: "width=device-width, initial-scale=1.0" }
       ]
     });
+    useBookingStore();
     return (_ctx, _push, _parent, _attrs) => {
       const _component_NuxtPage = __nuxt_component_0;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen bg-[#EDE7D6] flex justify-center py-8 px-3 font-sans text-ink" }, _attrs))}><div class="app-shell flex flex-col">`);
-      _push(ssrRenderComponent(_sfc_main$3, null, null, _parent));
-      _push(`<main class="flex-1 px-[22px] pt-[14px] pb-0 overflow-y-auto">`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen flex justify-center py-8 px-3 font-sans text-ink" }, _attrs))}><div class="app-shell flex flex-col">`);
+      _push(ssrRenderComponent(AppHeader, null, null, _parent));
+      _push(`<main class="flex-1 px-[22px] pt-[14px] pb-0 overflow-y-auto no-scrollbar">`);
       _push(ssrRenderComponent(_component_NuxtPage, null, null, _parent));
       _push(`</main></div></div>`);
     };
@@ -1797,8 +2350,8 @@ const _sfc_main$1 = {
     const statusText = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = void 0;
-    const _Error404 = defineAsyncComponent(() => import("./_nuxt/error-404-u_JNiGqb.js"));
-    const _Error = defineAsyncComponent(() => import("./_nuxt/error-500-irkX0kSU.js"));
+    const _Error404 = defineAsyncComponent(() => import("./_nuxt/error-404-DQfIEDG1.js"));
+    const _Error = defineAsyncComponent(() => import("./_nuxt/error-500-BqqiK8fw.js"));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
       _push(ssrRenderComponent(unref(ErrorTemplate), mergeProps({ status: unref(status), statusText: unref(statusText), statusCode: unref(status), statusMessage: unref(statusText), description: unref(description), stack: unref(stack) }, _attrs), null, _parent));
@@ -1890,9 +2443,10 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 export {
-  __nuxt_component_0$1 as _,
-  useRoute as a,
-  defineStore as d,
+  _export_sfc as _,
+  __nuxt_component_0$1 as a,
+  useBookingStore as b,
+  useRoute as c,
   entry_default as default,
   navigateTo as n,
   useHead as u

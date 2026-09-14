@@ -1,19 +1,18 @@
-/**
- * Lightweight Supabase composable with mock fallback support.
- * Can be connected to a live Supabase project by providing
- * SUPABASE_URL and SUPABASE_ANON_KEY in runtimeConfig.
- */
-export function useSupabase() {
-  const config = useRuntimeConfig()
-  const isConfigured = Boolean(config.public?.supabaseUrl && config.public?.supabaseKey)
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-  return {
-    isConfigured,
-    // Provide a unified query/table interface
-    from: (table: string) => ({
-      select: async () => ({ data: [], error: null }),
-      insert: async (data: any) => ({ data, error: null }),
-      update: async (data: any) => ({ data, error: null }),
-    }),
+let _client: SupabaseClient | null = null
+
+export function useSupabase(): SupabaseClient {
+  if (_client) return _client
+
+  const config = useRuntimeConfig()
+  const url = (config.public.supabaseUrl as string) || 'https://unfevsmviabqvlffwzsc.supabase.co'
+  const key = (config.public.supabaseKey as string) || ''
+
+  if (!url || !key) {
+    console.warn('[Supabase] Missing credentials in runtimeConfig!')
   }
+
+  _client = createClient(url, key)
+  return _client
 }

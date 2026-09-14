@@ -9,7 +9,7 @@
       </p>
 
       <PaddleStepper
-        v-for="p in PADDLES"
+        v-for="p in store.paddles"
         :key="p.id"
         :paddle="p"
         :quantity="store.paddleQty[p.id] || 0"
@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { useBookingStore, PADDLES } from '~/stores/booking'
+import { useBookingStore } from '~/stores/booking'
 import PaddleStepper from '~/components/booking/PaddleStepper.vue'
 import BottomCTA from '~/components/ui/BottomCTA.vue'
 import PriceTotalBar from '~/components/ui/PriceTotalBar.vue'
@@ -45,4 +45,5 @@ if (store.courtId === null && store.courtIds.length === 0) {
 function goNext() {
   navigateTo('/book/food')
 }
+
 </script>

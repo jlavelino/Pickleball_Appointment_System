@@ -160,14 +160,17 @@ function handleIdFile(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (file) {
     store.idPhotoName = file.name
+    store.idPhotoFile = file
   }
 }
 
 function clearId() {
   store.idPhotoName = null
+  store.idPhotoFile = null
   const input = document.getElementById('booker-id') as HTMLInputElement
   if (input) input.value = ''
 }
+
 
 function goNext() {
   if (canProceed.value) {

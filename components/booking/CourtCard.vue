@@ -48,8 +48,9 @@ const props = defineProps<{
 }>()
 
 defineEmits<{
-  select: [id: number]
+  select: [id: string | number]
 }>()
+
 
 const isFull = computed(() => props.status === 'full')
 

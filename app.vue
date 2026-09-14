@@ -10,7 +10,9 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import AppHeader from '~/components/ui/AppHeader.vue'
+import { useBookingStore } from '~/stores/booking'
 
 useHead({
   title: 'DINK — Book a court',
@@ -18,4 +20,11 @@ useHead({
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
   ],
 })
+
+const store = useBookingStore()
+onMounted(() => {
+  store.fetchCatalogs()
+  store.fetchAvailability()
+})
 </script>
+
