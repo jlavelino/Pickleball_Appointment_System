@@ -473,6 +473,7 @@ function statusClass(status: string): string {
   box-sizing: border-box;
   transition: border-color 0.15s, box-shadow 0.15s;
   -webkit-appearance: none;
+  appearance: none;
 }
 .lookup-input::-webkit-search-cancel-button,
 .lookup-input::-webkit-search-decoration {

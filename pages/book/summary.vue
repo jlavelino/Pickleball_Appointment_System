@@ -79,9 +79,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from 'vue'
-import { useBookingStore } from '~/stores/booking'
+import { useBookingStore, type PaddleItem, type FoodItem } from '~/stores/booking'
 import HoldTimer from '~/components/ui/HoldTimer.vue'
-import BottomCTA from '~/components/ui/BottomCTA.vue'
+import BottomCTA from '~/components/ui/BottomCta.vue'
 
 useHead({ title: 'Your booking — PickleBook' })
 
@@ -103,20 +103,20 @@ onUnmounted(() => {
 })
 
 const mainPaddleLine = computed(() => {
-  const active = store.paddles.filter(p => (store.paddleQty[p.id] || 0) > 0)
-    .sort((a, b) => (b.price * (store.paddleQty[b.id] || 0)) - (a.price * (store.paddleQty[a.id] || 0)))
+  const active = store.paddles.filter((p: PaddleItem) => (store.paddleQty[p.id] || 0) > 0)
+    .sort((a: PaddleItem, b: PaddleItem) => (b.price * (store.paddleQty[b.id] || 0)) - (a.price * (store.paddleQty[a.id] || 0)))
   if (!active.length) return { main: '', sub: '' }
   const main = `${store.paddleQty[active[0].id]} × ${active[0].name}`
-  const sub = active.slice(1).map(p => `${store.paddleQty[p.id]} × ${p.name}`).join(', ')
+  const sub = active.slice(1).map((p: PaddleItem) => `${store.paddleQty[p.id]} × ${p.name}`).join(', ')
   return { main, sub }
 })
 
 const mainFoodLine = computed(() => {
-  const active = store.allFood.filter(f => (store.foodQty[f.id] || 0) > 0)
-    .sort((a, b) => (b.price * (store.foodQty[b.id] || 0)) - (a.price * (store.foodQty[a.id] || 0)))
+  const active = store.allFood.filter((f: FoodItem) => (store.foodQty[f.id] || 0) > 0)
+    .sort((a: FoodItem, b: FoodItem) => (b.price * (store.foodQty[b.id] || 0)) - (a.price * (store.foodQty[a.id] || 0)))
   if (!active.length) return { main: '', sub: '' }
   const main = `${store.foodQty[active[0].id]} × ${active[0].name}`
-  const sub = active.slice(1).map(f => `${store.foodQty[f.id]} × ${f.name}`).join(', ')
+  const sub = active.slice(1).map((f: FoodItem) => `${store.foodQty[f.id]} × ${f.name}`).join(', ')
   return { main, sub }
 })
 

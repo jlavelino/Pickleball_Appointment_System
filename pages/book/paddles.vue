@@ -14,7 +14,7 @@
         :paddle="p"
         :quantity="store.paddleQty[p.id] || 0"
         :hours="store.slotHours"
-        @step="(dir) => store.setPaddleQty(p.id, dir)"
+        @step="(dir: number) => store.setPaddleQty(p.id, dir)"
       />
     </div>
 
@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { useBookingStore } from '~/stores/booking'
 import PaddleStepper from '~/components/booking/PaddleStepper.vue'
-import BottomCTA from '~/components/ui/BottomCTA.vue'
+import BottomCTA from '~/components/ui/BottomCta.vue'
 import PriceTotalBar from '~/components/ui/PriceTotalBar.vue'
 
 useHead({ title: 'Paddle rental — PickleBook' })

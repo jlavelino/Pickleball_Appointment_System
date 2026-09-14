@@ -11,7 +11,7 @@
       <!-- Court -->
       <div class="flex justify-between text-[12.5px] py-1.5">
         <span>Court rental</span>
-        <span class="font-semibold">₱{{ court.pricePerHour.toLocaleString() }}</span>
+        <span class="font-semibold">₱{{ court.price.toLocaleString() }}</span>
       </div>
 
       <!-- Paddles -->
@@ -58,11 +58,11 @@ const props = defineProps<{
   dateLabel: string
   startTime: string
   endTime: string
-  paddles: PaddleItem[]
-  food: FoodItem[]
+  paddles: (PaddleItem & { quantity: number })[]
+  food: (FoodItem & { quantity: number })[]
 }>()
 
 const foodTotal   = computed(() => props.food.reduce((s, f) => s + f.price * f.quantity, 0))
 const paddleTotal = computed(() => props.paddles.reduce((s, p) => s + p.price * p.quantity, 0))
-const total       = computed(() => props.court.pricePerHour + paddleTotal.value + foodTotal.value)
+const total       = computed(() => (props.court.price ?? 0) + paddleTotal.value + foodTotal.value)
 </script>

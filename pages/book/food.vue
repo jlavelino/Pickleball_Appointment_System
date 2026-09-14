@@ -17,7 +17,7 @@
           :key="f.id"
           :food="f"
           :quantity="store.foodQty[f.id] || 0"
-          @step="(dir) => store.setFoodQty(f.id, dir)"
+          @step="(dir: number) => store.setFoodQty(f.id, dir)"
         />
       </template>
     </div>
@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { useBookingStore } from '~/stores/booking'
 import FoodItemRow from '~/components/booking/FoodItemRow.vue'
-import BottomCTA from '~/components/ui/BottomCTA.vue'
+import BottomCTA from '~/components/ui/BottomCta.vue'
 import PriceTotalBar from '~/components/ui/PriceTotalBar.vue'
 
 useHead({ title: 'Pre-order food — PickleBook' })

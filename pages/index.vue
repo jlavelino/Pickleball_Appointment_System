@@ -138,7 +138,7 @@ import { ref, computed } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 import CalendarPicker from '~/components/booking/CalendarPicker.vue'
 import TimeSlotModal from '~/components/booking/TimeSlotModal.vue'
-import BottomCTA from '~/components/ui/BottomCTA.vue'
+import BottomCTA from '~/components/ui/BottomCta.vue'
 
 useHead({ title: 'PickleBook — Book a court' })
 

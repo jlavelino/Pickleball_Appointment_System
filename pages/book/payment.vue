@@ -50,7 +50,7 @@
 import { ref } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 import PaymentMethodCard from '~/components/booking/PaymentMethodCard.vue'
-import BottomCTA from '~/components/ui/BottomCTA.vue'
+import BottomCTA from '~/components/ui/BottomCta.vue'
 
 useHead({ title: 'Pay for your booking — DINK' })
 

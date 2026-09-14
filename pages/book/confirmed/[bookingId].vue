@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useBookingStore } from '~/stores/booking'
-import BookingQR from '~/components/booking/BookingQR.vue'
+import BookingQR from '~/components/booking/BookingQr.vue'
 
 useHead({ title: 'Booking confirmed — DINK' })
 

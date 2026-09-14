@@ -238,40 +238,40 @@ export const useBookingStore = defineStore('booking', {
       }))
     },
 
-    selectedCourt: (s): Court | null => {
-      const id = s.courtIds[0] ?? s.courtId
+    selectedCourt(): Court | null {
+      const id = this.courtIds[0] ?? this.courtId
       if (!id) return null
-      return s.courts.find(c => String(c.id) === String(id)) || null
+      return this.courts.find((c: Court) => String(c.id) === String(id)) || null
     },
 
-    selectedCourts: (s): Court[] => {
-      if (s.courtIds.length > 0) {
-        return s.courts.filter(c => s.courtIds.map(String).includes(String(c.id)))
+    selectedCourts(): Court[] {
+      if (this.courtIds.length > 0) {
+        return this.courts.filter((c: Court) => this.courtIds.map(String).includes(String(c.id)))
       }
-      if (s.courtId !== null) {
-        const c = s.courts.find(x => String(x.id) === String(s.courtId))
+      if (this.courtId !== null) {
+        const c = this.courts.find((x: Court) => String(x.id) === String(this.courtId))
         return c ? [c] : []
       }
       return []
     },
 
-    courtNamesLabel: (s): string => {
-      const courts = s.courts.filter(c => s.courtIds.map(String).includes(String(c.id)))
+    courtNamesLabel(): string {
+      const courts = this.courts.filter((c: Court) => this.courtIds.map(String).includes(String(c.id)))
       if (courts.length === 0) {
-        const c = s.courts.find(x => String(x.id) === String(s.courtId))
+        const c = this.courts.find((x: Court) => String(x.id) === String(this.courtId))
         return c ? c.name : ''
       }
-      const names = courts.map(c => c.name)
+      const names = courts.map((c: Court) => c.name)
       if (names.length === 1) return names[0]
       if (names.length === 2) return `${names[0]} & ${names[1]}`
       return names.join(', ')
     },
 
-    courtsStatusMap: (s): Record<string, 'open' | 'low' | 'full'> => {
+    courtsStatusMap(s): Record<string, 'open' | 'low' | 'full'> {
       const map: Record<string, 'open' | 'low' | 'full'> = {}
       const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2
 
-      s.courts.forEach(court => {
+      this.courts.forEach((court: Court) => {
         // Calculate status across selected slots
         const selectedCounts = s.selectedSlots.length > 0
           ? s.selectedSlots.map(idx => s.dbSlotAvailability[idx] ?? totalCourts)
@@ -286,53 +286,53 @@ export const useBookingStore = defineStore('booking', {
       return map
     },
 
-    paddleTotal: (s): number => {
+    paddleTotal(s): number {
       const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 1)
-      return s.paddles.reduce((sum, p) => sum + (p.price * hours) * (s.paddleQty[p.id] || 0), 0)
+      return this.paddles.reduce((sum: number, p: PaddleItem) => sum + (p.price * hours) * (s.paddleQty[p.id] || 0), 0)
     },
 
-    paddleCount: (s): number => {
-      return s.paddles.reduce((sum, p) => sum + (s.paddleQty[p.id] || 0), 0)
+    paddleCount(s): number {
+      return this.paddles.reduce((sum: number, p: PaddleItem) => sum + (s.paddleQty[p.id] || 0), 0)
     },
 
-    foodTotal: (s): number => {
-      return s.allFood.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0)
+    foodTotal(s): number {
+      return this.allFood.reduce((sum: number, f: FoodItem) => sum + f.price * (s.foodQty[f.id] || 0), 0)
     },
 
-    foodCount: (s): number => {
-      return s.allFood.reduce((sum, f) => sum + (s.foodQty[f.id] || 0), 0)
+    foodCount(s): number {
+      return this.allFood.reduce((sum: number, f: FoodItem) => sum + (s.foodQty[f.id] || 0), 0)
     },
 
-    slotHours: (s): number => {
+    slotHours(s): number {
       return s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 0)
     },
 
-    courtTotal: (s): number => {
+    courtTotal(s): number {
       const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 0)
       if (s.courtIds.length > 0) {
-        const selected = s.courts.filter(c => s.courtIds.map(String).includes(String(c.id)))
-        return selected.reduce((sum, c) => sum + (c.price * hours), 0)
+        const selected = this.courts.filter((c: Court) => s.courtIds.map(String).includes(String(c.id)))
+        return selected.reduce((sum: number, c: Court) => sum + (c.price * hours), 0)
       }
       if (s.courtId !== null) {
-        const c = s.courts.find(x => String(x.id) === String(s.courtId))
+        const c = this.courts.find((x: Court) => String(x.id) === String(s.courtId))
         return c ? c.price * hours : 0
       }
       return 0
     },
 
-    grandTotal: (s): number => {
+    grandTotal(s): number {
       const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 0)
       let courtPrice = 0
       if (s.courtIds.length > 0) {
-        const selected = s.courts.filter(c => s.courtIds.map(String).includes(String(c.id)))
-        courtPrice = selected.reduce((sum, c) => sum + (c.price * hours), 0)
+        const selected = this.courts.filter((c: Court) => s.courtIds.map(String).includes(String(c.id)))
+        courtPrice = selected.reduce((sum: number, c: Court) => sum + (c.price * hours), 0)
       } else if (s.courtId !== null) {
-        const c = s.courts.find(x => String(x.id) === String(s.courtId))
+        const c = this.courts.find((x: Court) => String(x.id) === String(s.courtId))
         courtPrice = c ? c.price * hours : 0
       }
       const paddleHours = hours > 0 ? hours : 1
-      const pTotal = s.paddles.reduce((sum, p) => sum + (p.price * paddleHours) * (s.paddleQty[p.id] || 0), 0)
-      const fTotal = s.allFood.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0)
+      const pTotal = this.paddles.reduce((sum: number, p: PaddleItem) => sum + (p.price * paddleHours) * (s.paddleQty[p.id] || 0), 0)
+      const fTotal = this.allFood.reduce((sum: number, f: FoodItem) => sum + f.price * (s.foodQty[f.id] || 0), 0)
       return courtPrice + pTotal + fTotal
     },
 

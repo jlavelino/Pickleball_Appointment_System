@@ -125,7 +125,7 @@
 import { computed, onMounted } from 'vue'
 import { useBookingStore, type PlayerEntry } from '~/stores/booking'
 import HoldTimer from '~/components/ui/HoldTimer.vue'
-import BottomCTA from '~/components/ui/BottomCTA.vue'
+import BottomCTA from '~/components/ui/BottomCta.vue'
 
 useHead({ title: 'Your details — PickleBook' })
 

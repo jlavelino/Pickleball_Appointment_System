@@ -1,4 +1,4 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, getCurrentInstance, inject, defineComponent, shallowRef, h, resolveComponent, getCurrentScope, computed, unref, ref, reactive, effectScope, isRef, isReactive, toRaw, onScopeDispose, watch, nextTick, toRefs, markRaw, createElementBlock, provide, cloneVNode, useSSRContext, createApp, shallowReactive, isVNode, createCommentVNode, mergeProps, withCtx, createVNode, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, Suspense, defineAsyncComponent, Fragment, toRef, isReadonly, isShallow } from 'vue';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, getCurrentInstance, inject, defineComponent, shallowRef, h, resolveComponent, getCurrentScope, computed, unref, ref, reactive, effectScope, isRef, isReactive, toRaw, onScopeDispose, watch, nextTick, toRefs, markRaw, createElementBlock, provide, cloneVNode, useSSRContext, createApp, shallowReactive, isVNode, createCommentVNode, mergeProps, withCtx, createVNode, openBlock, createBlock, onErrorCaptured, onServerPrefetch, resolveDynamicComponent, Suspense, defineAsyncComponent, Fragment, toRef, isReadonly, isShallow } from 'vue';
 import { l as hasProtocol, m as isScriptProtocol, n as joinURL, p as parseQuery, w as withQuery, o as sanitizeStatusCode, q as parseURL, e as encodePath, r as decodePath, v as getContext, x as withTrailingSlash, y as withoutTrailingSlash, $ as $fetch, z as createHooks, f as createError$1, A as executeAsync, B as defu } from '../_/nitro.mjs';
 import { u as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
@@ -582,6 +582,11 @@ const _routes = [
     component: () => import('./index-BGi2e_UW.mjs')
   },
   {
+    name: "lookup",
+    path: "/lookup",
+    component: () => import('./lookup-uXqd1fAu.mjs')
+  },
+  {
     name: "book-food",
     path: "/book/food",
     component: () => import('./food-DWQJr6Gq.mjs')
@@ -599,7 +604,7 @@ const _routes = [
   {
     name: "book-details",
     path: "/book/details",
-    component: () => import('./details-DH4PfNdo.mjs')
+    component: () => import('./details-mEluNm2Y.mjs')
   },
   {
     name: "book-paddles",
@@ -619,7 +624,7 @@ const _routes = [
   {
     name: "book-confirmed-bookingId",
     path: "/book/confirmed/:bookingId()",
-    component: () => import('./_bookingId_--wLS27Pu.mjs')
+    component: () => import('./_bookingId_-Bx8EB1Bw.mjs')
   }
 ];
 const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
@@ -1738,20 +1743,23 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
   setup(__props) {
     const route = useRoute();
     useRouter();
+    const isHomePage = computed(() => {
+      return route.path === "/" || route.path === "/book";
+    });
     const canGoBack = computed(() => {
       const path = route.path;
       return path !== "/" && path !== "/book" && !path.includes("/confirmed");
     });
     return (_ctx, _push, _parent, _attrs) => {
       const _component_NuxtLink = __nuxt_component_0$1;
-      _push(`<header${ssrRenderAttrs(mergeProps({ class: "header-bar" }, _attrs))} data-v-eb75dd39><button type="button" aria-label="Go back" class="${ssrRenderClass([canGoBack.value ? "opacity-100" : "opacity-0 pointer-events-none", "back-btn"])}" data-v-eb75dd39><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="back-icon" data-v-eb75dd39><path d="M19 12H5" data-v-eb75dd39></path><path d="M12 19l-7-7 7-7" data-v-eb75dd39></path></svg></button>`);
+      _push(`<header${ssrRenderAttrs(mergeProps({ class: "header-bar" }, _attrs))} data-v-6d7dc95a><button type="button" aria-label="Go back" class="${ssrRenderClass([canGoBack.value ? "opacity-100" : "opacity-0 pointer-events-none", "back-btn"])}" data-v-6d7dc95a><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="back-icon" data-v-6d7dc95a><path d="M19 12H5" data-v-6d7dc95a></path><path d="M12 19l-7-7 7-7" data-v-6d7dc95a></path></svg></button>`);
       _push(ssrRenderComponent(_component_NuxtLink, {
         to: "/",
         class: "logo-link"
       }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
-            _push2(`<img${ssrRenderAttr("src", _imports_0)} alt="PickleBook icon" class="logo-icon" style="${ssrRenderStyle({ "height": "32px", "width": "auto", "display": "block", "max-width": "none" })}" data-v-eb75dd39${_scopeId}><img${ssrRenderAttr("src", _imports_1)} alt="PickleBook" class="logo-name" style="${ssrRenderStyle({ "height": "22px", "width": "auto", "display": "block", "max-width": "none" })}" data-v-eb75dd39${_scopeId}>`);
+            _push2(`<img${ssrRenderAttr("src", _imports_0)} alt="PickleBook icon" class="logo-icon" style="${ssrRenderStyle({ "height": "32px", "width": "auto", "display": "block", "max-width": "none" })}" data-v-6d7dc95a${_scopeId}><img${ssrRenderAttr("src", _imports_1)} alt="PickleBook" class="logo-name" style="${ssrRenderStyle({ "height": "22px", "width": "auto", "display": "block", "max-width": "none" })}" data-v-6d7dc95a${_scopeId}>`);
           } else {
             return [
               createVNode("img", {
@@ -1771,7 +1779,39 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
         }),
         _: 1
       }, _parent));
-      _push(`<div class="back-spacer" aria-hidden="true" data-v-eb75dd39></div></header>`);
+      _push(ssrRenderComponent(_component_NuxtLink, {
+        to: "/lookup",
+        "aria-label": "Check booking",
+        class: ["lookup-btn", isHomePage.value ? "opacity-100" : "opacity-0 pointer-events-none"]
+      }, {
+        default: withCtx((_, _push2, _parent2, _scopeId) => {
+          if (_push2) {
+            _push2(`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" data-v-6d7dc95a${_scopeId}><circle cx="11" cy="11" r="8" data-v-6d7dc95a${_scopeId}></circle><path d="M21 21l-4.35-4.35" data-v-6d7dc95a${_scopeId}></path></svg>`);
+          } else {
+            return [
+              (openBlock(), createBlock("svg", {
+                width: "17",
+                height: "17",
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                "stroke-width": "2.2",
+                "stroke-linecap": "round",
+                "stroke-linejoin": "round"
+              }, [
+                createVNode("circle", {
+                  cx: "11",
+                  cy: "11",
+                  r: "8"
+                }),
+                createVNode("path", { d: "M21 21l-4.35-4.35" })
+              ]))
+            ];
+          }
+        }),
+        _: 1
+      }, _parent));
+      _push(`</header>`);
     };
   }
 });
@@ -1788,14 +1828,14 @@ _sfc_main$3.setup = (props, ctx) => {
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/ui/AppHeader.vue");
   return _sfc_setup$3 ? _sfc_setup$3(props, ctx) : void 0;
 };
-const AppHeader = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-eb75dd39"]]);
+const AppHeader = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-6d7dc95a"]]);
 let _client = null;
 function useSupabase() {
   if (_client) return _client;
   const config = /* @__PURE__ */ useRuntimeConfig();
   const url = config.public.supabaseUrl || "https://unfevsmviabqvlffwzsc.supabase.co";
   const key = config.public.supabaseKey || "";
-  if (!key) {
+  if (!url || !key) {
     console.warn("[Supabase] Missing credentials in runtimeConfig!");
   }
   _client = createClient(url, key);
@@ -1941,25 +1981,25 @@ const useBookingStore = /* @__PURE__ */ defineStore("booking", {
         open: s.dbSlotAvailability[idx] !== void 0 ? s.dbSlotAvailability[idx] : totalCourts
       }));
     },
-    selectedCourt: (s) => {
-      const id = s.courtIds[0] ?? s.courtId;
+    selectedCourt() {
+      const id = this.courtIds[0] ?? this.courtId;
       if (!id) return null;
-      return s.courts.find((c) => String(c.id) === String(id)) || null;
+      return this.courts.find((c) => String(c.id) === String(id)) || null;
     },
-    selectedCourts: (s) => {
-      if (s.courtIds.length > 0) {
-        return s.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
+    selectedCourts() {
+      if (this.courtIds.length > 0) {
+        return this.courts.filter((c) => this.courtIds.map(String).includes(String(c.id)));
       }
-      if (s.courtId !== null) {
-        const c = s.courts.find((x) => String(x.id) === String(s.courtId));
+      if (this.courtId !== null) {
+        const c = this.courts.find((x) => String(x.id) === String(this.courtId));
         return c ? [c] : [];
       }
       return [];
     },
-    courtNamesLabel: (s) => {
-      const courts = s.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
+    courtNamesLabel() {
+      const courts = this.courts.filter((c) => this.courtIds.map(String).includes(String(c.id)));
       if (courts.length === 0) {
-        const c = s.courts.find((x) => String(x.id) === String(s.courtId));
+        const c = this.courts.find((x) => String(x.id) === String(this.courtId));
         return c ? c.name : "";
       }
       const names = courts.map((c) => c.name);
@@ -1967,10 +2007,10 @@ const useBookingStore = /* @__PURE__ */ defineStore("booking", {
       if (names.length === 2) return `${names[0]} & ${names[1]}`;
       return names.join(", ");
     },
-    courtsStatusMap: (s) => {
+    courtsStatusMap(s) {
       const map = {};
       const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2;
-      s.courts.forEach((court) => {
+      this.courts.forEach((court) => {
         const selectedCounts = s.selectedSlots.length > 0 ? s.selectedSlots.map((idx) => s.dbSlotAvailability[idx] ?? totalCourts) : s.slotIndex !== null ? [s.dbSlotAvailability[s.slotIndex] ?? totalCourts] : [totalCourts];
         const minOpen = Math.min(...selectedCounts);
         if (minOpen >= 2) map[String(court.id)] = "open";
@@ -1979,47 +2019,47 @@ const useBookingStore = /* @__PURE__ */ defineStore("booking", {
       });
       return map;
     },
-    paddleTotal: (s) => {
+    paddleTotal(s) {
       const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : s.slotIndex !== null ? 1 : 1;
-      return s.paddles.reduce((sum, p) => sum + p.price * hours * (s.paddleQty[p.id] || 0), 0);
+      return this.paddles.reduce((sum, p) => sum + p.price * hours * (s.paddleQty[p.id] || 0), 0);
     },
-    paddleCount: (s) => {
-      return s.paddles.reduce((sum, p) => sum + (s.paddleQty[p.id] || 0), 0);
+    paddleCount(s) {
+      return this.paddles.reduce((sum, p) => sum + (s.paddleQty[p.id] || 0), 0);
     },
-    foodTotal: (s) => {
-      return s.allFood.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0);
+    foodTotal(s) {
+      return this.allFood.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0);
     },
-    foodCount: (s) => {
-      return s.allFood.reduce((sum, f) => sum + (s.foodQty[f.id] || 0), 0);
+    foodCount(s) {
+      return this.allFood.reduce((sum, f) => sum + (s.foodQty[f.id] || 0), 0);
     },
-    slotHours: (s) => {
+    slotHours(s) {
       return s.selectedSlots.length > 0 ? s.selectedSlots.length : s.slotIndex !== null ? 1 : 0;
     },
-    courtTotal: (s) => {
+    courtTotal(s) {
       const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : s.slotIndex !== null ? 1 : 0;
       if (s.courtIds.length > 0) {
-        const selected = s.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
+        const selected = this.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
         return selected.reduce((sum, c) => sum + c.price * hours, 0);
       }
       if (s.courtId !== null) {
-        const c = s.courts.find((x) => String(x.id) === String(s.courtId));
+        const c = this.courts.find((x) => String(x.id) === String(s.courtId));
         return c ? c.price * hours : 0;
       }
       return 0;
     },
-    grandTotal: (s) => {
+    grandTotal(s) {
       const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : s.slotIndex !== null ? 1 : 0;
       let courtPrice = 0;
       if (s.courtIds.length > 0) {
-        const selected = s.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
+        const selected = this.courts.filter((c) => s.courtIds.map(String).includes(String(c.id)));
         courtPrice = selected.reduce((sum, c) => sum + c.price * hours, 0);
       } else if (s.courtId !== null) {
-        const c = s.courts.find((x) => String(x.id) === String(s.courtId));
+        const c = this.courts.find((x) => String(x.id) === String(s.courtId));
         courtPrice = c ? c.price * hours : 0;
       }
       const paddleHours = hours > 0 ? hours : 1;
-      const pTotal = s.paddles.reduce((sum, p) => sum + p.price * paddleHours * (s.paddleQty[p.id] || 0), 0);
-      const fTotal = s.allFood.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0);
+      const pTotal = this.paddles.reduce((sum, p) => sum + p.price * paddleHours * (s.paddleQty[p.id] || 0), 0);
+      const fTotal = this.allFood.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0);
       return courtPrice + pTotal + fTotal;
     },
     dateLabel: (s) => {
@@ -2115,23 +2155,29 @@ const useBookingStore = /* @__PURE__ */ defineStore("booking", {
         const supabase = useSupabase();
         const dateStr = `${this.year}-${String(this.month + 1).padStart(2, "0")}-${String(this.day).padStart(2, "0")}`;
         const totalCourts = this.dbCourts.length > 0 ? this.dbCourts.length : 2;
+        const { data: bookingsData, error } = await supabase.from("bookings").select("id, start_time, end_time, booking_courts(court_id)").eq("booking_date", dateStr).in("status", ["confirmed", "pending_payment", "held"]);
+        if (error) {
+          console.error("[Supabase] fetchAvailability query error:", error);
+        }
         const availabilityMap = {};
-        const checks = TIME_SLOT_LABELS.map(async (_, idx) => {
-          const startTime = slotToTimeString(idx);
-          const endTime = slotToTimeString(idx + 1);
-          const { data, error } = await supabase.rpc("get_court_availability", {
-            p_date: dateStr,
-            p_start_time: startTime,
-            p_end_time: endTime
-          });
-          if (!error && Array.isArray(data)) {
-            const openCount = data.filter((c) => c.is_available).length;
-            availabilityMap[idx] = openCount;
-          } else {
-            availabilityMap[idx] = totalCourts;
+        TIME_SLOT_LABELS.forEach((_, idx) => {
+          const slotStartHour = 8 + idx;
+          const slotEndHour = slotStartHour + 1;
+          const bookedCourtIds = /* @__PURE__ */ new Set();
+          if (!error && bookingsData) {
+            bookingsData.forEach((booking) => {
+              const bookingStartHour = parseInt(booking.start_time.split(":")[0]);
+              const bookingEndHour = parseInt(booking.end_time.split(":")[0]);
+              if (bookingStartHour < slotEndHour && bookingEndHour > slotStartHour) {
+                ;
+                (booking.booking_courts || []).forEach((bc) => {
+                  bookedCourtIds.add(bc.court_id);
+                });
+              }
+            });
           }
+          availabilityMap[idx] = Math.max(0, totalCourts - bookedCourtIds.size);
         });
-        await Promise.all(checks);
         this.dbSlotAvailability = availabilityMap;
       } catch (err) {
         console.error("[Supabase] Failed to fetch availability:", err);
@@ -2450,5 +2496,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { _export_sfc as _, __nuxt_component_0$1 as a, useBookingStore as b, useRoute as c, entry_default as default, navigateTo as n, useHead as u };
+export { _export_sfc as _, __nuxt_component_0$1 as a, useBookingStore as b, useSupabase as c, useRoute as d, entry_default as default, navigateTo as n, useHead as u };
 //# sourceMappingURL=server.mjs.map

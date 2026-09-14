@@ -50,7 +50,7 @@
 import { computed } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 import CourtCard from '~/components/booking/CourtCard.vue'
-import BottomCTA from '~/components/ui/BottomCTA.vue'
+import BottomCTA from '~/components/ui/BottomCta.vue'
 import PriceTotalBar from '~/components/ui/PriceTotalBar.vue'
 
 useHead({ title: 'Pick a court — PickleBook' })
