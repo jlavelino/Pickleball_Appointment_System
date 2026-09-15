@@ -488,8 +488,8 @@ export const useBookingStore = defineStore('booking', {
       }
     },
 
-    // ─── Submit Booking to Supabase via create_booking_hold & confirm ──────
-    async submitBookingToSupabase(): Promise<string> {
+    // ─── Create 10-Minute Booking Hold in Supabase ─────────────────────────
+    async createBookingHold(): Promise<{ bookingId: string; bookingRef: string }> {
       this.isSubmittingBooking = true
       try {
         const supabase = useSupabase()
@@ -533,7 +533,7 @@ export const useBookingStore = defineStore('booking', {
           .filter(([_, qty]) => qty > 0)
           .map(([id, qty]) => ({ id, quantity: qty }))
 
-        // 1. Call create_booking_hold RPC
+        // Call create_booking_hold RPC
         const { data: holdData, error: holdError } = await supabase.rpc('create_booking_hold', {
           p_court_ids: courtIdsToBook,
           p_booking_date: dateStr,
@@ -556,22 +556,55 @@ export const useBookingStore = defineStore('booking', {
         this.createdBookingId = bookingId
         this.bookingRef = ref
 
-        // 2. Confirm payment
-        const { error: confirmError } = await supabase.rpc('confirm_booking_payment', {
-          p_booking_id: bookingId,
-          p_payment_method: this.payMethod,
-          p_transaction_reference: `PAY-${Date.now()}`,
-          p_amount: this.grandTotal,
-        })
-
-        if (confirmError) {
-          console.warn('[Supabase] confirm_booking_payment error (booking held):', confirmError)
-        }
-
-        return ref
+        return { bookingId, bookingRef: ref }
       } finally {
         this.isSubmittingBooking = false
       }
+    },
+
+    // ─── Initiate PayMongo Checkout Session (GCash / Maya) ─────────────────
+    async initiatePayMongoCheckout(): Promise<string> {
+      // 1. Create the booking hold in Supabase (or reuse active hold)
+      let bookingId = this.createdBookingId
+      let ref = this.bookingRef
+
+      if (!bookingId || !ref) {
+        const hold = await this.createBookingHold()
+        bookingId = hold.bookingId
+        ref = hold.bookingRef
+      }
+
+      // 2. Request PayMongo checkout session from Nuxt server route
+      const response = await $fetch<{ success: boolean; checkoutUrl: string; sessionId: string }>('/api/paymongo/create-checkout', {
+        method: 'POST',
+        body: {
+          bookingId,
+          bookingRef: ref,
+          amount: this.grandTotal,
+          paymentMethod: this.payMethod,
+          bookerName: this.bookerName,
+          bookerMobile: this.bookerMobile,
+        },
+      })
+
+      if (!response?.checkoutUrl) {
+        throw new Error('Failed to generate PayMongo checkout URL.')
+      }
+
+      if (typeof window !== 'undefined' && response.sessionId && ref) {
+        try {
+          sessionStorage.setItem(`paymongo_session_${ref}`, response.sessionId)
+        } catch (e) {
+          // ignore storage error
+        }
+      }
+
+      return response.checkoutUrl
+    },
+
+    // Convenience alias
+    async submitBookingToSupabase(): Promise<string> {
+      return this.initiatePayMongoCheckout()
     },
 
     setDay(day: number) {
