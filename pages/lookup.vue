@@ -4,212 +4,210 @@
 
       <!-- Page header -->
       <div class="mb-5 mt-1">
-        <h1 class="font-display font-semibold text-[26px] m-0 leading-[1.15]">
-          Check your booking
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cream-card border border-line text-[11.5px] font-bold text-ink-soft uppercase tracking-wider mb-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-relish-dark"></span>
+          <span>Match Pass & Reservation Search</span>
+        </div>
+        <h1 class="font-display font-bold text-[28px] text-ink m-0 leading-tight">
+          Find your booking
         </h1>
-        <p class="text-[13.5px] text-[var(--ink-soft)] mt-1 mb-0 leading-snug">
-          Search by your reference number or full name
+        <p class="text-[14px] text-ink-soft mt-1 mb-0 leading-relaxed">
+          Access your digital match pass, court details, and receipt.
         </p>
       </div>
 
-      <!-- Search input -->
-      <div class="relative mb-4">
-        <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-[var(--ink-soft)]">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- Search input container -->
+      <div class="p-3.5 rounded-2xl bg-cream-card border border-line shadow-xs mb-4">
+        <div class="relative mb-2.5">
+          <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-ink-soft">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </div>
+          <input
+            id="lookup-search-input"
+            v-model="query"
+            type="text"
+            placeholder="e.g. PB-20260915-... or full name"
+            autocomplete="off"
+            class="lookup-input font-mono"
+            @keydown.enter="search"
+          />
+          <button
+            v-if="query"
+            type="button"
+            class="absolute inset-y-0 right-3 flex items-center text-ink-soft hover:text-ink transition-colors"
+            aria-label="Clear search"
+            @click="clearSearch"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Quick tips / search button -->
+        <button
+          id="lookup-search-btn"
+          type="button"
+          class="lookup-search-btn"
+          :disabled="loading || !query.trim()"
+          @click="search"
+        >
+          <svg v-if="loading" class="spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
           </svg>
-        </div>
-        <input
-          id="lookup-search-input"
-          v-model="query"
-          type="text"
-          placeholder="PB-20260910-12345 or your full name"
-          autocomplete="off"
-          class="lookup-input"
-          @keydown.enter="search"
-        />
-        <button
-          v-if="query"
-          type="button"
-          class="absolute inset-y-0 right-3 flex items-center text-[var(--ink-soft)] hover:text-[var(--ink)] transition-colors"
-          aria-label="Clear search"
-          @click="clearSearch"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+          <span>{{ loading ? 'Searching records…' : 'Locate Booking' }}</span>
         </button>
       </div>
 
-      <!-- Search button -->
-      <button
-        id="lookup-search-btn"
-        type="button"
-        class="lookup-search-btn"
-        :disabled="loading || !query.trim()"
-        @click="search"
-      >
-        <svg v-if="loading" class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-        </svg>
-        <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-        </svg>
-        {{ loading ? 'Searching…' : 'Search Booking' }}
-      </button>
-
-      <!-- Error -->
+      <!-- Error banner -->
       <div
         v-if="error"
-        class="mt-4 p-3.5 rounded-2xl bg-[rgba(229,72,77,0.07)] border border-[rgba(229,72,77,0.22)] text-[#8A1F24] text-[13px] font-medium leading-snug"
+        class="mt-3 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-[13px] font-medium leading-snug flex items-center gap-2"
       >
-        ⚠️ {{ error }}
+        <svg class="w-4 h-4 text-red-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>{{ error }}</span>
       </div>
 
-      <!-- No results -->
+      <!-- Empty / No results -->
       <div
         v-else-if="searched && results.length === 0"
-        class="mt-8 flex flex-col items-center text-center gap-2 py-6"
+        class="mt-6 flex flex-col items-center text-center gap-2 py-8 bg-cream-card rounded-2xl border border-line"
       >
-        <div class="w-14 h-14 rounded-2xl bg-[var(--cream-card)] border border-[var(--line)] flex items-center justify-center text-[var(--ink-soft)] mb-1">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <div class="w-12 h-12 rounded-2xl bg-sold border border-line flex items-center justify-center text-relish-dark mb-1">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><line x1="8" y1="11" x2="14" y2="11"/>
           </svg>
         </div>
-        <p class="font-semibold text-[15px] text-[var(--ink)] m-0">No booking found</p>
-        <p class="text-[13px] text-[var(--ink-soft)] m-0 max-w-[220px] leading-snug">
-          Double-check your reference number or try your full name as registered.
+        <p class="font-display font-bold text-[17px] text-ink m-0">No booking found</p>
+        <p class="text-[13px] text-ink-soft m-0 max-w-[240px] leading-relaxed">
+          Please check the reference number or verify spelling of your full name.
         </p>
       </div>
 
-      <!-- Results -->
-      <div v-else-if="results.length > 0" class="mt-5 flex flex-col gap-3">
-        <p class="text-[12px] font-semibold uppercase tracking-wider text-[var(--ink-soft)] m-0 mb-0.5">
-          {{ results.length }} booking{{ results.length !== 1 ? 's' : '' }} found
-        </p>
+      <!-- Results list -->
+      <div v-else-if="results.length > 0" class="mt-4 flex flex-col gap-4">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-[12px] font-bold uppercase tracking-wider text-ink-soft">
+            {{ results.length }} match pass{{ results.length !== 1 ? 'es' : '' }} found
+          </span>
+        </div>
 
         <div
           v-for="b in results"
           :id="`result-${b.reference}`"
           :key="b.id"
-          class="booking-card"
+          class="ticket-pass-card"
         >
-          <!-- Reference + status badge -->
-          <div class="flex items-start justify-between gap-2 mb-3">
+          <!-- Top Header Strip: Ref & Status -->
+          <div class="p-4 bg-ink text-cream rounded-t-[18px] flex items-center justify-between">
             <div>
-              <div class="text-[10.5px] font-bold uppercase tracking-widest text-[var(--ink-soft)] mb-0.5">Reference no.</div>
-              <div class="font-display font-bold text-[18px] text-[var(--ink)] tracking-tight">{{ b.reference }}</div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-cream/60">
+                OFFICIAL MATCH PASS
+              </div>
+              <div class="font-mono font-bold text-[17px] tracking-tight text-white mt-0.5">
+                {{ b.reference }}
+              </div>
             </div>
+
             <span class="status-badge" :class="statusClass(b.status)">
               {{ statusLabel(b.status) }}
             </span>
           </div>
 
-          <div class="border-t border-[var(--line)]/70 mb-3"></div>
+          <!-- Ticket body -->
+          <div class="p-4 bg-white">
+            <!-- Court Hero line -->
+            <div class="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-line/60">
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wider text-ink-soft">Reserved Facility</div>
+                <div class="font-display font-bold text-[17px] text-ink">{{ b.court_names }}</div>
+              </div>
 
-          <!-- Primary detail grid -->
-          <div class="grid grid-cols-2 gap-y-3 gap-x-3">
-            <div class="detail-block">
-              <div class="detail-label">Guest name</div>
-              <div class="detail-value">{{ b.guest_name }}</div>
+              <!-- View Match Pass button -->
+              <NuxtLink
+                :to="`/book/confirmed/${b.reference}`"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-relish-dark text-white text-[12px] font-bold shadow-xs hover:opacity-90 active:scale-95 transition-all"
+              >
+                <span>View QR Pass</span>
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </NuxtLink>
             </div>
-            <div class="detail-block">
-              <div class="detail-label">Date</div>
-              <div class="detail-value">{{ formatDate(b.booking_date) }}</div>
+
+            <!-- Details Grid -->
+            <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-[13px]">
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wider text-ink-soft mb-0.5">Guest Booker</div>
+                <div class="font-semibold text-ink">{{ b.guest_name }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wider text-ink-soft mb-0.5">Match Date</div>
+                <div class="font-semibold text-ink">{{ formatDate(b.booking_date) }}</div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wider text-ink-soft mb-0.5">Session Window</div>
+                <div class="font-semibold text-ink">
+                  {{ formatTime(b.start_time) }} – {{ formatTime(b.end_time) }}
+                </div>
+              </div>
+              <div>
+                <div class="text-[10.5px] font-bold uppercase tracking-wider text-ink-soft mb-0.5">Duration</div>
+                <div class="font-semibold text-ink">
+                  {{ b.duration_hours }} hr{{ b.duration_hours > 1 ? 's' : '' }}
+                </div>
+              </div>
             </div>
-            <div class="detail-block">
-              <div class="detail-label">Time</div>
-              <div class="detail-value">
-                {{ formatTime(b.start_time) }} – {{ formatTime(b.end_time) }}
-                <span v-if="b.duration_hours" class="text-[11.5px] text-[var(--ink-soft)] font-normal block">
-                  ({{ b.duration_hours }} hr{{ b.duration_hours > 1 ? 's' : '' }})
+
+            <!-- Co-players if any -->
+            <div v-if="b.players && b.players.length > 0" class="mt-3 pt-3 border-t border-line/60">
+              <div class="text-[10.5px] font-bold uppercase tracking-wider text-ink-soft mb-1.5">Registered Squad</div>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="player in b.players"
+                  :key="player"
+                  class="px-2 py-0.5 rounded-md text-[11.5px] bg-cream border border-line text-ink font-medium"
+                >
+                  {{ player }}
                 </span>
               </div>
             </div>
-            <div class="detail-block">
-              <div class="detail-label">Court(s)</div>
-              <div class="detail-value">{{ b.court_names }}</div>
-            </div>
-          </div>
 
-          <!-- Additional Players if any -->
-          <div v-if="b.players && b.players.length > 0" class="mt-3 pt-2.5 border-t border-[var(--line)]/60">
-            <div class="detail-label mb-1">Additional Players</div>
-            <div class="flex flex-wrap gap-1.5">
-              <span
-                v-for="player in b.players"
-                :key="player"
-                class="px-2.5 py-0.5 rounded-md text-[12px] bg-[var(--cream)] border border-[var(--line)] text-[var(--ink)] font-medium"
-              >
-                {{ player }}
+            <!-- Order breakdown line items -->
+            <div class="mt-3.5 pt-3 border-t border-line/60 flex flex-col gap-1.5 text-[12.5px]">
+              <div class="flex justify-between items-center text-ink-soft">
+                <span>Court access ({{ b.duration_hours }}h)</span>
+                <span class="font-semibold text-ink">₱{{ Number(b.court_total).toLocaleString() }}</span>
+              </div>
+              <div v-if="b.paddle_total > 0" class="flex justify-between items-center text-ink-soft">
+                <span>Paddle rentals</span>
+                <span class="font-semibold text-ink">₱{{ Number(b.paddle_total).toLocaleString() }}</span>
+              </div>
+              <div v-if="b.food_total > 0" class="flex justify-between items-center text-ink-soft">
+                <span>Court-side refreshments</span>
+                <span class="font-semibold text-ink">₱{{ Number(b.food_total).toLocaleString() }}</span>
+              </div>
+            </div>
+
+            <!-- Ticket footer: Total & Payment Method -->
+            <div class="mt-3 pt-3 border-t border-line flex items-center justify-between">
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-ink-soft">Total Paid</div>
+                <div v-if="b.payment_method" class="text-[11px] text-ink-soft">
+                  via {{ b.payment_method.toUpperCase() }}
+                </div>
+              </div>
+              <span class="font-display font-extrabold text-[20px] text-ink">
+                {{ b.total_amount != null ? `₱${Number(b.total_amount).toLocaleString()}` : '—' }}
               </span>
             </div>
-          </div>
-
-          <!-- Availed Orders Breakdown -->
-          <div class="mt-3.5 pt-3 border-t border-[var(--line)]/70 flex flex-col gap-2.5">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-[var(--ink-soft)]">
-              Availed Orders & Breakdown
-            </div>
-
-            <!-- Court Rental Line -->
-            <div class="flex justify-between items-start text-[13px]">
-              <div>
-                <div class="font-medium text-[var(--ink)]">Court rental</div>
-                <div class="text-[12px] text-[var(--ink-soft)]">
-                  {{ b.court_rentals.length > 0 ? b.court_rentals.length : 1 }} {{ (b.court_rentals.length > 1) ? 'courts' : 'court' }} × {{ b.duration_hours }} {{ b.duration_hours === 1 ? 'hour' : 'hours' }}
-                </div>
-              </div>
-              <div class="font-semibold text-[13.5px] text-[var(--ink)]" v-if="b.court_total > 0">
-                ₱{{ Number(b.court_total).toLocaleString() }}
-              </div>
-            </div>
-
-            <!-- Paddles Line -->
-            <div v-if="b.paddles && b.paddles.length > 0" class="flex justify-between items-start text-[13px] pt-2 border-t border-[var(--line)]/40">
-              <div>
-                <div class="font-medium text-[var(--ink)]">
-                  {{ b.paddles[0].quantity }} × {{ b.paddles[0].name }}
-                </div>
-                <div class="text-[12px] text-[var(--ink-soft)] mt-0.5">
-                  <span v-if="b.paddles.length > 1">
-                    {{ b.paddles.slice(1).map(p => `${p.quantity} × ${p.name}`).join(', ') }} ·
-                  </span>
-                  <span>{{ b.duration_hours }} {{ b.duration_hours === 1 ? 'hour' : 'hours' }}</span>
-                </div>
-              </div>
-              <div class="font-semibold text-[13.5px] text-[var(--ink)]">
-                ₱{{ Number(b.paddle_total).toLocaleString() }}
-              </div>
-            </div>
-
-            <!-- Food & Drinks Line -->
-            <div v-if="b.food_items && b.food_items.length > 0" class="flex justify-between items-start text-[13px] pt-2 border-t border-[var(--line)]/40">
-              <div>
-                <div class="font-medium text-[var(--ink)]">
-                  {{ b.food_items[0].quantity }} × {{ b.food_items[0].name }}
-                </div>
-                <div v-if="b.food_items.length > 1" class="text-[12px] text-[var(--ink-soft)] mt-0.5">
-                  {{ b.food_items.slice(1).map(f => `${f.quantity} × ${f.name}`).join(', ') }}
-                </div>
-              </div>
-              <div class="font-semibold text-[13.5px] text-[var(--ink)]">
-                ₱{{ Number(b.food_total).toLocaleString() }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Total paid -->
-          <div class="mt-3.5 pt-3 border-t border-[var(--line)] flex items-center justify-between">
-            <div>
-              <div class="text-[12.5px] text-[var(--ink-soft)] font-medium">Total paid</div>
-              <div v-if="b.payment_method" class="text-[11px] text-[var(--ink-soft)] uppercase tracking-wider">
-                via {{ b.payment_method }}
-              </div>
-            </div>
-            <span class="font-display font-bold text-[18px] text-[var(--ink)]">
-              {{ b.total_amount != null ? `₱${Number(b.total_amount).toLocaleString()}` : '—' }}
-            </span>
           </div>
         </div>
       </div>
@@ -346,8 +344,6 @@ async function search() {
     const { data, error: qErr } = await req
     if (qErr) throw qErr
 
-    // toArr: Supabase returns 1-to-1 joins as an object, 1-to-many as an array.
-    // This helper always gives us a safe array to work with.
     const toArr = (v: any): any[] =>
       v == null ? [] : Array.isArray(v) ? v : [v]
 
@@ -462,81 +458,63 @@ function statusClass(status: string): string {
 <style scoped>
 .lookup-input {
   width: 100%;
-  padding: 12px 40px;
-  border-radius: 14px;
-  border: 1.5px solid var(--line);
-  background: var(--cream-card);
-  color: var(--ink);
+  padding: 11px 40px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line, #DDDDB8);
+  background: #FFFFFF;
+  color: var(--ink, #223318);
   font-size: 14px;
-  font-family: 'Inter', sans-serif;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  -webkit-appearance: none;
-  appearance: none;
-}
-.lookup-input::-webkit-search-cancel-button,
-.lookup-input::-webkit-search-decoration {
-  -webkit-appearance: none;
-  display: none;
+  transition: all 0.15s ease-out;
 }
 .lookup-input:focus {
-  border-color: var(--relish);
-  box-shadow: 0 0 0 3px rgba(107,142,35,0.12);
+  border-color: var(--ink, #223318);
+  box-shadow: 0 0 0 3px rgba(34, 51, 24, 0.08);
 }
-.lookup-input::placeholder { color: var(--ink-soft); }
+.lookup-input::placeholder { color: rgba(34, 51, 24, 0.4); }
 
 .lookup-search-btn {
   width: 100%;
-  padding: 13px;
-  border-radius: 14px;
+  padding: 12px;
+  border-radius: 12px;
   border: none;
-  background: var(--ink);
-  color: var(--cream);
-  font-size: 14.5px;
-  font-weight: 600;
+  background: var(--ink, #223318);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: opacity 0.15s, transform 0.12s;
+  transition: all 0.15s ease-out;
 }
-.lookup-search-btn:hover:not(:disabled) { opacity: 0.88; }
-.lookup-search-btn:active:not(:disabled) { transform: scale(0.97); }
-.lookup-search-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.lookup-search-btn:hover:not(:disabled) {
+  background: #15220F;
+  box-shadow: 0 4px 12px -2px rgba(34, 51, 24, 0.25);
+}
+.lookup-search-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.booking-card {
-  background: var(--cream-card);
-  border: 1.5px solid var(--line);
-  border-radius: 20px;
-  padding: 18px;
-  box-shadow: 0 2px 12px -4px rgba(34,51,24,0.08);
+.ticket-pass-card {
+  border: 1.5px solid var(--line, #DDDDB8);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px -4px rgba(34, 51, 24, 0.1);
 }
-
-.detail-block { display: flex; flex-direction: column; gap: 2px; }
-.detail-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.055em;
-  color: var(--ink-soft);
-}
-.detail-value { font-size: 13.5px; font-weight: 500; color: var(--ink); line-height: 1.3; }
 
 .status-badge {
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: 99px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
-  flex-shrink: 0;
 }
-.status--confirmed  { background: #D6EEDD; color: #1A6334; }
-.status--pending    { background: #FFF4DC; color: #9A5C00; }
-.status--held       { background: #EBF0FF; color: #2A4E9E; }
-.status--cancelled  { background: #FEECEB; color: #8A1F24; }
+.status--confirmed { background: #EAF5E8; color: #1D6331; }
+.status--pending   { background: #FEF3D6; color: #9B5A03; }
+.status--held      { background: #EBF0FF; color: #2A4E9E; }
+.status--cancelled { background: #FEECEB; color: #8A1F24; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.75s linear infinite; }
