@@ -19,11 +19,18 @@
         v-else
         :booking-ref="bookingRef"
         :court-name="displayCourtName"
+        :court-type="displayCourtType"
         :slot-range="displaySlotRange"
         :date-label="displayDateLabel"
+        :date-iso="displayDateIso"
+        :start-time="displayStartTime"
+        :end-time="displayEndTime"
         :pay-method="displayPayMethod"
+        :total-amount="displayTotalAmount"
         :paddle-count="displayPaddleCount"
         :food-count="displayFoodCount"
+        :booker-name="displayBookerName"
+        :booker-mobile="displayBookerMobile"
         @restart="handleRestart"
       />
     </div>
@@ -32,7 +39,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useBookingStore } from '~/stores/booking'
+import { useBookingStore, slotToTimeString } from '~/stores/booking'
 import { useSupabase } from '~/composables/useSupabase'
 import BookingQR from '~/components/booking/BookingQr.vue'
 
@@ -58,6 +65,12 @@ const displayCourtName = computed(() => {
   return 'Court 1'
 })
 
+const displayCourtType = computed(() => {
+  if (store.selectedCourt?.type) return store.selectedCourt.type
+  if (dbBooking.value?.booking_courts?.[0]?.courts?.type) return dbBooking.value.booking_courts[0].courts.type
+  return 'indoor'
+})
+
 const displaySlotRange = computed(() => {
   if (store.slotRangeLabel) return store.slotRangeLabel
   if (dbBooking.value) {
@@ -66,6 +79,29 @@ const displaySlotRange = computed(() => {
     return `${start} – ${end}`
   }
   return '8:00 AM – 10:00 AM'
+})
+
+const displayStartTime = computed(() => {
+  if (dbBooking.value?.start_time) return dbBooking.value.start_time
+  if (store.selectedSlots.length > 0) {
+    return slotToTimeString(Math.min(...store.selectedSlots))
+  }
+  return '08:00:00'
+})
+
+const displayEndTime = computed(() => {
+  if (dbBooking.value?.end_time) return dbBooking.value.end_time
+  if (store.selectedSlots.length > 0) {
+    return slotToTimeString(Math.max(...store.selectedSlots) + 1)
+  }
+  return '09:00:00'
+})
+
+const displayDateIso = computed(() => {
+  if (dbBooking.value?.booking_date) return dbBooking.value.booking_date
+  const m = String(store.month + 1).padStart(2, '0')
+  const d = String(store.day).padStart(2, '0')
+  return `${store.year}-${m}-${d}`
 })
 
 const displayDateLabel = computed(() => {
@@ -85,6 +121,13 @@ const displayPayMethod = computed(() => {
   return 'gcash'
 })
 
+const displayTotalAmount = computed(() => {
+  if (store.grandTotal > 0) return store.grandTotal
+  if (dbBooking.value?.total_amount) return Number(dbBooking.value.total_amount)
+  if (dbBooking.value?.payments?.[0]?.amount) return Number(dbBooking.value.payments[0].amount)
+  return 0
+})
+
 const displayPaddleCount = computed(() => {
   if (store.paddleCount > 0) return store.paddleCount
   if (dbBooking.value?.booking_paddles?.length) {
@@ -99,6 +142,18 @@ const displayFoodCount = computed(() => {
     return dbBooking.value.booking_food.reduce((acc: number, item: any) => acc + (item.quantity || 0), 0)
   }
   return 0
+})
+
+const displayBookerName = computed(() => {
+  if (store.bookerName) return store.bookerName
+  if (dbBooking.value?.booking_guests?.full_name) return dbBooking.value.booking_guests.full_name
+  return ''
+})
+
+const displayBookerMobile = computed(() => {
+  if (store.bookerMobile) return store.bookerMobile
+  if (dbBooking.value?.booking_guests?.mobile) return dbBooking.value.booking_guests.mobile
+  return ''
 })
 
 onMounted(async () => {
@@ -143,10 +198,11 @@ async function fetchBookingFromDb() {
       .from('bookings')
       .select(`
         id, reference, status, booking_date, start_time, end_time, total_amount,
-        booking_courts(courts(name)),
+        booking_guests(full_name, mobile),
+        booking_courts(courts(name, type)),
         booking_paddles(quantity),
         booking_food(quantity),
-        payments(payment_method, payment_status)
+        payments(payment_method, payment_status, amount)
       `)
       .eq('reference', bookingRef.value)
       .maybeSingle()
