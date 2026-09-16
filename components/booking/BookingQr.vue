@@ -25,92 +25,54 @@
         <h2 class="font-display font-semibold text-[23px] text-ink m-0 leading-tight">
           You're on the court!
         </h2>
-        <p class="text-ink-soft text-[13px] mt-0.5 mb-0">
-          Present your digital match pass at the front desk terminal.
+        <p class="text-ink-soft text-[13.5px] mt-0.5 mb-0">
+          Show this pass at the gate
         </p>
       </div>
     </div>
 
     <!-- DIGITAL MATCH PASS TICKET -->
-    <div class="relative bg-white border border-line rounded-[22px] shadow-[0_10px_30px_-10px_rgba(34,51,24,0.12)] text-left mb-4 overflow-hidden">
-      <!-- Ticket Header Bar -->
-      <div class="bg-gradient-to-r from-[#1E3314] via-[#2A481B] to-[#1E3314] text-white px-4 py-3 flex items-center justify-between border-b border-[#2E4F1E]">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-lime"></span>
-          <span class="text-[11px] font-bold tracking-[0.08em] text-lime uppercase">Match Pass</span>
+    <div class="relative bg-white border border-line rounded-[22px] shadow-[0_10px_30px_-10px_rgba(34,51,24,0.10)] text-left mb-4 overflow-hidden">
+
+      <!-- Scannable QR Code Section (Top Stub) -->
+      <div class="p-6 pb-5 flex flex-col items-center justify-center text-center bg-white">
+        <div class="relative p-3 bg-white rounded-2xl border border-line shadow-xs group mb-3">
+          <!-- Viewfinder Corner Brackets -->
+          <div class="absolute -top-1 -left-1 w-3.5 h-3.5 border-t-2 border-l-2 border-ink rounded-tl-sm"></div>
+          <div class="absolute -top-1 -right-1 w-3.5 h-3.5 border-t-2 border-r-2 border-ink rounded-tr-sm"></div>
+          <div class="absolute -bottom-1 -left-1 w-3.5 h-3.5 border-b-2 border-l-2 border-ink rounded-bl-sm"></div>
+          <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 border-b-2 border-r-2 border-ink rounded-br-sm"></div>
+
+          <!-- Dynamic Scannable QR -->
+          <div class="w-[150px] h-[150px] flex items-center justify-center bg-white">
+            <img
+              v-if="qrCodeUrl"
+              :src="qrCodeUrl"
+              alt="Booking QR Code"
+              class="w-[146px] h-[146px] object-contain rounded-sm"
+            />
+            <div v-else class="w-full h-full flex flex-col items-center justify-center text-ink-soft gap-2">
+              <div class="w-6 h-6 border-2 border-lime border-t-transparent rounded-full animate-spin"></div>
+              <span class="text-[11px]">Generating pass...</span>
+            </div>
+          </div>
         </div>
-        <!-- Booking Ref Pill with Copy Button -->
+
+        <!-- Booking Ref Pill with Copy Feedback -->
         <button
           type="button"
           @click="copyReference"
-          class="flex items-center gap-1.5 bg-black/25 hover:bg-black/40 text-cream text-[12px] font-mono px-2.5 py-1 rounded-full border border-white/10 transition-colors cursor-pointer group"
+          class="inline-flex items-center gap-2 bg-[#EFEAD8] hover:bg-[#E8E1CB] text-ink text-[13.5px] font-mono px-4 py-1.5 rounded-full border border-[#DFD8BE] transition-colors cursor-pointer group shadow-xs active:scale-95"
           title="Click to copy reference"
         >
-          <span>{{ bookingRef }}</span>
-          <span v-if="!copiedRef" class="mdi mdi-content-copy text-[13px] text-lime group-hover:scale-110 transition-transform"></span>
-          <span v-else class="text-lime font-bold text-[11px] animate-fade-in">Copied!</span>
+          <span class="font-semibold">{{ bookingRef }}</span>
+          <span v-if="!copiedRef" class="mdi mdi-content-copy text-[13px] text-ink-soft group-hover:text-ink transition-colors"></span>
+          <span v-else class="text-relish-dark font-bold text-[11.5px] animate-fade-in">Copied!</span>
         </button>
-      </div>
 
-      <!-- Court Hero Details -->
-      <div class="p-5 pb-3">
-        <div class="flex justify-between items-start gap-2">
-          <div>
-            <div class="text-[11px] font-bold tracking-wider uppercase text-ink-soft mb-0.5">Assigned Court</div>
-            <h3 class="font-display font-bold text-[24px] text-ink m-0 leading-tight">
-              {{ courtName }}
-            </h3>
-          </div>
-          <span class="px-2.5 py-1 rounded-full bg-lime-soft/70 border border-lime/30 text-lime-text font-bold text-[11px] uppercase tracking-wide">
-            {{ courtType ? courtType + ' Court' : 'Indoor Court' }}
-          </span>
-        </div>
-
-        <!-- Time & Schedule Banner -->
-        <div class="mt-3.5 p-3 rounded-xl bg-cream/70 border border-line/70 flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-white border border-line/60 flex items-center justify-center text-ink flex-shrink-0">
-              <span class="mdi mdi-clock-outline text-[16px]"></span>
-            </div>
-            <div>
-              <div class="font-bold text-[14px] text-ink leading-tight">{{ slotRange }}</div>
-              <div class="text-[12px] text-ink-soft">{{ dateLabel }}</div>
-            </div>
-          </div>
-          <div class="text-right">
-            <span class="text-[11px] font-semibold text-ink-soft bg-white/80 px-2 py-0.5 rounded-md border border-line/50">
-              {{ durationLabel }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Scannable QR Code Section -->
-        <div class="my-5 flex flex-col items-center justify-center">
-          <div class="relative p-3 bg-white rounded-2xl border border-line shadow-xs group">
-            <!-- Viewfinder Corner Brackets -->
-            <div class="absolute -top-1 -left-1 w-3.5 h-3.5 border-t-2 border-l-2 border-ink rounded-tl-sm"></div>
-            <div class="absolute -top-1 -right-1 w-3.5 h-3.5 border-t-2 border-r-2 border-ink rounded-tr-sm"></div>
-            <div class="absolute -bottom-1 -left-1 w-3.5 h-3.5 border-b-2 border-l-2 border-ink rounded-bl-sm"></div>
-            <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 border-b-2 border-r-2 border-ink rounded-br-sm"></div>
-
-            <!-- Dynamic Scannable QR -->
-            <div class="w-[150px] h-[150px] flex items-center justify-center bg-white">
-              <img
-                v-if="qrCodeUrl"
-                :src="qrCodeUrl"
-                alt="Booking QR Code"
-                class="w-[146px] h-[146px] object-contain rounded-sm"
-              />
-              <div v-else class="w-full h-full flex flex-col items-center justify-center text-ink-soft gap-2">
-                <div class="w-6 h-6 border-2 border-lime border-t-transparent rounded-full animate-spin"></div>
-                <span class="text-[11px]">Generating pass...</span>
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center gap-1.5 mt-2.5 text-[11.5px] text-ink-soft font-medium">
-            <span class="mdi mdi-qrcode-scan text-[13px]"></span>
-            <span>Scan at front desk terminal upon arrival</span>
-          </div>
+        <div class="flex items-center gap-1.5 mt-2.5 text-[11.5px] text-ink-soft font-medium">
+          <span class="mdi mdi-qrcode-scan text-[13px]"></span>
+          <span>Scan at front desk terminal upon arrival</span>
         </div>
       </div>
 
@@ -122,6 +84,19 @@
         <div class="w-full border-t border-dashed border-line"></div>
         <!-- Right Cutout Notch -->
         <div class="absolute -right-3 w-6 h-6 rounded-full bg-cream border-l border-line shadow-inner"></div>
+      </div>
+
+      <!-- Court & Schedule Session Details (Below Perforation) -->
+      <div class="p-5 pb-4 text-center bg-white border-b border-line/40">
+        <div class="text-ink-soft font-mono text-[12.5px] tracking-wider mb-1">
+          {{ bookingRef }}
+        </div>
+        <h3 class="font-display font-bold text-[26px] text-ink m-0 leading-tight">
+          {{ courtName }}
+        </h3>
+        <div class="text-[13.5px] text-ink-soft font-medium mt-1">
+          {{ slotRange }} · {{ dateLabel }}
+        </div>
       </div>
 
       <!-- Pass Amenities & Receipt Breakdown -->
@@ -204,29 +179,6 @@
       </div>
     </div>
 
-    <!-- Quick Utilities Action Bar -->
-    <div class="grid grid-cols-2 gap-2.5 mb-4">
-      <!-- Add to Calendar Button -->
-      <button
-        type="button"
-        @click="addToCalendar"
-        class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white border border-line text-ink hover:bg-cream/60 active:scale-[0.98] transition-all text-[13px] font-semibold shadow-xs cursor-pointer"
-      >
-        <span class="mdi mdi-calendar-plus text-[15px] text-ink-soft"></span>
-        <span>Add to Calendar</span>
-      </button>
-
-      <!-- Share Match Pass -->
-      <button
-        type="button"
-        @click="sharePass"
-        class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white border border-line text-ink hover:bg-cream/60 active:scale-[0.98] transition-all text-[13px] font-semibold shadow-xs cursor-pointer"
-      >
-        <span class="mdi mdi-share-variant text-[15px] text-ink-soft"></span>
-        <span>{{ shareFeedback || 'Share Pass' }}</span>
-      </button>
-    </div>
-
     <!-- Primary Action: Book Another Court -->
     <button
       type="button"
@@ -284,7 +236,6 @@ defineEmits<{
 
 const qrCodeUrl = ref<string>('')
 const copiedRef = ref(false)
-const shareFeedback = ref('')
 
 const payMethodLabel = computed(() => {
   const m = String(props.payMethod || '').toLowerCase()
@@ -340,65 +291,7 @@ async function copyReference() {
   }
 }
 
-async function sharePass() {
-  const shareText = `🎾 PickleBook Reservation Pass\nRef: ${props.bookingRef}\nCourt: ${props.courtName}\nSchedule: ${props.slotRange} · ${props.dateLabel}\nStatus: Paid & Confirmed`
 
-  if (typeof navigator !== 'undefined' && navigator.share) {
-    try {
-      await navigator.share({
-        title: `PickleBook Pass - ${props.courtName}`,
-        text: shareText,
-        url: typeof window !== 'undefined' ? `${window.location.origin}/lookup?ref=${props.bookingRef}` : undefined,
-      })
-      return
-    } catch {
-      // User cancelled or share failed, fallback to copy
-    }
-  }
-
-  // Fallback: Copy to clipboard
-  try {
-    await navigator.clipboard.writeText(shareText)
-    shareFeedback.value = 'Pass Copied!'
-    setTimeout(() => {
-      shareFeedback.value = ''
-    }, 2000)
-  } catch {
-    shareFeedback.value = 'Unable to copy'
-  }
-}
-
-function addToCalendar() {
-  // Generate Google Calendar Link
-  const title = encodeURIComponent(`Pickleball Match: ${props.courtName}`)
-  const details = encodeURIComponent(
-    `PickleBook Confirmed Reservation\nCourt: ${props.courtName}\nReference: ${props.bookingRef}\nStatus: Confirmed`
-  )
-  const location = encodeURIComponent('PickleBook Court Club')
-
-  // Parse dates if available
-  let startIso = ''
-  let endIso = ''
-
-  if (props.dateIso && props.startTime && props.endTime) {
-    const cleanDate = props.dateIso.replace(/-/g, '')
-    const cleanStart = props.startTime.replace(/:/g, '').slice(0, 6)
-    const cleanEnd = props.endTime.replace(/:/g, '').slice(0, 6)
-    startIso = `${cleanDate}T${cleanStart}`
-    endIso = `${cleanDate}T${cleanEnd}`
-  } else {
-    // Default fallback
-    const now = new Date()
-    const y = now.getFullYear()
-    const m = String(now.getMonth() + 1).padStart(2, '0')
-    const d = String(now.getDate()).padStart(2, '0')
-    startIso = `${y}${m}${d}T080000`
-    endIso = `${y}${m}${d}T090000`
-  }
-
-  const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}&location=${location}`
-  window.open(gCalUrl, '_blank')
-}
 </script>
 
 <style scoped>
