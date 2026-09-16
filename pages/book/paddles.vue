@@ -17,9 +17,7 @@
       <!-- Trust info pill banner -->
       <div class="p-3 rounded-2xl bg-cream-card border border-line flex items-center gap-3 mb-4 shadow-xs">
         <div class="w-8 h-8 rounded-xl bg-sold flex items-center justify-center text-relish-dark shrink-0">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
+          <span class="mdi mdi-shield-check-outline text-[16px]"></span>
         </div>
         <div class="text-[12.5px] text-ink-soft leading-snug">
           Paddles are sanitized and inspected before every match session.

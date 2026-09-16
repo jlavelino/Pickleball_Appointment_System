@@ -1,12 +1,6 @@
 <template>
   <div class="flex flex-col min-h-full">
     <div class="flex-1 pb-4">
-      <!-- Prestige club banner -->
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cream-card border border-line text-[11px] font-bold text-ink-soft uppercase tracking-widest mb-2 shadow-2xs">
-        <span class="w-1.5 h-1.5 rounded-full bg-relish-dark"></span>
-        <span>DINK PICKLEBALL CLUB · MANILA</span>
-      </div>
-
       <h1 class="font-display font-bold text-[28px] text-ink m-0 leading-tight">
         Reserve a court
       </h1>
@@ -63,9 +57,7 @@
               class="shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sold text-relish-dark text-[12px] font-bold transition-all hover:bg-relish-dark hover:text-white active:scale-95 ml-auto"
               @click.stop="openModal"
             >
-              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-              </svg>
+              <span class="mdi mdi-clock-outline text-[14px]"></span>
               <span>Change time</span>
             </button>
           </div>
@@ -75,18 +67,18 @@
       <!-- If selected day is fully booked -->
       <div
         v-else-if="store.isCurrentDayFullyBooked"
-        class="mt-3.5 p-3.5 rounded-2xl bg-red-50/80 border border-red-200 shadow-xs flex items-center justify-between gap-3 cursor-pointer hover:border-red-400 transition-all"
+        class="mt-3.5 p-3.5 rounded-2xl bg-red-50/80 border border-red-200 shadow-xs flex items-center justify-between gap-3 cursor-pointer hover:border-red-400 transition-all overflow-hidden"
         @click="openModal"
       >
-        <div class="flex items-center gap-2.5 min-w-0">
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
           <div class="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center text-red-600 shrink-0 font-bold text-[13px]">
             ✕
           </div>
-          <div class="min-w-0">
-            <div class="text-[14px] font-bold text-red-900 leading-snug whitespace-nowrap">
+          <div class="min-w-0 flex-1">
+            <div class="text-[13.5px] font-bold text-red-900 leading-snug truncate">
               Fully booked for this date
             </div>
-            <div class="text-[12px] text-red-700 font-medium mt-0.5 whitespace-nowrap">
+            <div class="text-[12px] text-red-700 font-medium mt-0.5 truncate">
               No open court slots remaining
             </div>
           </div>
@@ -103,33 +95,29 @@
       <!-- Quick prompt if no time selected yet -->
       <div
         v-else
-        class="mt-3.5 p-3.5 rounded-2xl bg-cream-card border border-line shadow-xs flex items-center justify-between gap-3 cursor-pointer hover:border-ink transition-all group"
+        class="mt-3.5 p-3 rounded-2xl bg-cream-card border border-line shadow-xs flex items-center justify-between gap-2.5 cursor-pointer hover:border-ink transition-all group overflow-hidden"
         @click="openModal"
       >
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-9 h-9 rounded-xl bg-sold flex items-center justify-center text-relish-dark shrink-0 group-hover:bg-relish-dark group-hover:text-white transition-colors">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <div class="w-8 h-8 rounded-xl bg-sold flex items-center justify-center text-relish-dark shrink-0 group-hover:bg-relish-dark group-hover:text-white transition-colors">
+            <span class="mdi mdi-clock-outline text-[18px]"></span>
           </div>
-          <div class="min-w-0">
-            <div class="text-[14px] font-bold text-ink leading-snug whitespace-nowrap">
+          <div class="min-w-0 flex-1">
+            <div class="text-[13.5px] font-bold text-ink leading-snug whitespace-nowrap">
               Select play hours
             </div>
             <div class="text-[12px] text-ink-soft font-medium mt-0.5 whitespace-nowrap">
-              Courts open daily · 8:00 AM – 11:00 PM
+              Daily · 8 AM – 11 PM
             </div>
           </div>
         </div>
 
         <button
           type="button"
-          class="shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-ink text-cream text-[12px] font-bold transition-all group-hover:bg-black active:scale-95 shadow-xs"
+          class="shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-ink text-cream text-[12px] font-bold transition-all group-hover:bg-black active:scale-95 shadow-xs"
         >
           <span>Pick times</span>
-          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
+          <span class="mdi mdi-arrow-right text-[14px]"></span>
         </button>
       </div>
     </div>

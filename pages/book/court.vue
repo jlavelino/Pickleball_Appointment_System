@@ -16,9 +16,7 @@
       <div class="mt-2.5 mb-4 p-3 rounded-2xl bg-cream-card border border-line flex items-center justify-between gap-3 shadow-xs">
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="w-8 h-8 rounded-xl bg-sold flex items-center justify-center text-relish-dark shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
+            <span class="mdi mdi-clock-outline text-[16px]"></span>
           </div>
           <div class="min-w-0">
             <div class="text-[13.5px] font-bold text-ink truncate leading-tight">

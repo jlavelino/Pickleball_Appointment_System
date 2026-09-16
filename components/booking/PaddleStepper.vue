@@ -3,9 +3,9 @@
     class="paddle-card transition-all duration-200"
     :class="quantity > 0 ? 'paddle-card--active' : ''"
   >
-    <!-- Top row: Gear info & thumbnail -->
+    <!-- Top row: image + name/price + stock badge -->
     <div class="flex items-center gap-3.5">
-      <!-- Paddle image container -->
+      <!-- Paddle image -->
       <div class="paddle-img-box shrink-0">
         <img
           src="~/assets/images/pickle_paddle.png"
@@ -14,23 +14,24 @@
         />
       </div>
 
-      <!-- Details -->
+      <!-- Name, price & stock -->
       <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-1.5 mb-0.5">
-          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-sold text-relish-dark">
-            USAPA Approved
+        <!-- Name row with stock pill inline -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="font-display font-bold text-[16px] text-ink leading-snug">
+            {{ paddle.name }}
           </span>
-          <span v-if="paddle.stock <= 4" class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md">
+          <span
+            v-if="paddle.stock <= 4"
+            class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded-full leading-none"
+          >
             {{ paddle.stock }} left
           </span>
         </div>
 
-        <div class="font-display font-bold text-[16px] text-ink truncate">
-          {{ paddle.name }}
-        </div>
-
+        <!-- Price sub-line -->
         <div class="text-[12.5px] text-ink-soft font-medium mt-0.5">
-          <span>₱{{ paddle.price }} / hr</span>
+          ₱{{ paddle.price }} / hr
           <span v-if="hours && hours > 1" class="text-ink font-semibold">
             · ₱{{ (paddle.price * hours).toLocaleString() }} ({{ hours }} hrs)
           </span>
@@ -41,7 +42,7 @@
     <!-- Divider -->
     <div class="border-t border-line/60 my-3"></div>
 
-    <!-- Bottom row: Quantity stepper & Subtotal -->
+    <!-- Bottom row: subtotal + stepper -->
     <div class="flex items-center justify-between">
       <div class="text-[12px] font-medium text-ink-soft">
         <template v-if="quantity > 0">
@@ -49,7 +50,7 @@
           <span class="text-[11.5px] text-ink-soft ml-1">subtotal</span>
         </template>
         <template v-else>
-          Select quantity
+          <span class="text-ink-soft text-[12px]">Select quantity</span>
         </template>
       </div>
 
@@ -62,9 +63,7 @@
           aria-label="Decrease quantity"
           class="stepper-btn"
         >
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <span class="mdi mdi-minus text-[14px]"></span>
         </button>
 
         <span class="w-6 text-center font-bold text-[15px] text-ink font-mono">
@@ -78,9 +77,7 @@
           aria-label="Increase quantity"
           class="stepper-btn stepper-btn--add"
         >
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <span class="mdi mdi-plus text-[14px]"></span>
         </button>
       </div>
     </div>

@@ -20,9 +20,7 @@
       <div class="p-3.5 rounded-2xl bg-cream-card border border-line shadow-xs mb-4">
         <div class="relative mb-2.5">
           <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-ink-soft">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-            </svg>
+            <span class="mdi mdi-magnify text-[18px]"></span>
           </div>
           <input
             id="lookup-search-input"
@@ -40,9 +38,7 @@
             aria-label="Clear search"
             @click="clearSearch"
           >
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+            <span class="mdi mdi-close text-[16px]"></span>
           </button>
         </div>
 
@@ -54,12 +50,8 @@
           :disabled="loading || !query.trim()"
           @click="search"
         >
-          <svg v-if="loading" class="spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-          </svg>
-          <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-          </svg>
+          <span v-if="loading" class="mdi mdi-loading animate-spin text-[16px]"></span>
+          <span v-else class="mdi mdi-magnify text-[16px]"></span>
           <span>{{ loading ? 'Searching records…' : 'Locate Booking' }}</span>
         </button>
       </div>
@@ -69,9 +61,7 @@
         v-if="error"
         class="mt-3 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-[13px] font-medium leading-snug flex items-center gap-2"
       >
-        <svg class="w-4 h-4 text-red-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
+        <span class="mdi mdi-alert-circle text-[16px] text-red-600 shrink-0"></span>
         <span>{{ error }}</span>
       </div>
 
@@ -81,9 +71,7 @@
         class="mt-6 flex flex-col items-center text-center gap-2 py-8 bg-cream-card rounded-2xl border border-line"
       >
         <div class="w-12 h-12 rounded-2xl bg-sold border border-line flex items-center justify-center text-relish-dark mb-1">
-          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><line x1="8" y1="11" x2="14" y2="11"/>
-          </svg>
+          <span class="mdi mdi-magnify-remove-outline text-[26px]"></span>
         </div>
         <p class="font-display font-bold text-[17px] text-ink m-0">No booking found</p>
         <p class="text-[13px] text-ink-soft m-0 max-w-[240px] leading-relaxed">
@@ -136,9 +124,7 @@
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-relish-dark text-white text-[12px] font-bold shadow-xs hover:opacity-90 active:scale-95 transition-all"
               >
                 <span>View QR Pass</span>
-                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
+                <span class="mdi mdi-chevron-right text-[16px]"></span>
               </NuxtLink>
             </div>
 

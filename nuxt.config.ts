@@ -9,6 +9,7 @@ export default defineNuxtConfig({
   ],
   css: [
     '~/assets/css/tailwind.css',
+    '@mdi/font/css/materialdesignicons.min.css',
   ],
   modules: ['@pinia/nuxt'],
   runtimeConfig: {

@@ -35,9 +35,7 @@
         {{ method === 'gcash' ? 'GCash' : 'Maya' }}
       </div>
       <div class="text-[12.5px] text-ink-soft mt-0.5 flex items-center gap-1">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="text-lime-text flex-shrink-0">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-        </svg>
+        <span class="mdi mdi-shield-check text-[12px] text-lime-text flex-shrink-0"></span>
         <span>Secure · Instant confirmation</span>
       </div>
     </div>
@@ -49,9 +47,7 @@
         ? 'border-ink bg-ink'
         : 'border-line bg-transparent group-hover:border-ink/40'"
     >
-      <svg v-if="selected" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F5F1DE" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
+      <span v-if="selected" class="mdi mdi-check text-[13px]" style="color:#F5F1DE"></span>
     </div>
   </div>
 </template>

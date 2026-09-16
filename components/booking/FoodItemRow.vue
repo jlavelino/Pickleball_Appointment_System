@@ -4,24 +4,13 @@
     :class="quantity > 0 ? 'food-card--active' : ''"
   >
     <div class="flex items-center gap-3.5">
-      <!-- Icon swatch based on category or name -->
-      <div class="food-icon-box shrink-0" :class="isDrink ? 'bg-[#EBF5FB]' : 'bg-[#FEF6E9]'">
-        <!-- Drink / hydration icon -->
-        <svg v-if="isDrink" class="w-5 h-5 text-[#2471A3]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          <path d="M7 2h10"/>
-        </svg>
-        <!-- Food / snack icon -->
-        <svg v-else class="w-5 h-5 text-[#B76E12]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
-          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
-          <line x1="6" y1="1" x2="6" y2="4"/>
-          <line x1="10" y1="1" x2="10" y2="4"/>
-          <line x1="14" y1="1" x2="14" y2="4"/>
-        </svg>
+
+      <!-- Context-aware MDI icon swatch -->
+      <div class="food-icon-box shrink-0" :style="{ background: iconBg, borderColor: iconBorder }">
+        <span class="mdi text-[22px]" :class="mdiIcon" :style="{ color: iconColor }"></span>
       </div>
 
-      <!-- Food info -->
+      <!-- Food name + price -->
       <div class="flex-1 min-w-0">
         <div class="font-display font-bold text-[15.5px] text-ink truncate">
           {{ food.name }}
@@ -32,7 +21,7 @@
         </div>
       </div>
 
-      <!-- Quantity Stepper -->
+      <!-- Quantity stepper -->
       <div class="flex items-center gap-2.5 shrink-0">
         <button
           type="button"
@@ -41,9 +30,7 @@
           aria-label="Decrease"
           class="stepper-btn"
         >
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <span class="mdi mdi-minus text-[14px]"></span>
         </button>
 
         <span class="w-5 text-center font-bold text-[15px] text-ink font-mono">
@@ -57,16 +44,14 @@
           aria-label="Increase"
           class="stepper-btn stepper-btn--add"
         >
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <span class="mdi mdi-plus text-[14px]"></span>
         </button>
       </div>
     </div>
 
-    <!-- Active quantity subtotal strip if selected -->
+    <!-- Subtotal strip when selected -->
     <div v-if="quantity > 0" class="flex items-center justify-between mt-2.5 pt-2 border-t border-line/60 text-[11.5px] font-medium text-ink-soft">
-      <span>Court-side chilled</span>
+      <span>Court-side served</span>
       <span class="font-bold text-ink text-[12.5px]">
         ₱{{ (food.price * quantity).toLocaleString() }}
       </span>
@@ -87,10 +72,90 @@ defineEmits<{
   step: [dir: number]
 }>()
 
-const isDrink = computed(() => {
-  const cat = (props.food.category || '').toLowerCase()
-  const name = (props.food.name || '').toLowerCase()
-  return cat.includes('drink') || cat.includes('beverage') || name.includes('water') || name.includes('gatorade') || name.includes('pocari') || name.includes('juice')
+// Classify food by name and category for icon + color matching
+const iconType = computed(() => {
+  const n = (props.food.name || '').toLowerCase()
+  const c = (props.food.category || '').toLowerCase()
+
+  if (n.includes('water') || n.includes('h2o'))                           return 'water'
+  if (n.includes('juice') || n.includes('gatorade') || n.includes('pocari') || n.includes('iced tea') || n.includes('soda') || c.includes('juice'))
+                                                                           return 'juice'
+  if (n.includes('coffee') || n.includes('latte') || n.includes('espresso') || n.includes('tea') || c.includes('coffee'))
+                                                                           return 'coffee'
+  if (n.includes('burger') || n.includes('patty'))                        return 'burger'
+  if (n.includes('chicken') || n.includes('wing') || n.includes('bbq') || n.includes('pork') || n.includes('beef') || n.includes('meat'))
+                                                                           return 'chicken'
+  if (n.includes('sandwich') || n.includes('sub') || n.includes('wrap') || n.includes('toast'))
+                                                                           return 'sandwich'
+  if (n.includes('fries') || n.includes('chips') || n.includes('nachos') || n.includes('popcorn') || n.includes('snack'))
+                                                                           return 'fries'
+  if (n.includes('pizza'))                                                 return 'pizza'
+  if (n.includes('noodle') || n.includes('pasta') || n.includes('rice') || n.includes('fried rice') || n.includes('ramen'))
+                                                                           return 'noodles'
+  if (c.includes('drink') || c.includes('beverage'))                      return 'juice'
+  if (c.includes('snack'))                                                 return 'fries'
+  return 'default'
+})
+
+const iconBg = computed(() => {
+  switch (iconType.value) {
+    case 'water':    return '#EBF5FB'
+    case 'juice':    return '#FEF3D6'
+    case 'coffee':   return '#F5EBE0'
+    case 'burger':   return '#FEF0E6'
+    case 'chicken':  return '#FEF0E6'
+    case 'sandwich': return '#FEF6E9'
+    case 'fries':    return '#FFFBE6'
+    case 'pizza':    return '#FEF0E6'
+    case 'noodles':  return '#F0F9EB'
+    default:         return '#F0F4F9'
+  }
+})
+
+const iconBorder = computed(() => {
+  switch (iconType.value) {
+    case 'water':    return '#BEE3F8'
+    case 'juice':    return '#FBD38D'
+    case 'coffee':   return '#D4A574'
+    case 'burger':   return '#F6AD55'
+    case 'chicken':  return '#F6AD55'
+    case 'sandwich': return '#FBD38D'
+    case 'fries':    return '#F6E05E'
+    case 'pizza':    return '#F6AD55'
+    case 'noodles':  return '#9AE6B4'
+    default:         return '#BEE3F8'
+  }
+})
+
+const iconColor = computed(() => {
+  switch (iconType.value) {
+    case 'water':    return '#2B6CB0'
+    case 'juice':    return '#B7791F'
+    case 'coffee':   return '#7B4F2E'
+    case 'burger':   return '#C05621'
+    case 'chicken':  return '#C05621'
+    case 'sandwich': return '#B7791F'
+    case 'fries':    return '#975A16'
+    case 'pizza':    return '#C05621'
+    case 'noodles':  return '#276749'
+    default:         return '#2C5282'
+  }
+})
+
+// Map food type to the correct MDI icon class
+const mdiIcon = computed(() => {
+  switch (iconType.value) {
+    case 'water':    return 'mdi-water'
+    case 'juice':    return 'mdi-bottle-soda-classic'
+    case 'coffee':   return 'mdi-coffee'
+    case 'burger':   return 'mdi-hamburger'
+    case 'chicken':  return 'mdi-food-drumstick'
+    case 'sandwich': return 'mdi-food'
+    case 'fries':    return 'mdi-french-fries'
+    case 'pizza':    return 'mdi-pizza'
+    case 'noodles':  return 'mdi-noodles'
+    default:         return 'mdi-silverware-fork-knife'
+  }
 })
 </script>
 

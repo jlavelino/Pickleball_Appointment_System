@@ -89,21 +89,24 @@
 
       <!-- Section 2: Playing Squad / Co-Players Card -->
       <div class="form-section-card mb-4">
-        <div class="flex items-center justify-between mb-3.5">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-sold text-relish-dark flex items-center justify-center text-[12px] font-bold">
-              2
-            </div>
-            <div>
+        <div class="flex items-start gap-2.5 mb-3.5">
+          <div class="w-7 h-7 rounded-lg bg-sold text-relish-dark flex items-center justify-center text-[12px] font-bold shrink-0 mt-0.5">
+            2
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
               <h2 class="text-[14px] font-bold text-ink uppercase tracking-wider m-0">
                 Co-Players / Squad
               </h2>
-              <p class="text-[11.5px] text-ink-soft m-0">Optional list of players joining your session</p>
+              <span
+                v-if="store.players.length > 0"
+                class="shrink-0 whitespace-nowrap text-[11px] font-bold text-relish-dark px-2 py-0.5 rounded-full bg-sold"
+              >
+                {{ store.players.length }} added
+              </span>
             </div>
+            <p class="text-[11.5px] text-ink-soft m-0 mt-0.5">Optional list of players joining your session</p>
           </div>
-          <span class="text-[11.5px] font-semibold text-ink-soft px-2 py-0.5 rounded bg-cream border border-line">
-            {{ store.players.length }} added
-          </span>
         </div>
 
         <div
@@ -126,10 +129,7 @@
             aria-label="Remove player"
             @click="removePlayer(idx)"
           >
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
+            <span class="mdi mdi-close text-[16px]"></span>
           </button>
         </div>
 
@@ -138,10 +138,7 @@
           class="add-player-btn"
           @click="addPlayer"
         >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <span class="mdi mdi-plus text-[16px]"></span>
           Add another player
         </button>
       </div>
@@ -168,13 +165,7 @@
           <!-- Empty State -->
           <div v-if="!store.idPhotoName" class="flex flex-col items-center gap-2 text-center py-2">
             <div class="w-12 h-12 rounded-2xl bg-sold flex items-center justify-center text-relish-dark shadow-xs">
-              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="16" rx="3"/>
-                <circle cx="9" cy="10" r="2"/>
-                <line x1="15" y1="8" x2="17" y2="8"/>
-                <line x1="15" y1="12" x2="17" y2="12"/>
-                <line x1="7" y1="16" x2="17" y2="16"/>
-              </svg>
+              <span class="mdi mdi-card-account-details-outline text-[26px]"></span>
             </div>
             <div>
               <div class="text-[14px] font-bold text-ink">Tap to upload ID photo</div>
@@ -189,9 +180,7 @@
           <div v-else class="flex items-center justify-between w-full gap-3 p-1">
             <div class="flex items-center gap-3 min-w-0">
               <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 shrink-0">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+                <span class="mdi mdi-check text-[20px]"></span>
               </div>
               <div class="min-w-0">
                 <div class="text-[13.5px] font-bold text-ink truncate">ID attached successfully</div>
@@ -218,10 +207,7 @@
         />
 
         <div class="flex items-center gap-1.5 mt-2.5 text-[11px] text-ink-soft">
-          <svg class="w-3.5 h-3.5 text-relish-dark shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
+          <span class="mdi mdi-lock-outline text-[14px] text-relish-dark shrink-0"></span>
           <span>IDs are securely processed and verified solely for gate admission.</span>
         </div>
       </div>

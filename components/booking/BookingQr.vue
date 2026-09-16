@@ -7,22 +7,12 @@
         <div class="absolute inset-0 rounded-full bg-lime/25 animate-ping opacity-75"></div>
         <div class="absolute -inset-1 rounded-full bg-lime/20 animate-pulse"></div>
         <div class="relative w-14 h-14 rounded-full bg-gradient-to-tr from-[#223318] via-[#2E4A1A] to-[#436D20] text-cream flex items-center justify-center shadow-lg border-2 border-lime/40">
-          <!-- Athletic Pickleball Paddle & Checkmark SVG -->
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" class="text-lime">
-            <!-- Pickleball Ball with Holes -->
-            <circle cx="16.5" cy="7.5" r="4.5" stroke="#96C33E" stroke-width="1.8" fill="#EAF1CE" />
-            <circle cx="15.5" cy="6.5" r="0.7" fill="#38591A" />
-            <circle cx="17.5" cy="6.5" r="0.7" fill="#38591A" />
-            <circle cx="16.5" cy="8.5" r="0.7" fill="#38591A" />
-            <!-- Paddle Outline -->
-            <path d="M4 14.5C4 11.46 6.46 9 9.5 9C12.54 9 15 11.46 15 14.5C15 16.2 14.2 17.7 13 18.7V21.5C13 21.8 12.8 22 12.5 22H6.5C6.2 22 6 21.8 6 21.5V18.7C4.8 17.7 4 16.2 4 14.5Z" stroke="#F5F1DE" stroke-width="1.8" stroke-linejoin="round" />
-            <!-- Checkmark badge -->
-            <path d="M7 14L9 16L12.5 12.5" stroke="#96C33E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <!-- Athletic Check Celebration MDI icon -->
+          <span class="mdi mdi-check-decagram text-[30px] text-lime"></span>
         </div>
         <!-- Mini Verified Check Badge -->
-        <div class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-lime border-2 border-cream flex items-center justify-center text-[10px] text-ink font-extrabold shadow-sm">
-          ✓
+        <div class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-lime border-2 border-cream flex items-center justify-center text-ink shadow-sm">
+          <span class="mdi mdi-check text-[11px] font-bold"></span>
         </div>
       </div>
 
@@ -57,10 +47,7 @@
           title="Click to copy reference"
         >
           <span>{{ bookingRef }}</span>
-          <svg v-if="!copiedRef" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-lime group-hover:scale-110 transition-transform">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
+          <span v-if="!copiedRef" class="mdi mdi-content-copy text-[13px] text-lime group-hover:scale-110 transition-transform"></span>
           <span v-else class="text-lime font-bold text-[11px] animate-fade-in">Copied!</span>
         </button>
       </div>
@@ -83,10 +70,7 @@
         <div class="mt-3.5 p-3 rounded-xl bg-cream/70 border border-line/70 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-lg bg-white border border-line/60 flex items-center justify-center text-ink flex-shrink-0">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
+              <span class="mdi mdi-clock-outline text-[16px]"></span>
             </div>
             <div>
               <div class="font-bold text-[14px] text-ink leading-tight">{{ slotRange }}</div>
@@ -124,12 +108,7 @@
             </div>
           </div>
           <div class="flex items-center gap-1.5 mt-2.5 text-[11.5px] text-ink-soft font-medium">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-              <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-              <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-              <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-            </svg>
+            <span class="mdi mdi-qrcode-scan text-[13px]"></span>
             <span>Scan at front desk terminal upon arrival</span>
           </div>
         </div>
@@ -154,7 +133,7 @@
           <div class="flex justify-between items-center py-1">
             <div class="flex items-center gap-2">
               <div class="w-5 h-5 rounded-full bg-lime-soft text-lime-text flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                ✓
+                <span class="mdi mdi-check text-[11px]"></span>
               </div>
               <span class="font-medium text-ink">Payment Status</span>
             </div>
@@ -170,7 +149,7 @@
           <div class="flex justify-between items-center py-1 border-t border-line/40">
             <div class="flex items-center gap-2">
               <div class="w-5 h-5 rounded-full bg-lime-soft text-lime-text flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                ✓
+                <span class="mdi mdi-check text-[11px]"></span>
               </div>
               <span class="font-medium text-ink">Court Access</span>
             </div>
@@ -181,7 +160,7 @@
           <div class="flex justify-between items-center py-1 border-t border-line/40">
             <div class="flex items-center gap-2">
               <div class="w-5 h-5 rounded-full bg-lime-soft text-lime-text flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                ✓
+                <span class="mdi mdi-check text-[11px]"></span>
               </div>
               <span class="font-medium text-ink">Paddles</span>
             </div>
@@ -194,7 +173,7 @@
           <div class="flex justify-between items-center py-1 border-t border-line/40">
             <div class="flex items-center gap-2">
               <div class="w-5 h-5 rounded-full bg-lime-soft text-lime-text flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                ✓
+                <span class="mdi mdi-check text-[11px]"></span>
               </div>
               <span class="font-medium text-ink">Refreshments</span>
             </div>
@@ -207,7 +186,7 @@
           <div v-if="bookerName" class="flex justify-between items-center py-1 border-t border-line/40">
             <div class="flex items-center gap-2">
               <div class="w-5 h-5 rounded-full bg-cream text-ink flex items-center justify-center text-[11px] font-bold flex-shrink-0">
-                👤
+                <span class="mdi mdi-account text-[13px]"></span>
               </div>
               <span class="font-medium text-ink">Booker Name</span>
             </div>
@@ -217,7 +196,7 @@
 
         <!-- Match Guidelines Note -->
         <div class="mt-4 p-3 rounded-xl bg-cream border border-line text-[12px] text-ink-soft flex items-start gap-2.5">
-          <span class="text-[14px]">💡</span>
+          <span class="mdi mdi-lightbulb-on-outline text-[15px] text-amber-600 shrink-0"></span>
           <p class="m-0 leading-relaxed">
             Please arrive <strong class="text-ink font-semibold">10 minutes before</strong> your time slot. Non-marking indoor court shoes are recommended.
           </p>
@@ -233,12 +212,7 @@
         @click="addToCalendar"
         class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white border border-line text-ink hover:bg-cream/60 active:scale-[0.98] transition-all text-[13px] font-semibold shadow-xs cursor-pointer"
       >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-ink-soft">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="16" y1="2" x2="16" y2="6"></line>
-          <line x1="8" y1="2" x2="8" y2="6"></line>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>
+        <span class="mdi mdi-calendar-plus text-[15px] text-ink-soft"></span>
         <span>Add to Calendar</span>
       </button>
 
@@ -248,13 +222,7 @@
         @click="sharePass"
         class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white border border-line text-ink hover:bg-cream/60 active:scale-[0.98] transition-all text-[13px] font-semibold shadow-xs cursor-pointer"
       >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-ink-soft">
-          <circle cx="18" cy="5" r="3"></circle>
-          <circle cx="6" cy="12" r="3"></circle>
-          <circle cx="18" cy="19" r="3"></circle>
-          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-        </svg>
+        <span class="mdi mdi-share-variant text-[15px] text-ink-soft"></span>
         <span>{{ shareFeedback || 'Share Pass' }}</span>
       </button>
     </div>
@@ -265,19 +233,7 @@
       @click="$emit('restart')"
       class="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-ink text-cream font-bold text-[15px] shadow-[0_6px_20px_-4px_rgba(34,51,24,0.4)] hover:bg-[#2e4a1a] hover:shadow-[0_8px_25px_-4px_rgba(34,51,24,0.5)] active:scale-[0.98] transition-all cursor-pointer group"
     >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.4"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="transition-transform group-hover:rotate-90 duration-200 text-lime"
-      >
-        <path d="M12 5v14M5 12h14" />
-      </svg>
+      <span class="mdi mdi-plus text-[18px] text-lime transition-transform group-hover:rotate-90 duration-200"></span>
       <span>Book another court</span>
     </button>
 
@@ -287,7 +243,7 @@
       class="mt-3 inline-flex items-center gap-1.5 text-ink-soft hover:text-ink text-[13px] font-medium transition-colors"
     >
       <span>Find this in Booking Lookup & Receipts</span>
-      <span>→</span>
+      <span class="mdi mdi-arrow-right text-[13px]"></span>
     </NuxtLink>
   </div>
 </template>

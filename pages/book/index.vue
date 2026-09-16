@@ -47,9 +47,7 @@
             class="shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--sold)] text-[var(--relish-dark)] text-[12px] font-semibold transition-all hover:bg-[var(--relish-dark)] hover:text-white active:scale-95 ml-auto"
             @click.stop="openModal"
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
+            <span class="mdi mdi-clock-outline text-[14px]"></span>
             Edit times
           </button>
         </div>
@@ -91,9 +89,7 @@
       >
         <div class="flex items-center gap-3 min-w-0">
           <div class="w-9 h-9 rounded-xl bg-[var(--sold)] flex items-center justify-center text-[var(--relish-dark)] shrink-0 group-hover:bg-[var(--relish-dark)] group-hover:text-white transition-colors">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
+            <span class="mdi mdi-clock-outline text-[18px]"></span>
           </div>
           <div class="min-w-0">
             <div class="text-[14px] font-semibold text-[var(--ink)] leading-snug whitespace-nowrap">
@@ -110,9 +106,7 @@
           class="shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--relish)] text-white text-[12px] font-semibold transition-all group-hover:opacity-90 active:scale-95 shadow-xs"
         >
           <span>Select</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
+          <span class="mdi mdi-arrow-right text-[14px]"></span>
         </button>
       </div>
     </div>

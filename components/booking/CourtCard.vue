@@ -43,21 +43,15 @@
       <!-- Facility highlights / amenities -->
       <div class="flex flex-wrap items-center gap-1.5 mt-2.5">
         <span class="amenity-tag">
-          <svg class="w-3 h-3 text-relish-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+          <span class="mdi mdi-check text-[11px] text-relish-dark"></span>
           Pro Acrylic
         </span>
         <span class="amenity-tag">
-          <svg class="w-3 h-3 text-relish-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+          <span class="mdi mdi-check text-[11px] text-relish-dark"></span>
           Tournament Net
         </span>
         <span class="amenity-tag">
-          <svg class="w-3 h-3 text-relish-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
+          <span class="mdi mdi-check text-[11px] text-relish-dark"></span>
           Anti-Glare LED
         </span>
       </div>
@@ -75,9 +69,7 @@
       ]"
     >
       <template v-if="isSelected">
-        <svg class="w-4 h-4 text-lime shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
+        <span class="mdi mdi-check text-lime text-[17px] shrink-0"></span>
         <span>Court Selected</span>
       </template>
       <template v-else-if="isFull">

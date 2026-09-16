@@ -85,18 +85,10 @@
                     class="slot-checkbox"
                     :class="isSelected(idx) ? 'slot-checkbox--active' : ''"
                   >
-                    <svg
+                    <span
                       v-if="isSelected(idx)"
-                      class="w-3.5 h-3.5 text-cream"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="3"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                      class="mdi mdi-check text-[14px] text-cream leading-none"
+                    ></span>
                   </div>
                   <span class="slot-label">{{ s.label }}</span>
                 </div>

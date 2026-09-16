@@ -32,10 +32,7 @@
           </div>
 
           <div class="text-white/70 text-[14px] flex items-center gap-1.5">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="flex-shrink-0">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
+            <span class="mdi mdi-clock-outline text-[13px] text-white/70 flex-shrink-0"></span>
             {{ store.slotRangeLabel }} · {{ store.dateLabel }}
           </div>
 

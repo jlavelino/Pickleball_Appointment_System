@@ -51,22 +51,15 @@
       <!-- Trust / Security Indicators -->
       <div class="flex items-center justify-center gap-4 py-3">
         <div class="flex items-center gap-1.5 text-[11.5px] text-ink-soft">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-lime-text">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
+          <span class="mdi mdi-shield-lock text-[13px] text-lime-text"></span>
           <span>256-bit SSL</span>
         </div>
         <div class="flex items-center gap-1.5 text-[11.5px] text-ink-soft">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-lime-text">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
+          <span class="mdi mdi-check-decagram text-[13px] text-lime-text"></span>
           <span>PayMongo secure</span>
         </div>
         <div class="flex items-center gap-1.5 text-[11.5px] text-ink-soft">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-lime-text">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
+          <span class="mdi mdi-clock-fast text-[13px] text-lime-text"></span>
           <span>Instant confirm</span>
         </div>
       </div>

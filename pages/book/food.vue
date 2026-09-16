@@ -17,9 +17,7 @@
       <!-- Facility delivery pill banner -->
       <div class="p-3 rounded-2xl bg-cream-card border border-line flex items-center gap-3 mb-4 shadow-xs">
         <div class="w-8 h-8 rounded-xl bg-sold flex items-center justify-center text-relish-dark shrink-0">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          </svg>
+          <span class="mdi mdi-snowflake text-[16px]"></span>
         </div>
         <div class="text-[12.5px] text-ink-soft leading-snug">
           Items will be kept on ice and ready at your reserved court bench upon arrival.
