@@ -1,45 +1,85 @@
 <template>
-  <div class="flex items-center gap-[14px] py-[14px] border-b border-line last:border-none">
-    <!-- Lime-soft swatch with paddle SVG -->
-    <div class="w-12 h-12 rounded-[12px] bg-lime-soft flex-shrink-0 flex items-center justify-center">
-      <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
-        <ellipse cx="24" cy="17" rx="15" ry="15" fill="#3F6019"/>
-        <rect x="20" y="29" width="8" height="15" rx="3.5" fill="#3F6019"/>
-        <circle cx="18" cy="12" r="1.6" fill="#EAF1CE"/>
-        <circle cx="29" cy="14" r="1.6" fill="#EAF1CE"/>
-        <circle cx="23" cy="21" r="1.6" fill="#EAF1CE"/>
-      </svg>
-    </div>
+  <div
+    class="paddle-card transition-all duration-200"
+    :class="quantity > 0 ? 'paddle-card--active' : ''"
+  >
+    <!-- Top row: image + name/price + stock badge -->
+    <div class="flex items-center gap-3.5">
+      <!-- Paddle image -->
+      <div class="paddle-img-box shrink-0">
+        <img
+          src="~/assets/images/pickle_paddle.png"
+          :alt="paddle.name"
+          class="w-full h-full object-contain filter drop-shadow-sm"
+        />
+      </div>
 
-    <!-- Info -->
-    <div class="flex-1 min-w-0">
-      <div class="font-semibold text-[15.5px] truncate text-ink">{{ paddle.name }}</div>
-      <div class="text-gray text-[13.5px] mt-[1px]">
-        ₱{{ paddle.price }} / session · {{ paddle.stock }} available
+      <!-- Name, price & stock -->
+      <div class="flex-1 min-w-0">
+        <!-- Name row with stock pill inline -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="font-display font-bold text-[16px] text-ink leading-snug">
+            {{ paddle.name }}
+          </span>
+          <span
+            v-if="paddle.stock <= 4"
+            class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded-full leading-none"
+          >
+            {{ paddle.stock }} left
+          </span>
+        </div>
+
+        <!-- Price sub-line -->
+        <div class="text-[12.5px] text-ink-soft font-medium mt-0.5">
+          ₱{{ paddle.price }} / hr
+          <span v-if="hours && hours > 1" class="text-ink font-semibold">
+            · ₱{{ (paddle.price * hours).toLocaleString() }} ({{ hours }} hrs)
+          </span>
+        </div>
       </div>
     </div>
 
-    <!-- Stepper -->
-    <div class="flex items-center gap-3 flex-shrink-0">
-      <button
-        type="button"
-        :disabled="quantity <= 0"
-        @click="$emit('step', -1)"
-        aria-label="Decrease"
-        class="w-[30px] h-[30px] rounded-full border border-line bg-white text-base cursor-pointer text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-ink transition-colors shadow-xs"
-      >
-        −
-      </button>
-      <div class="w-4 text-center font-semibold text-[15px] text-ink">{{ quantity }}</div>
-      <button
-        type="button"
-        :disabled="quantity >= paddle.stock"
-        @click="$emit('step', 1)"
-        aria-label="Increase"
-        class="w-[30px] h-[30px] rounded-full border border-line bg-white text-base cursor-pointer text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-ink transition-colors shadow-xs"
-      >
-        +
-      </button>
+    <!-- Divider -->
+    <div class="border-t border-line/60 my-3"></div>
+
+    <!-- Bottom row: subtotal + stepper -->
+    <div class="flex items-center justify-between">
+      <div class="text-[12px] font-medium text-ink-soft">
+        <template v-if="quantity > 0">
+          <span class="font-bold text-ink text-[13px]">₱{{ ((paddle.price * (hours || 1)) * quantity).toLocaleString() }}</span>
+          <span class="text-[11.5px] text-ink-soft ml-1">subtotal</span>
+        </template>
+        <template v-else>
+          <span class="text-ink-soft text-[12px]">Select quantity</span>
+        </template>
+      </div>
+
+      <!-- Stepper buttons -->
+      <div class="flex items-center gap-2.5">
+        <button
+          type="button"
+          :disabled="quantity <= 0"
+          @click="$emit('step', -1)"
+          aria-label="Decrease quantity"
+          class="stepper-btn"
+        >
+          <span class="mdi mdi-minus text-[14px]"></span>
+        </button>
+
+        <span class="w-6 text-center font-bold text-[15px] text-ink font-mono">
+          {{ quantity }}
+        </span>
+
+        <button
+          type="button"
+          :disabled="quantity >= paddle.stock"
+          @click="$emit('step', 1)"
+          aria-label="Increase quantity"
+          class="stepper-btn stepper-btn--add"
+        >
+          <span class="mdi mdi-plus text-[14px]"></span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -50,9 +90,75 @@ import type { PaddleItem } from '~/stores/booking'
 defineProps<{
   paddle: PaddleItem
   quantity: number
+  hours?: number
 }>()
 
 defineEmits<{
   step: [dir: number]
 }>()
 </script>
+
+<style scoped>
+.paddle-card {
+  background: var(--cream-card, #FDFCF5);
+  border: 1.5px solid var(--line, #DDDDB8);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px -3px rgba(34, 51, 24, 0.06);
+}
+
+.paddle-card--active {
+  border-color: var(--ink, #223318);
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAF0 100%);
+  box-shadow: 0 4px 14px -4px rgba(34, 51, 24, 0.14), 0 0 0 1px var(--ink, #223318);
+}
+
+.paddle-img-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #F1F0D9;
+  border: 1px solid var(--line, #DDDDB8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.stepper-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line, #DDDDB8);
+  background: #FFFFFF;
+  color: var(--ink, #223318);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+.stepper-btn:hover:not(:disabled) {
+  border-color: var(--ink, #223318);
+  background: var(--cream, #F5F1DE);
+}
+.stepper-btn:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.stepper-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.stepper-btn--add {
+  background: var(--ink, #223318);
+  color: var(--cream, #F5F1DE);
+  border-color: var(--ink, #223318);
+}
+.stepper-btn--add:hover:not(:disabled) {
+  background: #15220F;
+  border-color: #15220F;
+  color: #FFFFFF;
+}
+</style>

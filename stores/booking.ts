@@ -1,13 +1,15 @@
 import { defineStore } from 'pinia'
+import { useSupabase } from '~/composables/useSupabase'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 export const HOLD_DURATION_MS = 10 * 60 * 1000 // 10 minutes
 
 export interface Court {
-  id: number
+  id: string | number
   name: string
   price: number
   type: string
+  status?: string
 }
 
 export interface PaddleItem {
@@ -15,6 +17,8 @@ export interface PaddleItem {
   name: string
   price: number
   stock: number
+  total_quantity?: number
+  available_quantity?: number
 }
 
 export interface FoodItem {
@@ -22,38 +26,38 @@ export interface FoodItem {
   name: string
   price: number
   category: string
+  stock_quantity?: number | null
+  is_available?: boolean
 }
 
-export const COURTS: Court[] = [
-  { id: 1, name: 'Court 1', price: 300, type: 'indoor' },
-  { id: 2, name: 'Court 2', price: 300, type: 'indoor' },
-  { id: 3, name: 'Court 3', price: 350, type: 'covered outdoor' },
+// Fallback seed catalog (used as initial state before Supabase fetch completes)
+export const DEFAULT_COURTS: Court[] = [
+  { id: '7e96acc3-8ca9-4110-8895-fdb6330a1c70', name: 'Court 1', price: 250, type: 'indoor' },
+  { id: '0a31ed7d-f073-488d-aae9-9dc329c38149', name: 'Court 2', price: 250, type: 'indoor' },
 ]
 
-export const PADDLES: PaddleItem[] = [
-  { id: 'standard', name: 'Standard paddle', price: 100, stock: 13 },
-  { id: 'premium',  name: 'Premium paddle',  price: 150, stock: 6 },
-  { id: 'pro',      name: 'Pro paddle',       price: 200, stock: 4 },
+export const DEFAULT_PADDLES: PaddleItem[] = [
+  { id: 'cb5ee6e3-597f-4189-87b2-ad27c38885bd', name: 'Standard paddle', price: 100, stock: 4 },
+  { id: '1ef13ffa-d836-4cfd-8336-f05fc20b8a2b', name: 'Premium paddle', price: 150, stock: 4 },
+  { id: '6ad6b922-1b4c-4ba0-8ba6-ed9d16b10598', name: 'Pro paddle', price: 200, stock: 4 },
 ]
 
-export const FOOD_GROUPS = [
+export const DEFAULT_FOOD_GROUPS = [
   {
     label: 'Meals',
     items: [
-      { id: 'chicken', name: 'Chicken sandwich', price: 150, category: 'Meals' },
-      { id: 'burger',  name: 'Burger',           price: 180, category: 'Meals' },
+      { id: '850c5356-a0c0-48fb-9708-67027609c433', name: 'Chicken sandwich', price: 150, category: 'Meals' },
+      { id: '3d2e6ba5-79a0-4a10-b115-3efcbd113d4a', name: 'Burger', price: 180, category: 'Meals' },
     ],
   },
   {
     label: 'Snacks & drinks',
     items: [
-      { id: 'fries', name: 'Fries',         price: 80, category: 'Snacks & drinks' },
-      { id: 'water', name: 'Bottled water', price: 30, category: 'Snacks & drinks' },
+      { id: '71ffd93e-0d0c-456d-9399-54fb9313adbe', name: 'Fries', price: 80, category: 'Snacks & drinks' },
+      { id: '7c08dd8f-5823-4e7f-a5a0-9fb4b9e59694', name: 'Bottled water', price: 30, category: 'Snacks & drinks' },
     ],
   },
 ]
-
-export const ALL_FOOD: FoodItem[] = FOOD_GROUPS.flatMap(g => g.items)
 
 export type PaymentMethod = 'gcash' | 'maya'
 
@@ -62,25 +66,87 @@ export interface TimeSlot {
   open: number
 }
 
+// 8 AM to 11 PM hourly slots (16 total slots)
+export const TIME_SLOT_LABELS = [
+  '8:00 AM',
+  '9:00 AM',
+  '10:00 AM',
+  '11:00 AM',
+  '12:00 PM',
+  '1:00 PM',
+  '2:00 PM',
+  '3:00 PM',
+  '4:00 PM',
+  '5:00 PM',
+  '6:00 PM',
+  '7:00 PM',
+  '8:00 PM',
+  '9:00 PM',
+  '10:00 PM',
+  '11:00 PM',
+]
+
+// Slot index to SQL TIME string (HH:MM:SS)
+export function slotToTimeString(idx: number): string {
+  const hour = 8 + idx // 8 = 8 AM, 12 = 12 PM, 23 = 11 PM
+  return `${String(hour).padStart(2, '0')}:00:00`
+}
+
+export interface PlayerEntry {
+  name: string
+  mobile: string
+}
+
 interface BookingState {
   year: number
   month: number // 0-indexed (8 = September)
   day: number
-  slotIndex: number | null
-  courtId: number | null
+  selectedSlots: number[] // array of selected slot indices
+  slotIndex: number | null // kept for compatibility (first selected or null)
+  courtIds: (string | number)[] // array of selected court IDs
+  courtId: string | number | null // kept for compatibility (first selected court or null)
   paddleQty: Record<string, number>
   foodQty: Record<string, number>
   payMethod: PaymentMethod
   holdSeconds: number
   bookingRef: string | null
+  createdBookingId: string | null
+  // Booker details
+  bookerName: string
+  bookerMobile: string
+  bookerFacebook: string
+  players: PlayerEntry[]
+  idPhotoName: string | null
+  idPhotoFile: File | null
+
+  // Live Supabase Database Data
+  dbCourts: Court[]
+  dbPaddles: PaddleItem[]
+  dbFoodItems: FoodItem[]
+  isLoadingCatalog: boolean
+  isSubmittingBooking: boolean
+
+  // Availability map from database: slotIndex -> count of available courts
+  dbSlotAvailability: Record<number, number>
+  isLoadingAvailability: boolean
 }
 
-function seededVals(day: number): [number, number, number] {
-  if (day === 15) return [3, 2, 1]
-  const a = (day * 13) % 4
-  const b = (day * 7) % 4
-  const c = (day * 5) % 3
-  return [a, b, c]
+function formatEndHour(label: string): string {
+  const [time, period] = label.split(' ')
+  const [hourStr, minStr] = time.split(':')
+  const hour = parseInt(hourStr)
+  let nextHour = hour + 1
+  let nextPeriod = period
+  if (hour === 11 && period === 'AM') {
+    nextHour = 12
+    nextPeriod = 'PM'
+  } else if (hour === 11 && period === 'PM') {
+    nextHour = 12
+    nextPeriod = 'AM'
+  } else if (hour === 12) {
+    nextHour = 1
+  }
+  return `${nextHour}:${minStr} ${nextPeriod}`
 }
 
 export const useBookingStore = defineStore('booking', {
@@ -88,67 +154,185 @@ export const useBookingStore = defineStore('booking', {
     year: 2026,
     month: 8, // September
     day: 15,
+    selectedSlots: [],
     slotIndex: null,
+    courtIds: [],
     courtId: null,
-    paddleQty: { standard: 0, premium: 0, pro: 0 },
-    foodQty: { chicken: 0, burger: 0, fries: 0, water: 0 },
+    paddleQty: {},
+    foodQty: {},
     payMethod: 'gcash',
     holdSeconds: 10 * 60,
     bookingRef: null,
+    createdBookingId: null,
+    bookerName: '',
+    bookerMobile: '',
+    bookerFacebook: '',
+    players: [],
+    idPhotoName: null,
+    idPhotoFile: null,
+
+    dbCourts: DEFAULT_COURTS,
+    dbPaddles: DEFAULT_PADDLES,
+    dbFoodItems: DEFAULT_FOOD_GROUPS.flatMap(g => g.items),
+    isLoadingCatalog: false,
+    isSubmittingBooking: false,
+
+    dbSlotAvailability: {},
+    isLoadingAvailability: false,
   }),
 
   getters: {
+    courts: (s): Court[] => {
+      return s.dbCourts.length > 0 ? s.dbCourts : DEFAULT_COURTS
+    },
+
+    paddles: (s): PaddleItem[] => {
+      return s.dbPaddles.length > 0 ? s.dbPaddles : DEFAULT_PADDLES
+    },
+
+    allFood: (s): FoodItem[] => {
+      return s.dbFoodItems.length > 0 ? s.dbFoodItems : DEFAULT_FOOD_GROUPS.flatMap(g => g.items)
+    },
+
+    foodGroups: (s) => {
+      const items = s.dbFoodItems.length > 0 ? s.dbFoodItems : DEFAULT_FOOD_GROUPS.flatMap(g => g.items)
+      const meals = items.filter(f => f.category === 'Meals')
+      const snacks = items.filter(f => f.category === 'Snacks & drinks' || f.category !== 'Meals')
+      return [
+        { label: 'Meals', items: meals },
+        { label: 'Snacks & drinks', items: snacks },
+      ]
+    },
+
+    isCurrentDayFullyBooked: (s): boolean => {
+      // If we have live slot availability, check if all slots have 0 courts
+      if (Object.keys(s.dbSlotAvailability).length > 0) {
+        return TIME_SLOT_LABELS.every((_, idx) => (s.dbSlotAvailability[idx] ?? 0) === 0)
+      }
+      return false
+    },
+
     slots: (s): TimeSlot[] => {
-      const vals = seededVals(s.day)
-      const labels = ['6:00 PM', '7:00 PM', '8:00 PM']
-      return labels.map((label, i) => ({ label, open: vals[i] }))
+      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2
+      return TIME_SLOT_LABELS.map((label, i) => {
+        const count = s.dbSlotAvailability[i] !== undefined
+          ? s.dbSlotAvailability[i]
+          : totalCourts
+        return { label, open: count }
+      })
     },
 
     selectedSlot: (s): TimeSlot | null => {
-      if (s.slotIndex === null) return null
-      const vals = seededVals(s.day)
-      const labels = ['6:00 PM', '7:00 PM', '8:00 PM']
-      return { label: labels[s.slotIndex], open: vals[s.slotIndex] }
+      if (s.selectedSlots.length === 0 && s.slotIndex === null) return null
+      const idx = s.selectedSlots[0] ?? s.slotIndex!
+      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2
+      const count = s.dbSlotAvailability[idx] !== undefined ? s.dbSlotAvailability[idx] : totalCourts
+      return { label: TIME_SLOT_LABELS[idx], open: count }
     },
 
-    selectedCourt: (s): Court | null => {
-      return COURTS.find(c => c.id === s.courtId) || null
+    selectedSlotsList: (s): TimeSlot[] => {
+      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2
+      return s.selectedSlots.map(idx => ({
+        label: TIME_SLOT_LABELS[idx],
+        open: s.dbSlotAvailability[idx] !== undefined ? s.dbSlotAvailability[idx] : totalCourts,
+      }))
     },
 
-    courtsStatusMap: (s): Record<number, 'open' | 'low' | 'full'> => {
-      const slot = s.slotIndex !== null ? seededVals(s.day)[s.slotIndex] : 3
-      if (slot >= 3) return { 1: 'open', 2: 'open', 3: 'low' }
-      if (slot === 2) return { 1: 'open', 2: 'open', 3: 'full' }
-      if (slot === 1) return { 1: 'open', 2: 'full', 3: 'full' }
-      return { 1: 'full', 2: 'full', 3: 'full' }
+    selectedCourt(): Court | null {
+      const id = this.courtIds[0] ?? this.courtId
+      if (!id) return null
+      return this.courts.find((c: Court) => String(c.id) === String(id)) || null
     },
 
-    paddleTotal: (s): number => {
-      return PADDLES.reduce((sum, p) => sum + p.price * (s.paddleQty[p.id] || 0), 0)
+    selectedCourts(): Court[] {
+      if (this.courtIds.length > 0) {
+        return this.courts.filter((c: Court) => this.courtIds.map(String).includes(String(c.id)))
+      }
+      if (this.courtId !== null) {
+        const c = this.courts.find((x: Court) => String(x.id) === String(this.courtId))
+        return c ? [c] : []
+      }
+      return []
     },
 
-    paddleCount: (s): number => {
-      return PADDLES.reduce((sum, p) => sum + (s.paddleQty[p.id] || 0), 0)
+    courtNamesLabel(): string {
+      const courts = this.courts.filter((c: Court) => this.courtIds.map(String).includes(String(c.id)))
+      if (courts.length === 0) {
+        const c = this.courts.find((x: Court) => String(x.id) === String(this.courtId))
+        return c ? c.name : ''
+      }
+      const names = courts.map((c: Court) => c.name)
+      if (names.length === 1) return names[0]
+      if (names.length === 2) return `${names[0]} & ${names[1]}`
+      return names.join(', ')
     },
 
-    foodTotal: (s): number => {
-      return ALL_FOOD.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0)
+    courtsStatusMap(s): Record<string, 'open' | 'low' | 'full'> {
+      const map: Record<string, 'open' | 'low' | 'full'> = {}
+      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2
+
+      this.courts.forEach((court: Court) => {
+        // Calculate status across selected slots
+        const selectedCounts = s.selectedSlots.length > 0
+          ? s.selectedSlots.map(idx => s.dbSlotAvailability[idx] ?? totalCourts)
+          : (s.slotIndex !== null ? [s.dbSlotAvailability[s.slotIndex] ?? totalCourts] : [totalCourts])
+        const minOpen = Math.min(...selectedCounts)
+
+        if (minOpen >= 2) map[String(court.id)] = 'open'
+        else if (minOpen === 1) map[String(court.id)] = 'open'
+        else map[String(court.id)] = 'full'
+      })
+
+      return map
     },
 
-    foodCount: (s): number => {
-      return ALL_FOOD.reduce((sum, f) => sum + (s.foodQty[f.id] || 0), 0)
+    paddleTotal(s): number {
+      const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 1)
+      return this.paddles.reduce((sum: number, p: PaddleItem) => sum + (p.price * hours) * (s.paddleQty[p.id] || 0), 0)
     },
 
-    courtTotal: (s): number => {
-      const c = COURTS.find(x => x.id === s.courtId)
-      return c ? c.price : 0
+    paddleCount(s): number {
+      return this.paddles.reduce((sum: number, p: PaddleItem) => sum + (s.paddleQty[p.id] || 0), 0)
     },
 
-    grandTotal: (s): number => {
-      const c = COURTS.find(x => x.id === s.courtId)
-      const courtPrice = c ? c.price : 0
-      const pTotal = PADDLES.reduce((sum, p) => sum + p.price * (s.paddleQty[p.id] || 0), 0)
-      const fTotal = ALL_FOOD.reduce((sum, f) => sum + f.price * (s.foodQty[f.id] || 0), 0)
+    foodTotal(s): number {
+      return this.allFood.reduce((sum: number, f: FoodItem) => sum + f.price * (s.foodQty[f.id] || 0), 0)
+    },
+
+    foodCount(s): number {
+      return this.allFood.reduce((sum: number, f: FoodItem) => sum + (s.foodQty[f.id] || 0), 0)
+    },
+
+    slotHours(s): number {
+      return s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 0)
+    },
+
+    courtTotal(s): number {
+      const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 0)
+      if (s.courtIds.length > 0) {
+        const selected = this.courts.filter((c: Court) => s.courtIds.map(String).includes(String(c.id)))
+        return selected.reduce((sum: number, c: Court) => sum + (c.price * hours), 0)
+      }
+      if (s.courtId !== null) {
+        const c = this.courts.find((x: Court) => String(x.id) === String(s.courtId))
+        return c ? c.price * hours : 0
+      }
+      return 0
+    },
+
+    grandTotal(s): number {
+      const hours = s.selectedSlots.length > 0 ? s.selectedSlots.length : (s.slotIndex !== null ? 1 : 0)
+      let courtPrice = 0
+      if (s.courtIds.length > 0) {
+        const selected = this.courts.filter((c: Court) => s.courtIds.map(String).includes(String(c.id)))
+        courtPrice = selected.reduce((sum: number, c: Court) => sum + (c.price * hours), 0)
+      } else if (s.courtId !== null) {
+        const c = this.courts.find((x: Court) => String(x.id) === String(s.courtId))
+        courtPrice = c ? c.price * hours : 0
+      }
+      const paddleHours = hours > 0 ? hours : 1
+      const pTotal = this.paddles.reduce((sum: number, p: PaddleItem) => sum + (p.price * paddleHours) * (s.paddleQty[p.id] || 0), 0)
+      const fTotal = this.allFood.reduce((sum: number, f: FoodItem) => sum + f.price * (s.foodQty[f.id] || 0), 0)
       return courtPrice + pTotal + fTotal
     },
 
@@ -167,19 +351,269 @@ export const useBookingStore = defineStore('booking', {
     },
 
     slotRangeLabel: (s): string => {
-      if (s.slotIndex === null) return ''
-      const labels = ['6:00 PM', '7:00 PM', '8:00 PM']
-      const label = labels[s.slotIndex]
-      const startHour = parseInt(label)
-      const endHour = startHour + 1
-      return `${label} – ${endHour}:00 PM`
+      const count = s.selectedSlots.length
+      if (count === 0) {
+        if (s.slotIndex === null) return ''
+        const start = TIME_SLOT_LABELS[s.slotIndex]
+        return `${start} – ${formatEndHour(start)} (1 hr)`
+      }
+
+      if (count === 1) {
+        const start = TIME_SLOT_LABELS[s.selectedSlots[0]]
+        return `${start} – ${formatEndHour(start)} (1 hr)`
+      }
+
+      const sorted = [...s.selectedSlots].sort((a, b) => a - b)
+      let isContiguous = true
+      for (let i = 0; i < sorted.length - 1; i++) {
+        if (sorted[i + 1] !== sorted[i] + 1) {
+          isContiguous = false
+          break
+        }
+      }
+
+      const hrsText = `${count} hrs`
+      if (isContiguous) {
+        const start = TIME_SLOT_LABELS[sorted[0]]
+        const end = formatEndHour(TIME_SLOT_LABELS[sorted[sorted.length - 1]])
+        return `${start} – ${end} (${hrsText})`
+      }
+
+      return `${sorted.map(i => TIME_SLOT_LABELS[i]).join(', ')} (${hrsText})`
     },
   },
 
   actions: {
+    // ─── Fetch Catalogs from Supabase ──────────────────────────────────────
+    async fetchCatalogs() {
+      this.isLoadingCatalog = true
+      try {
+        const supabase = useSupabase()
+
+        const [courtsRes, paddlesRes, foodRes] = await Promise.all([
+          supabase.from('courts').select('*').order('name'),
+          supabase.from('paddles').select('*').order('price'),
+          supabase.from('food_items').select('*').order('name'),
+        ])
+
+        if (courtsRes.data && courtsRes.data.length > 0) {
+          this.dbCourts = courtsRes.data.map(c => ({
+            id: c.id,
+            name: c.name,
+            price: Number(c.price_per_hour),
+            type: c.type || 'indoor',
+            status: c.status || 'active',
+          }))
+        }
+
+        if (paddlesRes.data && paddlesRes.data.length > 0) {
+          this.dbPaddles = paddlesRes.data.map(p => ({
+            id: p.id,
+            name: p.name,
+            price: Number(p.price),
+            stock: Number(p.available_quantity ?? p.total_quantity ?? 4),
+            total_quantity: p.total_quantity,
+            available_quantity: p.available_quantity,
+          }))
+        }
+
+        if (foodRes.data && foodRes.data.length > 0) {
+          this.dbFoodItems = foodRes.data.map(f => ({
+            id: f.id,
+            name: f.name,
+            price: Number(f.price),
+            category: f.category,
+            stock_quantity: f.stock_quantity,
+            is_available: f.is_available,
+          }))
+        }
+      } catch (err) {
+        console.error('[Supabase] Failed to load catalogs, using defaults:', err)
+      } finally {
+        this.isLoadingCatalog = false
+      }
+    },
+
+    // ─── Fetch Availability for Current Date from Supabase ─────────────────
+    async fetchAvailability() {
+      this.isLoadingAvailability = true
+      try {
+        const supabase = useSupabase()
+        const dateStr = `${this.year}-${String(this.month + 1).padStart(2, '0')}-${String(this.day).padStart(2, '0')}`
+        const totalCourts = this.dbCourts.length > 0 ? this.dbCourts.length : 2
+
+        // Single query: fetch all active bookings for the day with their court assignments.
+        // Statuses that count as "taking a slot": confirmed, pending_payment, held.
+        const { data: bookingsData, error } = await supabase
+          .from('bookings')
+          .select('id, start_time, end_time, booking_courts(court_id)')
+          .eq('booking_date', dateStr)
+          .in('status', ['confirmed', 'pending_payment', 'held'])
+
+        if (error) {
+          console.error('[Supabase] fetchAvailability query error:', error)
+        }
+
+        const availabilityMap: Record<number, number> = {}
+
+        // For each hourly slot, find which courts are occupied
+        TIME_SLOT_LABELS.forEach((_, idx) => {
+          const slotStartHour = 8 + idx       // e.g. idx 0 → 8 AM
+          const slotEndHour   = slotStartHour + 1
+
+          const bookedCourtIds = new Set<string>()
+
+          if (!error && bookingsData) {
+            bookingsData.forEach((booking: any) => {
+              const bookingStartHour = parseInt((booking.start_time as string).split(':')[0])
+              const bookingEndHour   = parseInt((booking.end_time   as string).split(':')[0])
+
+              // Overlap: booking occupies this slot if it starts before slot ends AND ends after slot starts
+              if (bookingStartHour < slotEndHour && bookingEndHour > slotStartHour) {
+                ;(booking.booking_courts as { court_id: string }[] || []).forEach(bc => {
+                  bookedCourtIds.add(bc.court_id)
+                })
+              }
+            })
+          }
+
+          availabilityMap[idx] = Math.max(0, totalCourts - bookedCourtIds.size)
+        })
+
+        this.dbSlotAvailability = availabilityMap
+      } catch (err) {
+        console.error('[Supabase] Failed to fetch availability:', err)
+      } finally {
+        this.isLoadingAvailability = false
+      }
+    },
+
+    // ─── Create 10-Minute Booking Hold in Supabase ─────────────────────────
+    async createBookingHold(): Promise<{ bookingId: string; bookingRef: string }> {
+      this.isSubmittingBooking = true
+      try {
+        const supabase = useSupabase()
+        const dateStr = `${this.year}-${String(this.month + 1).padStart(2, '0')}-${String(this.day).padStart(2, '0')}`
+
+        // Sort slot indices
+        const sortedSlots = (this.selectedSlots.length > 0 ? this.selectedSlots : [this.slotIndex ?? 0]).sort((a, b) => a - b)
+        const startSlotIdx = sortedSlots[0]
+        const endSlotIdx = sortedSlots[sortedSlots.length - 1]
+
+        const startTime = slotToTimeString(startSlotIdx)
+        const endTime = slotToTimeString(endSlotIdx + 1)
+
+        // Selected court UUIDs
+        const courtIdsToBook = this.courtIds.length > 0
+          ? this.courtIds.map(String)
+          : [String(this.courtId || this.courts[0].id)]
+
+        // Prepare guest json
+        const guestPayload = {
+          full_name: this.bookerName || 'Guest User',
+          mobile: this.bookerMobile || '09000000000',
+          facebook_account: this.bookerFacebook || null,
+        }
+
+        // Prepare players json
+        const playersPayload = this.players
+          .filter(p => p.name.trim().length > 0)
+          .map(p => ({
+            player_name: p.name.trim(),
+            player_mobile: p.mobile ? p.mobile.trim() : null,
+          }))
+
+        // Prepare paddle selections
+        const paddleSelections = Object.entries(this.paddleQty)
+          .filter(([_, qty]) => qty > 0)
+          .map(([id, qty]) => ({ id, quantity: qty }))
+
+        // Prepare food selections
+        const foodSelections = Object.entries(this.foodQty)
+          .filter(([_, qty]) => qty > 0)
+          .map(([id, qty]) => ({ id, quantity: qty }))
+
+        // Call create_booking_hold RPC
+        const { data: holdData, error: holdError } = await supabase.rpc('create_booking_hold', {
+          p_court_ids: courtIdsToBook,
+          p_booking_date: dateStr,
+          p_start_time: startTime,
+          p_end_time: endTime,
+          p_guest: guestPayload,
+          p_players: playersPayload,
+          p_paddle_sels: paddleSelections,
+          p_food_sels: foodSelections,
+        })
+
+        if (holdError || !holdData) {
+          console.error('[Supabase] create_booking_hold error:', holdError)
+          throw new Error(holdError?.message || 'Failed to hold booking slots.')
+        }
+
+        const bookingId = holdData.booking_id
+        const ref = holdData.reference
+
+        this.createdBookingId = bookingId
+        this.bookingRef = ref
+
+        return { bookingId, bookingRef: ref }
+      } finally {
+        this.isSubmittingBooking = false
+      }
+    },
+
+    // ─── Initiate PayMongo Checkout Session (GCash / Maya) ─────────────────
+    async initiatePayMongoCheckout(): Promise<string> {
+      // 1. Create the booking hold in Supabase (or reuse active hold)
+      let bookingId = this.createdBookingId
+      let ref = this.bookingRef
+
+      if (!bookingId || !ref) {
+        const hold = await this.createBookingHold()
+        bookingId = hold.bookingId
+        ref = hold.bookingRef
+      }
+
+      // 2. Request PayMongo checkout session from Nuxt server route
+      const response = await $fetch<{ success: boolean; checkoutUrl: string; sessionId: string }>('/api/paymongo/create-checkout', {
+        method: 'POST',
+        body: {
+          bookingId,
+          bookingRef: ref,
+          amount: this.grandTotal,
+          paymentMethod: this.payMethod,
+          bookerName: this.bookerName,
+          bookerMobile: this.bookerMobile,
+        },
+      })
+
+      if (!response?.checkoutUrl) {
+        throw new Error('Failed to generate PayMongo checkout URL.')
+      }
+
+      if (typeof window !== 'undefined' && response.sessionId && ref) {
+        try {
+          sessionStorage.setItem(`paymongo_session_${ref}`, response.sessionId)
+        } catch (e) {
+          // ignore storage error
+        }
+      }
+
+      return response.checkoutUrl
+    },
+
+    // Convenience alias
+    async submitBookingToSupabase(): Promise<string> {
+      return this.initiatePayMongoCheckout()
+    },
+
     setDay(day: number) {
       this.day = day
+      this.selectedSlots = []
       this.slotIndex = null
+      this.courtIds = []
+      this.courtId = null
+      this.fetchAvailability()
     },
 
     prevMonth() {
@@ -189,7 +623,11 @@ export const useBookingStore = defineStore('booking', {
         this.year -= 1
       }
       this.day = 1
+      this.selectedSlots = []
       this.slotIndex = null
+      this.courtIds = []
+      this.courtId = null
+      this.fetchAvailability()
     },
 
     nextMonth() {
@@ -199,19 +637,63 @@ export const useBookingStore = defineStore('booking', {
         this.year += 1
       }
       this.day = 1
+      this.selectedSlots = []
       this.slotIndex = null
+      this.courtIds = []
+      this.courtId = null
+      this.fetchAvailability()
+    },
+
+    toggleSlot(idx: number) {
+      if (this.selectedSlots.includes(idx)) {
+        this.selectedSlots = this.selectedSlots.filter(i => i !== idx)
+      } else {
+        this.selectedSlots = [...this.selectedSlots, idx].sort((a, b) => a - b)
+      }
+      this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null
     },
 
     setSlot(idx: number) {
-      this.slotIndex = idx
+      this.toggleSlot(idx)
     },
 
-    setCourt(id: number) {
-      this.courtId = id
+    setSlots(indices: number[]) {
+      this.selectedSlots = [...indices].sort((a, b) => a - b)
+      this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null
+    },
+
+    clearSlots() {
+      this.selectedSlots = []
+      this.slotIndex = null
+    },
+
+    toggleCourt(id: string | number) {
+      const strId = String(id)
+      const current = this.courtIds.map(String)
+      if (current.includes(strId)) {
+        this.courtIds = this.courtIds.filter(x => String(x) !== strId)
+      } else {
+        this.courtIds = [...this.courtIds, id]
+      }
+      this.courtId = this.courtIds.length > 0 ? this.courtIds[0] : null
+    },
+
+    setCourt(id: string | number) {
+      this.toggleCourt(id)
+    },
+
+    setCourts(ids: (string | number)[]) {
+      this.courtIds = [...ids]
+      this.courtId = this.courtIds.length > 0 ? this.courtIds[0] : null
+    },
+
+    clearCourts() {
+      this.courtIds = []
+      this.courtId = null
     },
 
     setPaddleQty(id: string, dir: number) {
-      const p = PADDLES.find(x => x.id === id)
+      const p = this.paddles.find(x => x.id === id)
       if (!p) return
       let next = (this.paddleQty[id] || 0) + dir
       next = Math.max(0, Math.min(p.stock, next))
@@ -243,13 +725,23 @@ export const useBookingStore = defineStore('booking', {
     },
 
     reset() {
+      this.selectedSlots = []
       this.slotIndex = null
+      this.courtIds = []
       this.courtId = null
-      this.paddleQty = { standard: 0, premium: 0, pro: 0 }
-      this.foodQty = { chicken: 0, burger: 0, fries: 0, water: 0 }
+      this.paddleQty = {}
+      this.foodQty = {}
       this.payMethod = 'gcash'
       this.holdSeconds = 10 * 60
       this.bookingRef = null
+      this.createdBookingId = null
+      this.bookerName = ''
+      this.bookerMobile = ''
+      this.bookerFacebook = ''
+      this.players = []
+      this.idPhotoName = null
+      this.idPhotoFile = null
+      this.fetchAvailability()
     },
   },
 })
