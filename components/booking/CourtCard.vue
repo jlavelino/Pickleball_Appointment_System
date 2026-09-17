@@ -3,7 +3,7 @@
     class="court-card group transition-all duration-200"
     :class="[
       isSelected ? 'court-card--selected' : '',
-      isFull ? 'court-card--full' : 'hover:border-ink/40'
+      isMaintenance ? 'court-card--maintenance' : isFull ? 'court-card--full' : 'hover:border-ink/40'
     ]"
     @click="!isFull && $emit('select', court.id)"
   >
@@ -72,6 +72,10 @@
         <span class="mdi mdi-check text-lime text-[17px] shrink-0"></span>
         <span>Court Selected</span>
       </template>
+      <template v-else-if="isMaintenance">
+        <span class="mdi mdi-wrench text-amber-700 text-[15px] shrink-0"></span>
+        <span>Under Maintenance</span>
+      </template>
       <template v-else-if="isFull">
         <span>Unavailable</span>
       </template>
@@ -88,7 +92,7 @@ import type { Court } from '~/stores/booking'
 
 const props = defineProps<{
   court: Court
-  status: 'open' | 'low' | 'full'
+  status: 'open' | 'low' | 'full' | 'maintenance'
   isSelected: boolean
   hours?: number
   courtIndex?: number
@@ -98,21 +102,25 @@ defineEmits<{
   select: [id: string | number]
 }>()
 
-const isFull = computed(() => props.status === 'full')
+const isFull = computed(() => props.status === 'full' || props.status === 'maintenance')
+const isMaintenance = computed(() => props.status === 'maintenance')
 
 const badgeText = computed(() => {
+  if (props.status === 'maintenance') return 'Under Maintenance'
   if (props.status === 'open') return 'Available'
   if (props.status === 'low') return '1 slot left'
   return 'Reserved'
 })
 
 const badgeClass = computed(() => {
+  if (props.status === 'maintenance') return 'badge--maintenance'
   if (props.status === 'open') return 'badge--open'
   if (props.status === 'low') return 'badge--low'
   return 'badge--full'
 })
 
 const dotClass = computed(() => {
+  if (props.status === 'maintenance') return 'bg-amber-600'
   if (props.status === 'open') return 'bg-emerald-500'
   if (props.status === 'low') return 'bg-amber-500'
   return 'bg-gray-400'
@@ -175,6 +183,14 @@ const dotClass = computed(() => {
 .badge--open { background: #EAF5E8; color: #1D6331; }
 .badge--low  { background: #FEF3D6; color: #9B5A03; }
 .badge--full { background: #EBEAE4; color: #737063; }
+.badge--maintenance { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+
+.court-card--maintenance {
+  opacity: 0.72;
+  cursor: not-allowed;
+  background: #FAF8F0;
+  border-color: #E6DFCF;
+}
 
 .court-btn {
   display: flex;

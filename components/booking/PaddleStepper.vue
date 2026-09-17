@@ -1,12 +1,15 @@
 <template>
   <div
     class="paddle-card transition-all duration-200"
-    :class="quantity > 0 ? 'paddle-card--active' : ''"
+    :class="[
+      quantity > 0 ? 'paddle-card--active' : '',
+      isOutOfStock ? 'paddle-card--out-of-stock' : ''
+    ]"
   >
     <!-- Top row: image + name/price + stock badge -->
     <div class="flex items-center gap-3.5">
       <!-- Paddle image -->
-      <div class="paddle-img-box shrink-0">
+      <div class="paddle-img-box shrink-0" :class="{ 'opacity-60 grayscale': isOutOfStock }">
         <img
           src="~/assets/images/pickle_paddle.png"
           :alt="paddle.name"
@@ -18,20 +21,20 @@
       <div class="flex-1 min-w-0">
         <!-- Name row with stock pill inline -->
         <div class="flex items-center gap-1.5 flex-wrap">
-          <span class="font-display font-bold text-[16px] text-ink leading-snug">
+          <span class="font-display font-bold text-[16px] text-ink leading-snug" :class="{ 'text-ink-soft/70': isOutOfStock }">
             {{ paddle.name }}
           </span>
           <span
             v-if="paddle.stock <= 4"
-            class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none"
-            :class="paddle.stock === 0 ? 'text-red-700 bg-red-100 border border-red-200' : 'text-amber-700 bg-amber-100 border border-amber-200'"
+            class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full leading-none shrink-0"
+            :class="isOutOfStock ? 'text-amber-900 bg-amber-100 border border-amber-300 uppercase tracking-wider font-extrabold' : 'text-amber-700 bg-amber-100 border border-amber-200'"
           >
-            {{ paddle.stock === 0 ? '0 left (In use)' : `${paddle.stock} left` }}
+            {{ isOutOfStock ? 'Out of Stock' : `${paddle.stock} left` }}
           </span>
         </div>
 
         <!-- Price sub-line -->
-        <div class="text-[12.5px] text-ink-soft font-medium mt-0.5">
+        <div class="text-[12.5px] text-ink-soft font-medium mt-0.5" :class="{ 'text-ink-soft/60': isOutOfStock }">
           ₱{{ paddle.price }} / hr
           <span v-if="hours && hours > 1" class="text-ink font-semibold">
             · ₱{{ (paddle.price * hours).toLocaleString() }} ({{ hours }} hrs)
@@ -46,7 +49,10 @@
     <!-- Bottom row: subtotal + stepper -->
     <div class="flex items-center justify-between">
       <div class="text-[12px] font-medium text-ink-soft">
-        <template v-if="quantity > 0">
+        <template v-if="isOutOfStock">
+          <span class="text-ink-soft/70 text-[12px]">Currently unavailable</span>
+        </template>
+        <template v-else-if="quantity > 0">
           <span class="font-bold text-ink text-[13px]">₱{{ ((paddle.price * (hours || 1)) * quantity).toLocaleString() }}</span>
           <span class="text-[11.5px] text-ink-soft ml-1">subtotal</span>
         </template>
@@ -55,8 +61,13 @@
         </template>
       </div>
 
-      <!-- Stepper buttons -->
-      <div class="flex items-center gap-2.5">
+      <!-- Stepper buttons or Out of Stock indicator -->
+      <div v-if="isOutOfStock" class="shrink-0">
+        <span class="text-[11.5px] font-bold text-amber-900/80 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-xl">
+          Unavailable
+        </span>
+      </div>
+      <div v-else class="flex items-center gap-2.5">
         <button
           type="button"
           :disabled="quantity <= 0"
@@ -86,13 +97,16 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { PaddleItem } from '~/stores/booking'
 
-defineProps<{
+const props = defineProps<{
   paddle: PaddleItem
   quantity: number
   hours?: number
 }>()
+
+const isOutOfStock = computed(() => props.paddle.stock <= 0)
 
 defineEmits<{
   step: [dir: number]
@@ -113,6 +127,13 @@ defineEmits<{
   border-color: var(--ink, #223318);
   background: linear-gradient(180deg, #FFFFFF 0%, #F8FAF0 100%);
   box-shadow: 0 4px 14px -4px rgba(34, 51, 24, 0.14), 0 0 0 1px var(--ink, #223318);
+}
+
+.paddle-card--out-of-stock {
+  opacity: 0.65;
+  background: #FAF8F5;
+  border-color: #E8E5DA;
+  cursor: not-allowed;
 }
 
 .paddle-img-box {

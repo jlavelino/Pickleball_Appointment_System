@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 import FoodItemRow from '~/components/booking/FoodItemRow.vue'
 import BottomCTA from '~/components/ui/BottomCta.vue'
@@ -67,6 +67,10 @@ const store = useBookingStore()
 if (store.courtId === null && store.courtIds.length === 0) {
   navigateTo('/book/court')
 }
+
+onMounted(() => {
+  store.fetchCatalogs()
+})
 
 const continueLabel = computed(() => {
   if (store.foodCount > 0) {

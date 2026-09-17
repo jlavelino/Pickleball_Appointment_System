@@ -63,12 +63,19 @@
         <div
           v-for="paddle in paddles"
           :key="paddle.id"
-          class="p-3.5 rounded-2xl bg-cream/40 border border-line flex items-center justify-between gap-3"
+          class="p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition-colors"
+          :class="paddle.available_quantity > 0 ? 'bg-cream/40 border-line' : 'bg-red-50/70 border-red-200'"
         >
           <div>
             <div class="font-bold text-[14.5px] text-ink">{{ paddle.name }}</div>
-            <div class="text-[12px] text-ink-soft mt-0.5">
-              ₱{{ Number(paddle.price).toLocaleString() }}/hour rental
+            <div class="text-[12px] text-ink-soft mt-0.5 flex items-center gap-1.5 flex-wrap">
+              <span>₱{{ Number(paddle.price).toLocaleString() }}/hour rental ·</span>
+              <span class="inline-flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full" :class="paddle.available_quantity > 0 ? 'bg-relish-dark' : 'bg-red-500'"></span>
+                <strong :class="paddle.available_quantity > 0 ? 'text-relish-dark font-medium' : 'text-red-700 font-bold'">
+                  {{ paddle.available_quantity > 0 ? 'In Stock' : 'Out of Stock' }}
+                </strong>
+              </span>
             </div>
           </div>
 
@@ -116,22 +123,28 @@
           v-for="item in foodItems"
           :key="item.id"
           class="p-3.5 rounded-2xl border transition-all flex flex-col justify-between gap-3"
-          :class="item.is_available ? 'bg-cream/40 border-line' : 'bg-gray-100/80 border-gray-200 opacity-75'"
+          :class="item.is_available ? 'bg-cream/40 border-line' : 'bg-red-50/60 border-red-200'"
         >
           <div>
-            <div class="flex items-center justify-between gap-1 mb-1">
+            <div class="flex items-center justify-between gap-1 mb-1.5">
               <span class="text-[10px] font-bold uppercase tracking-wider text-ink-soft px-1.5 py-0.5 rounded bg-white border border-line">
                 {{ item.category }}
               </span>
               <span class="font-bold text-[13.5px] text-ink">₱{{ Number(item.price).toLocaleString() }}</span>
             </div>
             <div class="font-bold text-[14px] text-ink">{{ item.name }}</div>
+            <div class="text-[12px] text-ink-soft mt-1 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full" :class="item.is_available ? 'bg-relish-dark' : 'bg-red-500'"></span>
+              <span :class="item.is_available ? 'text-relish-dark font-medium' : 'text-red-700 font-bold'">
+                {{ item.is_available ? 'In Stock' : 'Out of Stock' }}
+              </span>
+            </div>
           </div>
 
           <button
             type="button"
             class="w-full py-1.5 px-2 rounded-xl text-[11.5px] font-bold transition-all cursor-pointer shadow-2xs flex items-center justify-center gap-1"
-            :class="item.is_available ? 'bg-white hover:bg-amber-50 text-amber-900 border border-amber-200' : 'bg-relish-dark text-white hover:bg-black'"
+            :class="item.is_available ? 'bg-white hover:bg-red-50 text-red-700 border border-red-200' : 'bg-relish-dark text-white hover:bg-black'"
             @click="$emit('toggle-food', item.id, !item.is_available)"
           >
             <span class="mdi" :class="item.is_available ? 'mdi-cancel' : 'mdi-check'"></span>

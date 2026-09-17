@@ -52,7 +52,16 @@
             class="p-2 rounded-xl bg-lime-soft/60 border border-lime/20 flex items-center justify-center gap-1.5"
           >
             <span class="font-display font-bold text-ink">{{ court.name }}</span>
-            <span class="text-[10px] uppercase font-bold text-lime-text px-1.5 py-0.5 rounded bg-white/70 border border-lime/20">
+            <span
+              v-if="court.status === 'maintenance'"
+              class="text-[9.5px] uppercase font-bold text-amber-900 px-1.5 py-0.5 rounded bg-amber-100 border border-amber-300"
+            >
+              Maintenance
+            </span>
+            <span
+              v-else
+              class="text-[10px] uppercase font-bold text-lime-text px-1.5 py-0.5 rounded bg-white/70 border border-lime/20"
+            >
               {{ court.type.includes('covered') ? 'Covered' : 'Indoor' }}
             </span>
           </div>
@@ -115,12 +124,13 @@
                 </div>
               </div>
 
-              <!-- Available / Open slot -->
+              <!-- Available / Open slot or Maintenance slot -->
               <div
                 v-else
-                class="w-full h-full flex items-center justify-center transition-all duration-150 text-[11px] font-medium border-2 border-dashed rounded-xl border-transparent text-ink-soft/30 hover:text-lime-text hover:border-lime/40 hover:bg-lime-soft/30"
+                class="w-full h-full flex items-center justify-center transition-all duration-150 text-[11px] font-medium rounded-xl"
+                :class="court.status === 'maintenance' ? 'bg-amber-50/50 text-amber-800/60 border border-dashed border-amber-200' : 'border-2 border-dashed border-transparent text-ink-soft/30 hover:text-lime-text hover:border-lime/40 hover:bg-lime-soft/30'"
               >
-                <span>Open</span>
+                <span>{{ court.status === 'maintenance' ? 'Maintenance' : 'Open' }}</span>
               </div>
             </div>
           </div>

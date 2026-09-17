@@ -1,0 +1,16 @@
+{
+  "courts": {
+    "0a31ed7d-f073-488d-aae9-9dc329c38149": "active"
+  },
+  "paddles": {
+    "cb5ee6e3-597f-4189-87b2-ad27c38885bd": 0,
+    "1ef13ffa-d836-4cfd-8336-f05fc20b8a2b": 3,
+    "6ad6b922-1b4c-4ba0-8ba6-ed9d16b10598": 3
+  },
+  "foodItems": {
+    "850c5356-a0c0-48fb-9708-67027609c433": false,
+    "3d2e6ba5-79a0-4a10-b115-3efcbd113d4a": false,
+    "71ffd93e-0d0c-456d-9399-54fb9313adbe": false,
+    "7c08dd8f-5823-4e7f-a5a0-9fb4b9e59694": false
+  }
+}

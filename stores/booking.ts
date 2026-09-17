@@ -46,15 +46,15 @@ export const DEFAULT_FOOD_GROUPS = [
   {
     label: 'Meals',
     items: [
-      { id: '850c5356-a0c0-48fb-9708-67027609c433', name: 'Chicken sandwich', price: 150, category: 'Meals' },
-      { id: '3d2e6ba5-79a0-4a10-b115-3efcbd113d4a', name: 'Burger', price: 180, category: 'Meals' },
+      { id: '850c5356-a0c0-48fb-9708-67027609c433', name: 'Chicken sandwich', price: 150, category: 'Meals', is_available: true },
+      { id: '3d2e6ba5-79a0-4a10-b115-3efcbd113d4a', name: 'Burger', price: 180, category: 'Meals', is_available: true },
     ],
   },
   {
     label: 'Snacks & drinks',
     items: [
-      { id: '71ffd93e-0d0c-456d-9399-54fb9313adbe', name: 'Fries', price: 80, category: 'Snacks & drinks' },
-      { id: '7c08dd8f-5823-4e7f-a5a0-9fb4b9e59694', name: 'Bottled water', price: 30, category: 'Snacks & drinks' },
+      { id: '71ffd93e-0d0c-456d-9399-54fb9313adbe', name: 'Fries', price: 80, category: 'Snacks & drinks', is_available: true },
+      { id: '7c08dd8f-5823-4e7f-a5a0-9fb4b9e59694', name: 'Bottled water', price: 30, category: 'Snacks & drinks', is_available: true },
     ],
   },
 ]
@@ -201,8 +201,10 @@ export const useBookingStore = defineStore('booking', {
         : (s.slotIndex !== null ? [s.slotIndex] : [])
 
       return baseList.map(p => {
-        // Base facility inventory
-        const total = p.total_quantity ?? 4
+        // Base facility inventory (respect admin override in available_quantity if set)
+        const baseTotal = typeof p.available_quantity === 'number'
+          ? p.available_quantity
+          : (p.total_quantity ?? 4)
 
         // If user has selected slots, find peak reserved quantity across those slots
         let maxReserved = 0
@@ -215,12 +217,12 @@ export const useBookingStore = defineStore('booking', {
           })
         }
 
-        const available = Math.max(0, total - maxReserved)
+        const available = Math.max(0, baseTotal - maxReserved)
         return {
           ...p,
           stock: available,
-          total_quantity: total,
-          available_quantity: available,
+          total_quantity: Number(p.total_quantity ?? 4),
+          available_quantity: baseTotal,
         }
       })
     },
@@ -302,8 +304,8 @@ export const useBookingStore = defineStore('booking', {
       return names.join(', ')
     },
 
-    courtsStatusMap(s): Record<string, 'open' | 'low' | 'full'> {
-      const map: Record<string, 'open' | 'low' | 'full'> = {}
+    courtsStatusMap(s): Record<string, 'open' | 'low' | 'full' | 'maintenance'> {
+      const map: Record<string, 'open' | 'low' | 'full' | 'maintenance'> = {}
 
       // Determine which slots are active
       const activeSlots = s.selectedSlots.length > 0
@@ -313,8 +315,14 @@ export const useBookingStore = defineStore('booking', {
       this.courts.forEach((court: Court) => {
         const courtIdStr = String(court.id)
 
+        // Court in maintenance mode cannot be booked
+        if (court.status === 'maintenance') {
+          map[courtIdStr] = 'maintenance'
+          return
+        }
+
         if (activeSlots.length === 0) {
-          // No slot selected yet — show all courts as open
+          // No slot selected yet — show active courts as open
           map[courtIdStr] = 'open'
           return
         }
@@ -436,43 +444,80 @@ export const useBookingStore = defineStore('booking', {
       try {
         const supabase = useSupabase()
 
-        const [courtsRes, paddlesRes, foodRes] = await Promise.all([
+        const [courtsRes, paddlesRes, foodRes, facilityRes] = await Promise.all([
           supabase.from('courts').select('*').order('name'),
           supabase.from('paddles').select('*').order('price'),
           supabase.from('food_items').select('*').order('name'),
+          $fetch<{ success: boolean; data: any }>('/api/admin/facility').catch(() => null),
         ])
 
+        const facilityOverrides = facilityRes?.data || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('dink_facility_controls') || '{}') : null)
+
         if (courtsRes.data && courtsRes.data.length > 0) {
-          this.dbCourts = courtsRes.data.map(c => ({
-            id: c.id,
-            name: c.name,
-            price: Number(c.price_per_hour),
-            type: c.type || 'indoor',
-            status: c.status || 'active',
-          }))
+          this.dbCourts = courtsRes.data.map(c => {
+            const overrideStatus = facilityOverrides?.courts?.[c.id]
+            return {
+              id: c.id,
+              name: c.name,
+              price: Number(c.price_per_hour),
+              type: c.type || 'indoor',
+              status: overrideStatus || c.status || 'active',
+            }
+          })
         }
 
         if (paddlesRes.data && paddlesRes.data.length > 0) {
-          this.dbPaddles = paddlesRes.data.map(p => ({
-            id: p.id,
-            name: p.name,
-            price: Number(p.price),
-            stock: Number(p.total_quantity ?? p.available_quantity ?? 4),
-            total_quantity: Number(p.total_quantity ?? 4),
-            available_quantity: Number(p.available_quantity ?? p.total_quantity ?? 4),
-          }))
+          this.dbPaddles = paddlesRes.data.map(p => {
+            const overrideQty = facilityOverrides?.paddles?.[p.id]
+            const available = typeof overrideQty === 'number' ? overrideQty : Number(p.available_quantity ?? p.total_quantity ?? 4)
+            return {
+              id: p.id,
+              name: p.name,
+              price: Number(p.price),
+              stock: available,
+              total_quantity: Number(p.total_quantity ?? 4),
+              available_quantity: available,
+            }
+          })
+        } else if (facilityOverrides?.paddles) {
+          this.dbPaddles = DEFAULT_PADDLES.map(p => {
+            const overrideQty = facilityOverrides.paddles[p.id]
+            const available = typeof overrideQty === 'number' ? overrideQty : p.stock
+            return {
+              ...p,
+              stock: available,
+              available_quantity: available,
+            }
+          })
         }
 
         if (foodRes.data && foodRes.data.length > 0) {
-          this.dbFoodItems = foodRes.data.map(f => ({
-            id: f.id,
-            name: f.name,
-            price: Number(f.price),
-            category: f.category,
-            stock_quantity: f.stock_quantity,
-            is_available: f.is_available,
-          }))
+          this.dbFoodItems = foodRes.data.map(f => {
+            const overrideAvail = facilityOverrides?.foodItems?.[f.id]
+            return {
+              id: f.id,
+              name: f.name,
+              price: Number(f.price),
+              category: f.category,
+              stock_quantity: f.stock_quantity,
+              is_available: typeof overrideAvail === 'boolean' ? overrideAvail : f.is_available,
+            }
+          })
         }
+
+        // Automatically reset quantities of out of stock food items to 0
+        this.allFood.forEach(f => {
+          if (f.is_available === false && this.foodQty[f.id]) {
+            this.foodQty[f.id] = 0
+          }
+        })
+
+        // Automatically clamp any selected paddle quantities to current available stock
+        this.paddles.forEach(p => {
+          if ((this.paddleQty[p.id] || 0) > p.stock) {
+            this.paddleQty[p.id] = p.stock
+          }
+        })
       } catch (err) {
         console.error('[Supabase] Failed to load catalogs, using defaults:', err)
       } finally {
@@ -532,7 +577,12 @@ export const useBookingStore = defineStore('booking', {
             })
           }
 
-          availabilityMap[idx] = Math.max(0, totalCourts - bookedCourtIds.size)
+          // Deduct booked courts AND courts in maintenance mode
+          const availableCount = this.courts.filter(c => {
+            if (c.status === 'maintenance') return false
+            return !bookedCourtIds.has(String(c.id))
+          }).length
+          availabilityMap[idx] = Math.max(0, availableCount)
           courtSlotBookedMap[idx] = Array.from(bookedCourtIds)
           paddleReservedMap[idx] = paddleReserved
         })
@@ -548,13 +598,15 @@ export const useBookingStore = defineStore('booking', {
           }
         })
 
-        // Auto-deselect any courts that are now booked during the selected slots
+        // Auto-deselect any courts that are in maintenance or booked during the selected slots
         if (this.courtIds.length > 0) {
           const activeSlots = this.selectedSlots.length > 0
             ? this.selectedSlots
             : (this.slotIndex !== null ? [this.slotIndex] : [])
           const nowUnavailable = this.courtIds.filter(id => {
             const idStr = String(id)
+            const courtObj = this.courts.find(c => String(c.id) === idStr)
+            if (courtObj && courtObj.status === 'maintenance') return true
             return activeSlots.some(slotIdx => {
               const booked = courtSlotBookedMap[slotIdx] ?? []
               return booked.includes(idStr)
@@ -814,12 +866,15 @@ export const useBookingStore = defineStore('booking', {
     setPaddleQty(id: string, dir: number) {
       const p = this.paddles.find(x => x.id === id)
       if (!p) return
+      if (p.stock <= 0 && dir > 0) return
       let next = (this.paddleQty[id] || 0) + dir
       next = Math.max(0, Math.min(p.stock, next))
       this.paddleQty[id] = next
     },
 
     setFoodQty(id: string, dir: number) {
+      const f = this.allFood.find(x => x.id === id)
+      if (f && f.is_available === false && dir > 0) return
       let next = (this.foodQty[id] || 0) + dir
       next = Math.max(0, Math.min(20, next))
       this.foodQty[id] = next

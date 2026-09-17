@@ -62,8 +62,11 @@ if (store.courtId === null && store.courtIds.length === 0) {
   navigateTo('/book/court')
 }
 
-onMounted(() => {
-  store.fetchAvailability()
+onMounted(async () => {
+  await Promise.all([
+    store.fetchCatalogs(),
+    store.fetchAvailability(),
+  ])
 })
 
 const continueLabel = computed(() => {

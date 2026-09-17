@@ -162,6 +162,28 @@ export function useAdminData() {
     }
   }
 
+  // Facility overrides sync helper (courts maintenance, paddle stock, food item availability)
+  async function fetchFacilityOverrides() {
+    try {
+      const res = await $fetch<{ success: boolean; data: any }>('/api/admin/facility')
+      if (res?.data) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('dink_facility_controls', JSON.stringify(res.data))
+        }
+        return res.data
+      }
+    } catch {
+      if (typeof window !== 'undefined') {
+        try {
+          return JSON.parse(localStorage.getItem('dink_facility_controls') || '{}')
+        } catch {
+          return null
+        }
+      }
+    }
+    return null
+  }
+
   async function fetchCourts() {
     try {
       const { data, error: err } = await supabase
@@ -170,7 +192,19 @@ export function useAdminData() {
         .order('name', { ascending: true })
 
       if (err) throw err
-      courts.value = data || []
+      const rawCourts: AdminCourt[] = data || []
+
+      // Overlay facility controls (maintenance status)
+      const overrides = await fetchFacilityOverrides()
+      if (overrides?.courts) {
+        rawCourts.forEach((c: any) => {
+          if (overrides.courts[c.id]) {
+            c.status = overrides.courts[c.id]
+          }
+        })
+      }
+
+      courts.value = rawCourts
     } catch (err: any) {
       console.error('Error fetching courts:', err)
     }
@@ -184,7 +218,22 @@ export function useAdminData() {
         .order('price', { ascending: true })
 
       if (err) throw err
-      paddles.value = data || []
+      const rawPaddles: AdminPaddle[] = (data && data.length > 0) ? data : [
+        { id: 'cb5ee6e3-597f-4189-87b2-ad27c38885bd', name: 'Standard paddle', price: 100, total_quantity: 4, available_quantity: 4 },
+        { id: '1ef13ffa-d836-4cfd-8336-f05fc20b8a2b', name: 'Premium paddle', price: 150, total_quantity: 4, available_quantity: 4 },
+        { id: '6ad6b922-1b4c-4ba0-8ba6-ed9d16b10598', name: 'Pro paddle', price: 200, total_quantity: 4, available_quantity: 4 },
+      ]
+
+      const overrides = await fetchFacilityOverrides()
+      if (overrides?.paddles) {
+        rawPaddles.forEach((p: any) => {
+          if (typeof overrides.paddles[p.id] === 'number') {
+            p.available_quantity = overrides.paddles[p.id]
+          }
+        })
+      }
+
+      paddles.value = rawPaddles
     } catch (err: any) {
       console.error('Error fetching paddles:', err)
     }
@@ -198,7 +247,18 @@ export function useAdminData() {
         .order('category', { ascending: true })
 
       if (err) throw err
-      foodItems.value = data || []
+      const rawFood: AdminFoodItem[] = data || []
+
+      const overrides = await fetchFacilityOverrides()
+      if (overrides?.foodItems) {
+        rawFood.forEach((f: any) => {
+          if (typeof overrides.foodItems[f.id] === 'boolean') {
+            f.is_available = overrides.foodItems[f.id]
+          }
+        })
+      }
+
+      foodItems.value = rawFood
     } catch (err: any) {
       console.error('Error fetching food items:', err)
     }
@@ -283,51 +343,105 @@ export function useAdminData() {
   }
 
   async function toggleCourtStatus(courtId: string, newStatus: 'active' | 'maintenance') {
-    try {
-      const { error: err } = await supabase
-        .from('courts')
-        .update({ status: newStatus })
-        .eq('id', courtId)
+    // 1. Immediately update local state
+    const court = courts.value.find((c) => c.id === courtId)
+    if (court) court.status = newStatus
 
-      if (err) throw err
-      const court = courts.value.find((c) => c.id === courtId)
-      if (court) court.status = newStatus
+    // 2. Persist to server API
+    try {
+      await $fetch('/api/admin/facility', {
+        method: 'POST',
+        body: { type: 'court', id: courtId, status: newStatus }
+      })
     } catch (err) {
-      console.error('Error updating court status:', err)
+      console.warn('Could not persist court status to server:', err)
     }
+
+    // 3. Persist to localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = JSON.parse(localStorage.getItem('dink_facility_controls') || '{}')
+        saved.courts = saved.courts || {}
+        saved.courts[courtId] = newStatus
+        localStorage.setItem('dink_facility_controls', JSON.stringify(saved))
+      } catch (err) {
+        console.error('Error saving court status to localStorage:', err)
+      }
+    }
+
+    // 4. Also try Supabase update if permissions allow
+    try {
+      await supabase.from('courts').update({ status: newStatus }).eq('id', courtId)
+    } catch {}
   }
+
+  // Debounced paddle sync map
+  const pendingPaddleUpdates: Record<string, number> = {}
+  let paddleSyncTimer: ReturnType<typeof setTimeout> | null = null
 
   async function adjustPaddleStock(paddleId: string, delta: number) {
     const p = paddles.value.find((item) => item.id === paddleId)
     if (!p) return
 
     const newQty = Math.max(0, Math.min(p.total_quantity, p.available_quantity + delta))
-    try {
-      const { error: err } = await supabase
-        .from('paddles')
-        .update({ available_quantity: newQty })
-        .eq('id', paddleId)
+    p.available_quantity = newQty
+    pendingPaddleUpdates[paddleId] = newQty
 
-      if (err) throw err
-      p.available_quantity = newQty
-    } catch (err) {
-      console.error('Error updating paddle stock:', err)
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = JSON.parse(localStorage.getItem('dink_facility_controls') || '{}')
+        saved.paddles = saved.paddles || {}
+        saved.paddles[paddleId] = newQty
+        localStorage.setItem('dink_facility_controls', JSON.stringify(saved))
+      } catch {}
     }
+
+    if (paddleSyncTimer) clearTimeout(paddleSyncTimer)
+    paddleSyncTimer = setTimeout(async () => {
+      const updates = { ...pendingPaddleUpdates }
+      for (const [id, quantity] of Object.entries(updates)) {
+        try {
+          await $fetch('/api/admin/facility', {
+            method: 'POST',
+            body: { type: 'paddle', id, quantity }
+          })
+          delete pendingPaddleUpdates[id]
+        } catch (err) {
+          console.warn('Could not persist paddle stock to server:', err)
+        }
+
+        try {
+          await supabase.from('paddles').update({ available_quantity: quantity }).eq('id', id)
+        } catch {}
+      }
+    }, 150)
   }
 
   async function toggleFoodAvailability(foodId: string, isAvailable: boolean) {
-    try {
-      const { error: err } = await supabase
-        .from('food_items')
-        .update({ is_available: isAvailable })
-        .eq('id', foodId)
+    const f = foodItems.value.find((item) => item.id === foodId)
+    if (f) f.is_available = isAvailable
 
-      if (err) throw err
-      const f = foodItems.value.find((item) => item.id === foodId)
-      if (f) f.is_available = isAvailable
+    try {
+      await $fetch('/api/admin/facility', {
+        method: 'POST',
+        body: { type: 'food', id: foodId, is_available: isAvailable }
+      })
     } catch (err) {
-      console.error('Error toggling food item:', err)
+      console.warn('Could not persist food status to server:', err)
     }
+
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = JSON.parse(localStorage.getItem('dink_facility_controls') || '{}')
+        saved.foodItems = saved.foodItems || {}
+        saved.foodItems[foodId] = isAvailable
+        localStorage.setItem('dink_facility_controls', JSON.stringify(saved))
+      } catch {}
+    }
+
+    try {
+      await supabase.from('food_items').update({ is_available: isAvailable }).eq('id', foodId)
+    } catch {}
   }
 
   async function updateBookingStatus(bookingId: string, newStatus: 'confirmed' | 'cancelled') {

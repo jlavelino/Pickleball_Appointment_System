@@ -1,28 +1,44 @@
 <template>
   <div
     class="food-card transition-all duration-200"
-    :class="quantity > 0 ? 'food-card--active' : ''"
+    :class="[
+      quantity > 0 ? 'food-card--active' : '',
+      isOutOfStock ? 'food-card--out-of-stock' : ''
+    ]"
   >
     <div class="flex items-center gap-3.5">
 
       <!-- Context-aware MDI icon swatch -->
-      <div class="food-icon-box shrink-0" :style="{ background: iconBg, borderColor: iconBorder }">
-        <span class="mdi text-[22px]" :class="mdiIcon" :style="{ color: iconColor }"></span>
+      <div class="food-icon-box shrink-0" :style="{ background: isOutOfStock ? '#F3F4F6' : iconBg, borderColor: isOutOfStock ? '#E5E7EB' : iconBorder }">
+        <span class="mdi text-[22px]" :class="mdiIcon" :style="{ color: isOutOfStock ? '#9CA3AF' : iconColor }"></span>
       </div>
 
       <!-- Food name + price -->
       <div class="flex-1 min-w-0">
-        <div class="font-display font-bold text-[15.5px] text-ink truncate">
-          {{ food.name }}
+        <div class="flex items-center gap-2">
+          <span class="font-display font-bold text-[15.5px] text-ink truncate" :class="{ 'text-ink-soft/70': isOutOfStock }">
+            {{ food.name }}
+          </span>
+          <span
+            v-if="isOutOfStock"
+            class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 shrink-0"
+          >
+            Out of Stock
+          </span>
         </div>
-        <div class="text-[13px] font-bold text-ink mt-0.5">
+        <div class="text-[13px] font-bold text-ink mt-0.5" :class="{ 'text-ink-soft/60': isOutOfStock }">
           ₱{{ food.price }}
           <span class="text-[11.5px] font-normal text-ink-soft">each</span>
         </div>
       </div>
 
-      <!-- Quantity stepper -->
-      <div class="flex items-center gap-2.5 shrink-0">
+      <!-- Quantity stepper or Out of Stock indicator -->
+      <div v-if="isOutOfStock" class="shrink-0">
+        <span class="text-[11.5px] font-bold text-amber-900/80 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-xl">
+          Unavailable
+        </span>
+      </div>
+      <div v-else class="flex items-center gap-2.5 shrink-0">
         <button
           type="button"
           :disabled="quantity <= 0"
@@ -50,7 +66,7 @@
     </div>
 
     <!-- Subtotal strip when selected -->
-    <div v-if="quantity > 0" class="flex items-center justify-between mt-2.5 pt-2 border-t border-line/60 text-[11.5px] font-medium text-ink-soft">
+    <div v-if="quantity > 0 && !isOutOfStock" class="flex items-center justify-between mt-2.5 pt-2 border-t border-line/60 text-[11.5px] font-medium text-ink-soft">
       <span>Court-side served</span>
       <span class="font-bold text-ink text-[12.5px]">
         ₱{{ (food.price * quantity).toLocaleString() }}
@@ -67,6 +83,8 @@ const props = defineProps<{
   food: FoodItem
   quantity: number
 }>()
+
+const isOutOfStock = computed(() => props.food.is_available === false)
 
 defineEmits<{
   step: [dir: number]
@@ -173,6 +191,13 @@ const mdiIcon = computed(() => {
   border-color: var(--ink, #223318);
   background: linear-gradient(180deg, #FFFFFF 0%, #F8FAF0 100%);
   box-shadow: 0 4px 12px -4px rgba(34, 51, 24, 0.12), 0 0 0 1px var(--ink, #223318);
+}
+
+.food-card--out-of-stock {
+  opacity: 0.65;
+  background: #FAF8F5;
+  border-color: #E8E5DA;
+  cursor: not-allowed;
 }
 
 .food-icon-box {
