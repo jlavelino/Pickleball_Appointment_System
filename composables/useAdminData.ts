@@ -76,6 +76,18 @@ export function useAdminData() {
   const bookings = ref<AdminBooking[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const idPhotoMap = ref<Record<string, string>>({})
+
+  async function fetchIdPhotoMap(): Promise<Record<string, string>> {
+    try {
+      const res = await $fetch<{ success: boolean; data: Record<string, string> }>('/api/admin/id-photos')
+      if (res?.data) {
+        idPhotoMap.value = res.data
+        return res.data
+      }
+    } catch {}
+    return {}
+  }
 
   // Local storage check-in tracker
   function getCheckedInMap(): Record<string, string> {
@@ -133,7 +145,7 @@ export function useAdminData() {
       guest_name: guestName,
       guest_mobile: firstGuest.mobile || '',
       guest_facebook: firstGuest.facebook_account || '',
-      id_photo_url: firstGuest.id_photo_url || '',
+      id_photo_url: idPhotoMap.value[b.id] || idPhotoMap.value[b.reference] || firstGuest.id_photo_url || '',
       court_names: courtNames,
       court_ids: courtIds,
       court_rentals: courtList.map((c: any) => ({
@@ -269,6 +281,8 @@ export function useAdminData() {
     error.value = null
 
     try {
+      await fetchIdPhotoMap()
+
       let query = supabase
         .from('bookings')
         .select(`
@@ -310,6 +324,7 @@ export function useAdminData() {
 
   async function getBookingByReference(refStr: string): Promise<AdminBooking | null> {
     try {
+      await fetchIdPhotoMap()
       const cleanRef = refStr.trim().replace(/^.*ref=/i, '')
       const { data, error: err } = await supabase
         .from('bookings')

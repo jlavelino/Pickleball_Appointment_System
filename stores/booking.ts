@@ -716,6 +716,30 @@ export const useBookingStore = defineStore('booking', {
         this.createdBookingId = bookingId
         this.bookingRef = ref
 
+        // Upload attached ID photo to server if present
+        if (this.idPhotoFile && typeof window !== 'undefined') {
+          try {
+            const base64 = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader()
+              reader.onload = () => resolve(reader.result as string)
+              reader.onerror = reject
+              reader.readAsDataURL(this.idPhotoFile!)
+            })
+
+            await $fetch('/api/booking/upload-id', {
+              method: 'POST',
+              body: {
+                bookingId,
+                bookingRef: ref,
+                photoBase64: base64,
+                filename: this.idPhotoName || 'id_photo.jpg',
+              }
+            })
+          } catch (uploadErr) {
+            console.warn('[Booking] Could not upload ID photo:', uploadErr)
+          }
+        }
+
         return { bookingId, bookingRef: ref }
       } finally {
         this.isSubmittingBooking = false
