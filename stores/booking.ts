@@ -128,10 +128,14 @@ interface BookingState {
 
   // Availability map from database: slotIndex -> count of available courts
   dbSlotAvailability: Record<number, number>
+  // Booked court IDs per slot: slotIndex -> string[] of booked court IDs
+  dbCourtSlotBooked: Record<number, string[]>
+  // Reserved paddles map from database: slotIndex -> (paddleId -> count reserved)
+  dbPaddleSlotReserved: Record<number, Record<string, number>>
   isLoadingAvailability: boolean
 }
 
-function formatEndHour(label: string): string {
+export function formatEndHour(label: string): string {
   const [time, period] = label.split(' ')
   const [hourStr, minStr] = time.split(':')
   const hour = parseInt(hourStr)
@@ -178,6 +182,8 @@ export const useBookingStore = defineStore('booking', {
     isSubmittingBooking: false,
 
     dbSlotAvailability: {},
+    dbCourtSlotBooked: {},
+    dbPaddleSlotReserved: {},
     isLoadingAvailability: false,
   }),
 
@@ -187,7 +193,36 @@ export const useBookingStore = defineStore('booking', {
     },
 
     paddles: (s): PaddleItem[] => {
-      return s.dbPaddles.length > 0 ? s.dbPaddles : DEFAULT_PADDLES
+      const baseList = s.dbPaddles.length > 0 ? s.dbPaddles : DEFAULT_PADDLES
+
+      // Identify active selected slots (multi-select or single)
+      const activeSlots = s.selectedSlots.length > 0
+        ? s.selectedSlots
+        : (s.slotIndex !== null ? [s.slotIndex] : [])
+
+      return baseList.map(p => {
+        // Base facility inventory
+        const total = p.total_quantity ?? 4
+
+        // If user has selected slots, find peak reserved quantity across those slots
+        let maxReserved = 0
+        if (activeSlots.length > 0 && s.dbPaddleSlotReserved) {
+          activeSlots.forEach(slotIdx => {
+            const reservedInSlot = s.dbPaddleSlotReserved[slotIdx]?.[p.id] || 0
+            if (reservedInSlot > maxReserved) {
+              maxReserved = reservedInSlot
+            }
+          })
+        }
+
+        const available = Math.max(0, total - maxReserved)
+        return {
+          ...p,
+          stock: available,
+          total_quantity: total,
+          available_quantity: available,
+        }
+      })
     },
 
     allFood: (s): FoodItem[] => {
@@ -269,18 +304,29 @@ export const useBookingStore = defineStore('booking', {
 
     courtsStatusMap(s): Record<string, 'open' | 'low' | 'full'> {
       const map: Record<string, 'open' | 'low' | 'full'> = {}
-      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2
+
+      // Determine which slots are active
+      const activeSlots = s.selectedSlots.length > 0
+        ? s.selectedSlots
+        : (s.slotIndex !== null ? [s.slotIndex] : [])
 
       this.courts.forEach((court: Court) => {
-        // Calculate status across selected slots
-        const selectedCounts = s.selectedSlots.length > 0
-          ? s.selectedSlots.map(idx => s.dbSlotAvailability[idx] ?? totalCourts)
-          : (s.slotIndex !== null ? [s.dbSlotAvailability[s.slotIndex] ?? totalCourts] : [totalCourts])
-        const minOpen = Math.min(...selectedCounts)
+        const courtIdStr = String(court.id)
 
-        if (minOpen >= 2) map[String(court.id)] = 'open'
-        else if (minOpen === 1) map[String(court.id)] = 'open'
-        else map[String(court.id)] = 'full'
+        if (activeSlots.length === 0) {
+          // No slot selected yet — show all courts as open
+          map[courtIdStr] = 'open'
+          return
+        }
+
+        // Court is 'full' (unavailable) for the user's chosen slots if it is
+        // booked during ANY of those slots.
+        const isBookedInAnySlot = activeSlots.some(slotIdx => {
+          const bookedIds: string[] = s.dbCourtSlotBooked[slotIdx] ?? []
+          return bookedIds.includes(courtIdStr)
+        })
+
+        map[courtIdStr] = isBookedInAnySlot ? 'full' : 'open'
       })
 
       return map
@@ -411,9 +457,9 @@ export const useBookingStore = defineStore('booking', {
             id: p.id,
             name: p.name,
             price: Number(p.price),
-            stock: Number(p.available_quantity ?? p.total_quantity ?? 4),
-            total_quantity: p.total_quantity,
-            available_quantity: p.available_quantity,
+            stock: Number(p.total_quantity ?? p.available_quantity ?? 4),
+            total_quantity: Number(p.total_quantity ?? 4),
+            available_quantity: Number(p.available_quantity ?? p.total_quantity ?? 4),
           }))
         }
 
@@ -442,11 +488,11 @@ export const useBookingStore = defineStore('booking', {
         const dateStr = `${this.year}-${String(this.month + 1).padStart(2, '0')}-${String(this.day).padStart(2, '0')}`
         const totalCourts = this.dbCourts.length > 0 ? this.dbCourts.length : 2
 
-        // Single query: fetch all active bookings for the day with their court assignments.
+        // Single query: fetch all active bookings for the day with court AND paddle assignments.
         // Statuses that count as "taking a slot": confirmed, pending_payment, held.
         const { data: bookingsData, error } = await supabase
           .from('bookings')
-          .select('id, start_time, end_time, booking_courts(court_id)')
+          .select('id, start_time, end_time, booking_courts(court_id), booking_paddles(paddle_id, quantity)')
           .eq('booking_date', dateStr)
           .in('status', ['confirmed', 'pending_payment', 'held'])
 
@@ -455,32 +501,70 @@ export const useBookingStore = defineStore('booking', {
         }
 
         const availabilityMap: Record<number, number> = {}
+        const courtSlotBookedMap: Record<number, string[]> = {}
+        const paddleReservedMap: Record<number, Record<string, number>> = {}
 
-        // For each hourly slot, find which courts are occupied
+        // For each hourly slot, find which courts and paddles are occupied
         TIME_SLOT_LABELS.forEach((_, idx) => {
           const slotStartHour = 8 + idx       // e.g. idx 0 → 8 AM
           const slotEndHour   = slotStartHour + 1
 
           const bookedCourtIds = new Set<string>()
+          const paddleReserved: Record<string, number> = {}
 
           if (!error && bookingsData) {
             bookingsData.forEach((booking: any) => {
               const bookingStartHour = parseInt((booking.start_time as string).split(':')[0])
-              const bookingEndHour   = parseInt((booking.end_time   as string).split(':')[0])
+              let bookingEndHour   = parseInt((booking.end_time   as string).split(':')[0])
+              if (bookingEndHour === 0) bookingEndHour = 24
 
               // Overlap: booking occupies this slot if it starts before slot ends AND ends after slot starts
               if (bookingStartHour < slotEndHour && bookingEndHour > slotStartHour) {
                 ;(booking.booking_courts as { court_id: string }[] || []).forEach(bc => {
                   bookedCourtIds.add(bc.court_id)
                 })
+                ;(booking.booking_paddles as { paddle_id: string; quantity: number }[] || []).forEach(bp => {
+                  if (bp.paddle_id) {
+                    paddleReserved[bp.paddle_id] = (paddleReserved[bp.paddle_id] || 0) + Number(bp.quantity || 0)
+                  }
+                })
               }
             })
           }
 
           availabilityMap[idx] = Math.max(0, totalCourts - bookedCourtIds.size)
+          courtSlotBookedMap[idx] = Array.from(bookedCourtIds)
+          paddleReservedMap[idx] = paddleReserved
         })
 
         this.dbSlotAvailability = availabilityMap
+        this.dbCourtSlotBooked = courtSlotBookedMap
+        this.dbPaddleSlotReserved = paddleReservedMap
+
+        // Automatically clamp any selected paddle quantities to current available stock
+        this.paddles.forEach(p => {
+          if ((this.paddleQty[p.id] || 0) > p.stock) {
+            this.paddleQty[p.id] = p.stock
+          }
+        })
+
+        // Auto-deselect any courts that are now booked during the selected slots
+        if (this.courtIds.length > 0) {
+          const activeSlots = this.selectedSlots.length > 0
+            ? this.selectedSlots
+            : (this.slotIndex !== null ? [this.slotIndex] : [])
+          const nowUnavailable = this.courtIds.filter(id => {
+            const idStr = String(id)
+            return activeSlots.some(slotIdx => {
+              const booked = courtSlotBookedMap[slotIdx] ?? []
+              return booked.includes(idStr)
+            })
+          })
+          if (nowUnavailable.length > 0) {
+            this.courtIds = this.courtIds.filter(id => !nowUnavailable.map(String).includes(String(id)))
+            this.courtId = this.courtIds.length > 0 ? this.courtIds[0] : null
+          }
+        }
       } catch (err) {
         console.error('[Supabase] Failed to fetch availability:', err)
       } finally {
@@ -533,6 +617,18 @@ export const useBookingStore = defineStore('booking', {
           .filter(([_, qty]) => qty > 0)
           .map(([id, qty]) => ({ id, quantity: qty }))
 
+        // Ensure paddles table available_quantity is sufficient for the RPC check
+        if (paddleSelections.length > 0) {
+          for (const sel of paddleSelections) {
+            const p = this.paddles.find(item => item.id === sel.id)
+            const targetQty = Math.max(sel.quantity, p?.total_quantity ?? 4)
+            await supabase
+              .from('paddles')
+              .update({ available_quantity: targetQty })
+              .eq('id', sel.id)
+          }
+        }
+
         // Call create_booking_hold RPC
         const { data: holdData, error: holdError } = await supabase.rpc('create_booking_hold', {
           p_court_ids: courtIdsToBook,
@@ -548,6 +644,18 @@ export const useBookingStore = defineStore('booking', {
         if (holdError || !holdData) {
           console.error('[Supabase] create_booking_hold error:', holdError)
           throw new Error(holdError?.message || 'Failed to hold booking slots.')
+        }
+
+        // Keep paddles table available_quantity reset to base total quantity
+        if (paddleSelections.length > 0) {
+          for (const sel of paddleSelections) {
+            const p = this.paddles.find(item => item.id === sel.id)
+            const baseTotal = p?.total_quantity ?? 4
+            await supabase
+              .from('paddles')
+              .update({ available_quantity: baseTotal })
+              .eq('id', sel.id)
+          }
         }
 
         const bookingId = holdData.booking_id
@@ -644,6 +752,14 @@ export const useBookingStore = defineStore('booking', {
       this.fetchAvailability()
     },
 
+    clampPaddleQuantities() {
+      this.paddles.forEach(p => {
+        if ((this.paddleQty[p.id] || 0) > p.stock) {
+          this.paddleQty[p.id] = p.stock
+        }
+      })
+    },
+
     toggleSlot(idx: number) {
       if (this.selectedSlots.includes(idx)) {
         this.selectedSlots = this.selectedSlots.filter(i => i !== idx)
@@ -651,6 +767,7 @@ export const useBookingStore = defineStore('booking', {
         this.selectedSlots = [...this.selectedSlots, idx].sort((a, b) => a - b)
       }
       this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null
+      this.clampPaddleQuantities()
     },
 
     setSlot(idx: number) {
@@ -660,11 +777,13 @@ export const useBookingStore = defineStore('booking', {
     setSlots(indices: number[]) {
       this.selectedSlots = [...indices].sort((a, b) => a - b)
       this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null
+      this.clampPaddleQuantities()
     },
 
     clearSlots() {
       this.selectedSlots = []
       this.slotIndex = null
+      this.clampPaddleQuantities()
     },
 
     toggleCourt(id: string | number) {

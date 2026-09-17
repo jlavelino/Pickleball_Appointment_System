@@ -29,7 +29,7 @@
         </div>
 
         <NuxtLink
-          to="/"
+          to="/book"
           class="shrink-0 text-[11.5px] font-bold text-relish-dark hover:text-ink px-2.5 py-1 rounded-lg bg-sold/60 hover:bg-sold transition-colors"
         >
           Change

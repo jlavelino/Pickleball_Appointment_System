@@ -90,7 +90,7 @@
                       class="mdi mdi-check text-[14px] text-cream leading-none"
                     ></span>
                   </div>
-                  <span class="slot-label">{{ s.label }}</span>
+                  <span class="slot-label">{{ s.label }} – {{ formatEndHour(s.label) }}</span>
                 </div>
 
                 <span
@@ -128,7 +128,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from 'vue'
-import { useBookingStore } from '~/stores/booking'
+import { useBookingStore, formatEndHour } from '~/stores/booking'
 
 const props = defineProps<{
   show: boolean

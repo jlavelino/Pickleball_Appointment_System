@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 import PaddleStepper from '~/components/booking/PaddleStepper.vue'
 import BottomCTA from '~/components/ui/BottomCta.vue'
@@ -61,6 +61,10 @@ const store = useBookingStore()
 if (store.courtId === null && store.courtIds.length === 0) {
   navigateTo('/book/court')
 }
+
+onMounted(() => {
+  store.fetchAvailability()
+})
 
 const continueLabel = computed(() => {
   if (store.paddleCount > 0) {

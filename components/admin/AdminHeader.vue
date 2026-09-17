@@ -30,7 +30,7 @@
           <span class="mdi mdi-chevron-left text-[20px]"></span>
         </button>
 
-        <span class="text-[13px] font-semibold px-2 text-lime font-mono">
+        <span class="text-[13px] font-semibold px-2 text-lime tracking-tight">
           {{ selectedDateLabel }}
         </span>
 
@@ -99,7 +99,7 @@
         >
           <span class="mdi mdi-chevron-left text-[18px]"></span>
         </button>
-        <span class="font-semibold text-lime font-mono">{{ selectedDateLabel }}</span>
+        <span class="font-semibold text-lime">{{ selectedDateLabel }}</span>
         <button
           type="button"
           class="p-1 text-white/70 hover:text-white"

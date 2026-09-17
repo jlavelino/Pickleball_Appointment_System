@@ -49,10 +49,10 @@
           <div
             v-for="court in courtHeaders"
             :key="court.id"
-            class="p-2 rounded-xl bg-sold/60 border border-line/60 flex items-center justify-center gap-1.5"
+            class="p-2 rounded-xl bg-lime-soft/60 border border-lime/20 flex items-center justify-center gap-1.5"
           >
-            <span class="font-display">{{ court.name }}</span>
-            <span class="text-[10px] uppercase font-bold text-relish-dark px-1.5 py-0.5 rounded bg-white/70">
+            <span class="font-display font-bold text-ink">{{ court.name }}</span>
+            <span class="text-[10px] uppercase font-bold text-lime-text px-1.5 py-0.5 rounded bg-white/70 border border-lime/20">
               {{ court.type.includes('covered') ? 'Covered' : 'Indoor' }}
             </span>
           </div>
@@ -67,8 +67,9 @@
             :style="gridColumnsStyle"
           >
             <!-- Time label -->
-            <div class="text-left font-mono text-[11.5px] text-ink-soft pl-1 font-semibold">
-              {{ hour.label }}
+            <div class="text-left font-mono text-[11px] text-ink-soft pl-1 leading-tight">
+              <div class="font-bold text-ink">{{ hour.label }}</div>
+              <div class="text-[9px] text-ink-soft/70">to {{ hour.endLabel }}</div>
             </div>
 
             <!-- Court Slots (Dynamically matches courts from database) -->
@@ -105,16 +106,21 @@
 
                 <div class="flex items-center justify-between text-[10px] text-ink-soft/90 font-mono mt-0.5">
                   <span class="truncate">{{ getBookingForSlot(court.id, hour.startStr)!.reference }}</span>
-                  <span v-if="getBookingForSlot(court.id, hour.startStr)!.paddles.length" class="mdi mdi-racquetball text-[11px] text-relish-dark" title="Paddles rented"></span>
+                  <div class="flex items-center gap-1 shrink-0">
+                    <span class="text-[9px] font-sans font-bold text-relish-dark/90 bg-black/5 px-1 py-0.2 rounded">
+                      {{ formatBookingTimeSpan(getBookingForSlot(court.id, hour.startStr)!) }}
+                    </span>
+                    <span v-if="getBookingForSlot(court.id, hour.startStr)!.paddles.length" class="mdi mdi-racquetball text-[11px] text-relish-dark" title="Paddles rented"></span>
+                  </div>
                 </div>
               </div>
 
               <!-- Available / Open slot -->
               <div
                 v-else
-                class="w-full h-full flex items-center justify-center text-ink-soft/40 hover:text-relish-dark hover:bg-sold/30 transition-colors text-[11px] font-medium"
+                class="w-full h-full flex items-center justify-center transition-all duration-150 text-[11px] font-medium border-2 border-dashed rounded-xl border-transparent text-ink-soft/30 hover:text-lime-text hover:border-lime/40 hover:bg-lime-soft/30"
               >
-                <span>Available</span>
+                <span>Open</span>
               </div>
             </div>
           </div>
@@ -172,10 +178,21 @@ const hours = computed(() => {
       startStr,
       hourNum: h,
       label: formatHour(h),
+      endLabel: formatHour(nextH),
     })
   }
   return list
 })
+
+function formatBookingTimeSpan(b: AdminBooking): string {
+  const formatH = (tStr: string) => {
+    const h = parseInt(tStr.split(':')[0])
+    const ampm = h >= 12 && h < 24 ? 'PM' : 'AM'
+    const displayH = h > 12 ? h - 12 : h === 0 ? 12 : h
+    return `${displayH}${ampm}`
+  }
+  return `${formatH(b.start_time)}–${formatH(b.end_time)}`
+}
 
 function getBookingForSlot(courtId: string, startStr: string): AdminBooking | undefined {
   const courtObj = props.courts.find((c) => c.id === courtId)

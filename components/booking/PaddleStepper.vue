@@ -23,9 +23,10 @@
           </span>
           <span
             v-if="paddle.stock <= 4"
-            class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded-full leading-none"
+            class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none"
+            :class="paddle.stock === 0 ? 'text-red-700 bg-red-100 border border-red-200' : 'text-amber-700 bg-amber-100 border border-amber-200'"
           >
-            {{ paddle.stock }} left
+            {{ paddle.stock === 0 ? '0 left (In use)' : `${paddle.stock} left` }}
           </span>
         </div>
 

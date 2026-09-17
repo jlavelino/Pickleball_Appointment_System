@@ -11,7 +11,7 @@
         Staff Gate Access
       </h1>
       <p class="text-[13px] text-ink-soft mt-1 mb-6">
-        Enter 4-digit security PIN to access DINK Admin & Gate Controls
+        Enter your 4-digit security PIN to continue
       </p>
 
       <!-- 4-Dot PIN Indicator -->
@@ -19,18 +19,17 @@
         <div
           v-for="i in 4"
           :key="i"
-          class="w-4 h-4 rounded-full border-2 transition-all duration-200"
-          :class="pin.length >= i ? 'bg-relish-dark border-relish-dark scale-110' : 'bg-sold/50 border-line'"
+          class="w-4 h-4 rounded-full border-2 transition-all duration-150"
+          :class="pin.length >= i ? 'bg-ink border-ink scale-110 shadow-sm' : 'bg-sold/50 border-line'"
         ></div>
       </div>
 
       <!-- Error message -->
-      <div v-if="hasError" class="text-[12px] font-bold text-red-600 mb-3 animate-fade-in">
-        Invalid PIN. Please try again.
+      <div v-if="hasError" class="text-[12px] font-bold text-red-600 mb-3 animate-fade-in flex items-center justify-center gap-1">
+        <span class="mdi mdi-alert-circle-outline text-[14px]"></span>
+        Incorrect PIN. Please try again.
       </div>
-      <div v-else class="text-[11.5px] text-ink-soft mb-3">
-        Default Staff PIN: <strong class="text-ink font-mono">2026</strong>
-      </div>
+      <div v-else class="text-[11.5px] text-ink-soft mb-3">&nbsp;</div>
 
       <!-- Numeric Keypad Grid -->
       <div class="grid grid-cols-3 gap-2.5 max-w-[280px] mx-auto mb-2">

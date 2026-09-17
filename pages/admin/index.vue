@@ -25,59 +25,82 @@
       <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         <!-- Quick KPI Stats Cards -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <!-- Total Day Revenue -->
-          <div class="p-4 rounded-2xl bg-white border border-line shadow-xs">
-            <div class="flex items-center justify-between text-ink-soft mb-1">
-              <span class="text-[11.5px] font-bold uppercase tracking-wider">Day Revenue</span>
-              <span class="mdi mdi-cash text-[18px] text-relish-dark"></span>
+
+          <!-- 1. Total Day Revenue — Accent fill: primary action metric -->
+          <div class="p-4 rounded-2xl bg-[#1E3314] border border-[#2D4D1E] shadow-sm flex flex-col justify-between col-span-1">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10.5px] font-bold uppercase tracking-widest text-lime/80">Day Revenue</span>
+              <span class="mdi mdi-cash text-[16px] text-lime"></span>
             </div>
-            <div class="font-display font-extrabold text-[22px] sm:text-[24px] text-ink leading-tight">
+            <div class="font-display font-extrabold text-[26px] sm:text-[28px] text-white leading-none">
               ₱{{ dayRevenue.toLocaleString() }}
             </div>
-            <div class="text-[11.5px] text-ink-soft mt-1 font-medium">
-              From {{ dayConfirmedCount }} paid bookings
+            <div class="text-[11px] text-white/50 mt-2 font-medium">
+              {{ dayConfirmedCount }} paid booking{{ dayConfirmedCount !== 1 ? 's' : '' }}
             </div>
           </div>
 
-          <!-- Total Bookings -->
-          <div class="p-4 rounded-2xl bg-white border border-line shadow-xs">
-            <div class="flex items-center justify-between text-ink-soft mb-1">
-              <span class="text-[11.5px] font-bold uppercase tracking-wider">Bookings</span>
-              <span class="mdi mdi-calendar-check text-[18px] text-relish-dark"></span>
+          <!-- 2. Total Bookings — Neutral white: informational -->
+          <div class="p-4 rounded-2xl bg-white border border-line shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10.5px] font-bold uppercase tracking-widest text-ink-soft">Bookings</span>
+              <span class="mdi mdi-calendar-check text-[16px] text-relish-dark"></span>
             </div>
-            <div class="font-display font-extrabold text-[22px] sm:text-[24px] text-ink leading-tight">
+            <div class="font-display font-extrabold text-[26px] sm:text-[28px] text-ink leading-none">
               {{ dayBookings.length }}
             </div>
-            <div class="text-[11.5px] text-ink-soft mt-1 font-medium">
-              {{ dayConfirmedCount }} confirmed · {{ dayPendingCount }} pending
+            <div class="flex items-center gap-1.5 mt-2">
+              <span class="inline-flex items-center gap-1 text-[10.5px] font-bold px-1.5 py-0.5 rounded-md bg-lime-soft text-lime-text border border-lime/30">
+                <span class="w-1 h-1 rounded-full bg-lime-text inline-block"></span>
+                {{ dayConfirmedCount }} paid
+              </span>
+              <span v-if="dayPendingCount > 0" class="text-[10.5px] font-medium text-relish-dark">
+                {{ dayPendingCount }} hold
+              </span>
             </div>
           </div>
 
-          <!-- Checked In Players -->
-          <div class="p-4 rounded-2xl bg-white border border-line shadow-xs">
-            <div class="flex items-center justify-between text-ink-soft mb-1">
-              <span class="text-[11.5px] font-bold uppercase tracking-wider">Gate Check-Ins</span>
-              <span class="mdi mdi-account-check text-[18px] text-emerald-600"></span>
+          <!-- 3. Gate Check-Ins — Warm cream: operational / arrival tracking -->
+          <div class="p-4 rounded-2xl bg-sold border border-[#E8CEA0] shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10.5px] font-bold uppercase tracking-widest text-sold-text/80">Gate Check-Ins</span>
+              <span class="mdi mdi-account-check text-[16px] text-sold-text"></span>
             </div>
-            <div class="font-display font-extrabold text-[22px] sm:text-[24px] text-emerald-800 leading-tight">
+            <div class="font-display font-extrabold text-[26px] sm:text-[28px] text-ink leading-none">
               {{ dayCheckedInCount }}
             </div>
-            <div class="text-[11.5px] text-ink-soft mt-1 font-medium">
-              {{ dayCheckedInCount }} of {{ dayConfirmedCount }} arrived
+            <!-- Arrival progress bar -->
+            <div class="mt-2">
+              <div class="h-1 rounded-full bg-black/10 overflow-hidden">
+                <div
+                  class="h-full rounded-full bg-relish-dark transition-all duration-500"
+                  :style="{ width: dayConfirmedCount > 0 ? (dayCheckedInCount / dayConfirmedCount * 100) + '%' : '0%' }"
+                ></div>
+              </div>
+              <div class="text-[10.5px] text-ink-soft mt-1 font-medium">
+                {{ dayCheckedInCount }} of {{ dayConfirmedCount }} arrived
+              </div>
             </div>
           </div>
 
-          <!-- Active Courts -->
-          <div class="p-4 rounded-2xl bg-white border border-line shadow-xs">
-            <div class="flex items-center justify-between text-ink-soft mb-1">
-              <span class="text-[11.5px] font-bold uppercase tracking-wider">Active Courts</span>
-              <span class="mdi mdi-court text-[18px] text-relish-dark"></span>
+          <!-- 4. Active Courts — Clean white: facility status -->
+          <div class="p-4 rounded-2xl bg-white border border-line shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10.5px] font-bold uppercase tracking-widest text-ink-soft">Active Courts</span>
+              <span class="mdi mdi-court text-[16px] text-relish-dark"></span>
             </div>
-            <div class="font-display font-extrabold text-[22px] sm:text-[24px] text-ink leading-tight">
-              {{ activeCourtsCount }} / {{ data.courts.value.length || 2 }}
+            <div class="font-display font-extrabold text-[26px] sm:text-[28px] text-ink leading-none">
+              {{ activeCourtsCount }}<span class="text-[16px] font-sans font-semibold text-ink-soft ml-0.5">/ {{ data.courts.value.length || 2 }}</span>
             </div>
-            <div class="text-[11.5px] text-ink-soft mt-1 font-medium">
-              Available for play today
+            <!-- Court status dots -->
+            <div class="flex items-center gap-1.5 mt-2">
+              <span
+                v-for="(court, idx) in (data.courts.value.length > 0 ? data.courts.value : [{status:'active'},{status:'active'}])"
+                :key="'id' in court ? court.id : idx"
+                class="w-2 h-2 rounded-full transition-colors"
+                :class="court.status === 'active' ? 'bg-lime' : 'bg-relish'"
+              ></span>
+              <span class="text-[10.5px] text-ink-soft font-medium ml-0.5">open today</span>
             </div>
           </div>
         </div>
@@ -145,13 +168,19 @@
       />
 
       <!-- Notification Toast -->
-      <div
-        v-if="notification"
-        class="fixed bottom-6 right-6 z-60 px-4 py-3 rounded-2xl bg-[#1E3314] text-white border border-[#38591A] shadow-xl text-[13px] font-bold flex items-center gap-2 animate-fade-in"
+      <Transition
+        enter-active-class="transition-none"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-to-class="opacity-0 translate-y-2"
       >
-        <span class="mdi mdi-information-outline text-lime text-[18px]"></span>
-        <span>{{ notification }}</span>
-      </div>
+        <div
+          v-if="notification"
+          class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl bg-[#1E3314] text-white border border-[#38591A] shadow-2xl text-[13px] font-bold flex items-center gap-2.5 animate-slide-up-in"
+        >
+          <span class="mdi mdi-check-circle-outline text-lime text-[18px] shrink-0"></span>
+          <span>{{ notification }}</span>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
