@@ -3,18 +3,20 @@
     class="court-card group transition-all duration-200"
     :class="[
       isSelected ? 'court-card--selected' : '',
-      isFull ? 'court-card--full' : 'hover:border-ink/40'
+      isMaintenance ? 'court-card--maintenance' : isFull ? 'court-card--full' : ''
     ]"
     @click="!isFull && $emit('select', court.id)"
   >
-    <!-- Top badge bar -->
+    <!-- Top Row: Court number badge + INDOOR + Availability badge -->
     <div class="flex items-center justify-between gap-2 mb-3">
-      <div class="flex items-center gap-2">
-        <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-ink text-cream text-[11px] font-bold font-mono tracking-tight">
-          {{ courtIndex != null ? String(courtIndex + 1).padStart(2, '0') : 'CT' }}
+      <div class="flex items-center gap-2.5">
+        <!-- Dark forest green rounded square badge (32-36px) -->
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#14231C] text-white text-[12px] font-bold font-mono tracking-tight shrink-0 shadow-xs">
+          {{ courtIndex != null ? String(courtIndex + 1).padStart(2, '0') : '01' }}
         </span>
-        <span class="text-[11px] font-bold uppercase tracking-wider text-ink-soft">
-          {{ court.type || 'Championship Court' }}
+        <!-- Indoor label in muted green-gray small uppercase -->
+        <span class="text-[11.5px] font-bold uppercase tracking-wider text-[#66756D]">
+          {{ court.type ? court.type.toUpperCase() : 'INDOOR' }}
         </span>
       </div>
 
@@ -25,60 +27,47 @@
       </span>
     </div>
 
-    <!-- Court Title & Amenities -->
-    <div class="mb-3">
-      <div class="font-display font-bold text-[20px] text-ink leading-tight flex items-center justify-between">
-        <span>{{ court.name }}</span>
-        <div class="text-right">
-          <span class="font-display font-extrabold text-[20px] text-ink">₱{{ court.price }}</span>
-          <span class="text-[12px] font-medium text-ink-soft">/hr</span>
-        </div>
+    <!-- Middle Row: Court Name & Price (Dark forest green #0B6623) -->
+    <div class="flex items-baseline justify-between mb-2">
+      <div class="font-display font-bold text-[24px] text-[#14231C] leading-tight">
+        {{ court.name }}
       </div>
-
-      <!-- Multi-hour calculation subtitle -->
-      <div v-if="hours && hours > 1" class="text-right text-[12px] font-semibold text-relish-dark mt-0.5">
-        ₱{{ (court.price * hours).toLocaleString() }} for {{ hours }} hours
-      </div>
-
-      <!-- Facility highlights / amenities -->
-      <div class="flex flex-wrap items-center gap-1.5 mt-2.5">
-        <span class="amenity-tag">
-          <span class="mdi mdi-check text-[11px] text-relish-dark"></span>
-          Pro Acrylic
-        </span>
-        <span class="amenity-tag">
-          <span class="mdi mdi-check text-[11px] text-relish-dark"></span>
-          Tournament Net
-        </span>
-        <span class="amenity-tag">
-          <span class="mdi mdi-check text-[11px] text-relish-dark"></span>
-          Anti-Glare LED
-        </span>
+      <div class="text-right">
+        <span class="font-display font-bold text-[22px] text-[#0B6623]">₱{{ court.price }}</span>
+        <span class="text-[12px] font-medium text-[#66756D]">/hr</span>
       </div>
     </div>
 
-    <!-- Select Action Button -->
-    <button
-      type="button"
-      :disabled="isFull"
-      @click.stop="$emit('select', court.id)"
-      class="court-btn"
-      :class="[
-        isSelected ? 'court-btn--chosen' :
-        isFull ? 'court-btn--full' : 'court-btn--idle'
-      ]"
-    >
-      <template v-if="isSelected">
-        <span class="mdi mdi-check text-lime text-[17px] shrink-0"></span>
-        <span>Court Selected</span>
-      </template>
-      <template v-else-if="isFull">
-        <span>Unavailable</span>
-      </template>
-      <template v-else>
-        <span>Select Court</span>
-      </template>
-    </button>
+    <!-- Multi-hour calculation subtitle if user booked > 1 hour -->
+    <div v-if="hours && hours > 1" class="text-right text-[11.5px] font-bold text-[#0B6623] -mt-1 mb-2.5">
+      ₱{{ (court.price * hours).toLocaleString() }} for {{ hours }} hours
+    </div>
+
+
+
+    <!-- Court Image: 100% width with Selection Indicator in overlay/corner -->
+    <div class="relative w-full h-[104px] rounded-xl overflow-hidden border border-[#DCE6D8] bg-black/5">
+      <img
+        src="~/assets/images/court_preview.jpg"
+        alt="Pickleball Court Preview"
+        class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
+
+      <!-- Selection Indicator bottom-right of image / card -->
+      <div class="absolute bottom-2.5 right-2.5 shrink-0 flex items-center justify-center">
+        <div
+          v-if="isSelected"
+          class="w-7 h-7 rounded-full bg-[#0B6623] text-white flex items-center justify-center font-bold text-[14px] shadow-sm border border-white"
+        >
+          <span class="mdi mdi-check text-[16px] leading-none"></span>
+        </div>
+        <div
+          v-else
+          class="w-7 h-7 rounded-full border-2 border-white/80 bg-black/30 backdrop-blur-xs group-hover:border-white transition-colors"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -88,7 +77,7 @@ import type { Court } from '~/stores/booking'
 
 const props = defineProps<{
   court: Court
-  status: 'open' | 'low' | 'full'
+  status: 'open' | 'low' | 'full' | 'maintenance'
   isSelected: boolean
   hours?: number
   courtIndex?: number
@@ -98,70 +87,82 @@ defineEmits<{
   select: [id: string | number]
 }>()
 
-const isFull = computed(() => props.status === 'full')
+const isFull = computed(() => props.status === 'full' || props.status === 'maintenance')
+const isMaintenance = computed(() => props.status === 'maintenance')
 
 const badgeText = computed(() => {
+  if (props.status === 'maintenance') return 'Under Maintenance'
   if (props.status === 'open') return 'Available'
   if (props.status === 'low') return '1 slot left'
   return 'Reserved'
 })
 
 const badgeClass = computed(() => {
+  if (props.status === 'maintenance') return 'badge--maintenance'
   if (props.status === 'open') return 'badge--open'
   if (props.status === 'low') return 'badge--low'
   return 'badge--full'
 })
 
 const dotClass = computed(() => {
-  if (props.status === 'open') return 'bg-emerald-500'
-  if (props.status === 'low') return 'bg-amber-500'
-  return 'bg-gray-400'
+  if (props.status === 'maintenance') return 'bg-[#D98216]'
+  if (props.status === 'open') return 'bg-[#0B6623]'
+  if (props.status === 'low') return 'bg-[#D98216]'
+  return 'bg-[#8A938D]'
 })
 </script>
 
 <style scoped>
 .court-card {
   position: relative;
-  background: var(--cream-card, #FDFCF5);
-  border: 1.5px solid var(--line, #DDDDB8);
-  border-radius: 18px;
+  background: #FFFFFF;
+  border: 1px solid #DCE6D8;
+  border-radius: 20px;
   padding: 16px 18px;
   margin-bottom: 14px;
   cursor: pointer;
-  box-shadow: 0 2px 10px -4px rgba(34, 51, 24, 0.07);
+  box-shadow: 0 2px 10px -2px rgba(20, 35, 28, 0.04);
+  user-select: none;
+  transition: all 0.15s ease;
 }
 
+.court-card:hover:not(.court-card--full):not(.court-card--selected) {
+  border-color: #0B6623;
+  box-shadow: 0 4px 14px -2px rgba(11, 102, 35, 0.08);
+}
+
+/* Selected state: 2px forest green border + subtle green tint */
 .court-card--selected {
-  border-color: var(--ink, #223318);
-  background: linear-gradient(180deg, #FFFFFF 0%, #F5F7EA 100%);
-  box-shadow: 0 6px 20px -6px rgba(34, 51, 24, 0.18), 0 0 0 1px var(--ink, #223318);
+  border: 2px solid #0B6623 !important;
+  background: #F6FAF2 !important;
+  box-shadow: 0 4px 16px -2px rgba(11, 102, 35, 0.14) !important;
 }
 
 .court-card--full {
   opacity: 0.55;
   cursor: not-allowed;
-  background: var(--cream, #F5F1DE);
+  background: #FAF9F1;
 }
 
-.amenity-tag {
+.feature-pill {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--ink-soft);
-  background: rgba(34, 51, 24, 0.05);
+  color: #14231C;
+  background: #F2F7EC;
 }
 
 .status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-size: 11.5px;
   font-weight: 700;
-  padding: 3px 10px;
+  padding: 3px 9px;
   border-radius: 999px;
   letter-spacing: 0.02em;
 }
@@ -172,48 +173,14 @@ const dotClass = computed(() => {
   border-radius: 999px;
 }
 
-.badge--open { background: #EAF5E8; color: #1D6331; }
-.badge--low  { background: #FEF3D6; color: #9B5A03; }
-.badge--full { background: #EBEAE4; color: #737063; }
+.badge--open { background: #E8F4D8; color: #0B6623; }
+.badge--low  { background: #FEF3D6; color: #D98216; }
+.badge--full { background: #EAEFE7; color: #66756D; }
+.badge--maintenance { background: #FEF3D6; color: #D98216; border: 1px solid #FCD34D; }
 
-.court-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 11px 16px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  border: 1.5px solid transparent;
-  transition: all 0.15s ease-out;
-}
-
-.court-btn--idle {
-  background: transparent;
-  color: var(--ink, #223318);
-  border-color: var(--line, #DDDDB8);
-}
-.court-card:hover .court-btn--idle {
-  background: var(--ink, #223318);
-  color: var(--cream, #F5F1DE);
-  border-color: var(--ink, #223318);
-}
-
-.court-btn--chosen {
-  background: var(--ink, #223318);
-  color: #FFFFFF;
-  border-color: var(--ink, #223318);
-  box-shadow: 0 4px 14px -4px rgba(34, 51, 24, 0.35);
-}
-
-.court-btn--full {
-  background: transparent;
-  color: var(--gray, #847E63);
-  border-color: var(--line, #DDDDB8);
+.court-card--maintenance {
+  opacity: 0.72;
   cursor: not-allowed;
+  background: #FAF9F1;
 }
 </style>

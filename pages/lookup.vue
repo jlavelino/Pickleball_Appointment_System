@@ -118,14 +118,15 @@
                 <div class="font-display font-bold text-[17px] text-ink">{{ b.court_names }}</div>
               </div>
 
-              <!-- View Match Pass button -->
-              <NuxtLink
-                :to="`/book/confirmed/${b.reference}`"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-relish-dark text-white text-[12px] font-bold shadow-xs hover:opacity-90 active:scale-95 transition-all"
+              <!-- Quick QR Button -->
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E8F4D8] hover:bg-[#D4EBC0] text-[#0B6623] text-[12px] font-bold shadow-2xs active:scale-95 transition-all cursor-pointer border border-[#B8DC9E]"
+                @click="openQrModal(b)"
               >
+                <span class="mdi mdi-qrcode text-[15px]"></span>
                 <span>View QR Pass</span>
-                <span class="mdi mdi-chevron-right text-[16px]"></span>
-              </NuxtLink>
+              </button>
             </div>
 
             <!-- Details Grid -->
@@ -194,10 +195,148 @@
                 {{ b.total_amount != null ? `₱${Number(b.total_amount).toLocaleString()}` : '—' }}
               </span>
             </div>
+
+            <!-- Gate QR Access Actions -->
+            <div class="mt-3.5 pt-3.5 border-t border-[#DCE6D8] flex flex-col sm:flex-row gap-2">
+              <button
+                type="button"
+                class="flex-1 py-3 px-4 rounded-xl bg-[#0B6623] hover:bg-[#08521C] active:scale-[0.98] text-white font-bold text-[13.5px] shadow-[0_3px_12px_rgba(11,102,35,0.25)] transition-all cursor-pointer flex items-center justify-center gap-2"
+                @click="openQrModal(b)"
+              >
+                <span class="mdi mdi-qrcode-scan text-[18px] text-[#9ACD32]"></span>
+                <span>Access Gate QR Pass</span>
+              </button>
+
+              <NuxtLink
+                :to="`/book/confirmed/${b.reference}`"
+                class="py-3 px-4 rounded-xl bg-[#FAF9F1] hover:bg-[#E8F4D8] border border-[#DCE6D8] text-[#14231C] hover:text-[#0B6623] font-bold text-[13px] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 no-underline shadow-2xs"
+              >
+                <span>Full Receipt</span>
+                <span class="mdi mdi-arrow-right text-[15px]"></span>
+              </NuxtLink>
+            </div>
           </div>
         </div>
       </div>
 
+    </div>
+
+    <!-- Digital Match Pass Gate QR Modal -->
+    <div
+      v-if="selectedBookingForQr"
+      class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs animate-fade-in overflow-y-auto"
+      @click="closeQrModal"
+    >
+      <div
+        class="w-full max-w-[420px] bg-white rounded-[26px] border border-[#DCE6D8] shadow-2xl overflow-hidden flex flex-col my-auto text-left"
+        @click.stop
+      >
+        <!-- Modal Header -->
+        <div class="px-5 py-3.5 bg-[#14231C] text-white flex items-center justify-between border-b border-[#243D2F]">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-[#0B6623] text-[#9ACD32] flex items-center justify-center text-[15px]">
+              <span class="mdi mdi-qrcode-scan"></span>
+            </div>
+            <div>
+              <div class="text-[10px] uppercase font-bold tracking-widest text-[#9ACD32]">
+                Official Match Pass
+              </div>
+              <div class="font-mono font-bold text-[15px] text-white leading-tight">
+                {{ selectedBookingForQr.reference }}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+            @click="closeQrModal"
+            aria-label="Close pass modal"
+          >
+            <span class="mdi mdi-close text-[17px]"></span>
+          </button>
+        </div>
+
+        <!-- Modal QR Body -->
+        <div class="p-5 flex flex-col items-center justify-center text-center bg-white">
+          <!-- QR Frame with Corner Brackets -->
+          <div class="relative p-3.5 bg-white rounded-2xl border border-[#DCE6D8] shadow-xs mb-3">
+            <div class="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-[#0B6623] rounded-tl-sm"></div>
+            <div class="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-[#0B6623] rounded-tr-sm"></div>
+            <div class="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-[#0B6623] rounded-bl-sm"></div>
+            <div class="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-[#0B6623] rounded-br-sm"></div>
+
+            <div class="w-[180px] h-[180px] flex items-center justify-center bg-white">
+              <img
+                v-if="modalQrCodeUrl"
+                :src="modalQrCodeUrl"
+                alt="Match Pass QR Code"
+                class="w-[176px] h-[176px] object-contain rounded-sm"
+              />
+              <div v-else class="flex flex-col items-center justify-center text-[#66756D] gap-2">
+                <div class="w-7 h-7 border-2.5 border-[#0B6623] border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-[11.5px] font-medium">Generating gate pass...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reference with Copy Button -->
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 bg-[#FAF9F1] hover:bg-[#E8F4D8] text-[#14231C] text-[13px] font-mono px-3.5 py-1.5 rounded-full border border-[#DCE6D8] transition-colors cursor-pointer shadow-xs active:scale-95 mb-2"
+            title="Copy Reference Code"
+            @click="copyModalReference"
+          >
+            <span class="font-bold">{{ selectedBookingForQr.reference }}</span>
+            <span v-if="!copiedModalRef" class="mdi mdi-content-copy text-[13px] text-[#66756D]"></span>
+            <span v-else class="text-[#0B6623] font-bold text-[11px]">Copied!</span>
+          </button>
+
+          <p class="text-[12px] text-[#66756D] m-0 mb-4 flex items-center gap-1.5 font-medium">
+            <span class="mdi mdi-cellphone-check text-[15px] text-[#0B6623]"></span>
+            <span>Scan at front desk terminal upon arrival</span>
+          </p>
+
+          <!-- Match Summary Pill -->
+          <div class="w-full p-3.5 rounded-2xl bg-[#FAF9F1] border border-[#DCE6D8] text-left text-[12.5px] space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-[#66756D] font-medium">Facility</span>
+              <strong class="text-[#14231C] font-display">{{ selectedBookingForQr.court_names }}</strong>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-[#66756D] font-medium">Schedule</span>
+              <span class="text-[#14231C] font-semibold">
+                {{ formatTime(selectedBookingForQr.start_time) }} – {{ formatTime(selectedBookingForQr.end_time) }}
+              </span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-[#66756D] font-medium">Match Date</span>
+              <span class="text-[#14231C] font-semibold">{{ formatDate(selectedBookingForQr.booking_date) }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-[#66756D] font-medium">Guest</span>
+              <span class="text-[#14231C] font-semibold">{{ selectedBookingForQr.guest_name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-3.5 bg-[#FAF9F1] border-t border-[#DCE6D8] flex items-center gap-2">
+          <button
+            type="button"
+            class="flex-1 py-2.5 px-4 rounded-xl bg-[#0B6623] hover:bg-[#08521C] text-white font-bold text-[13px] shadow-sm transition-all cursor-pointer"
+            @click="closeQrModal"
+          >
+            Done
+          </button>
+          <NuxtLink
+            :to="`/book/confirmed/${selectedBookingForQr.reference}`"
+            class="py-2.5 px-4 rounded-xl bg-white hover:bg-[#E8F4D8] border border-[#DCE6D8] text-[#14231C] font-bold text-[13px] transition-all no-underline shadow-2xs text-center"
+          >
+            Full Details
+          </NuxtLink>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -250,6 +389,54 @@ const loading  = ref(false)
 const searched = ref(false)
 const error    = ref('')
 const results  = ref<BookingResult[]>([])
+
+const selectedBookingForQr = ref<BookingResult | null>(null)
+const modalQrCodeUrl = ref<string>('')
+const copiedModalRef = ref(false)
+const qrGenerating = ref(false)
+
+async function openQrModal(booking: BookingResult) {
+  selectedBookingForQr.value = booking
+  modalQrCodeUrl.value = ''
+  qrGenerating.value = true
+  copiedModalRef.value = false
+
+  try {
+    const QRCode = (await import('qrcode')).default
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const qrData = origin ? `${origin}/lookup?ref=${booking.reference}` : booking.reference
+
+    modalQrCodeUrl.value = await QRCode.toDataURL(qrData, {
+      width: 360,
+      margin: 1,
+      color: {
+        dark: '#14231C',
+        light: '#FFFFFF',
+      },
+      errorCorrectionLevel: 'M',
+    })
+  } catch (err) {
+    console.error('Failed to generate match pass QR code:', err)
+  } finally {
+    qrGenerating.value = false
+  }
+}
+
+function closeQrModal() {
+  selectedBookingForQr.value = null
+  modalQrCodeUrl.value = ''
+}
+
+function copyModalReference() {
+  if (!selectedBookingForQr.value) return
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(selectedBookingForQr.value.reference)
+    copiedModalRef.value = true
+    setTimeout(() => {
+      copiedModalRef.value = false
+    }, 2000)
+  }
+}
 
 function clearSearch() {
   query.value    = ''
@@ -446,28 +633,28 @@ function statusClass(status: string): string {
   width: 100%;
   padding: 11px 40px;
   border-radius: 12px;
-  border: 1.5px solid var(--line, #DDDDB8);
+  border: 1px solid #DCE6D8;
   background: #FFFFFF;
-  color: var(--ink, #223318);
+  color: #14231C;
   font-size: 14px;
   outline: none;
   box-sizing: border-box;
   transition: all 0.15s ease-out;
 }
 .lookup-input:focus {
-  border-color: var(--ink, #223318);
-  box-shadow: 0 0 0 3px rgba(34, 51, 24, 0.08);
+  border-color: #0B6623;
+  box-shadow: 0 0 0 3px rgba(11, 102, 35, 0.1);
 }
-.lookup-input::placeholder { color: rgba(34, 51, 24, 0.4); }
+.lookup-input::placeholder { color: #8A938D; }
 
 .lookup-search-btn {
   width: 100%;
-  padding: 12px;
-  border-radius: 12px;
+  height: 48px;
+  border-radius: 14px;
   border: none;
-  background: var(--ink, #223318);
+  background: #0B6623;
   color: #FFFFFF;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 700;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
@@ -478,16 +665,21 @@ function statusClass(status: string): string {
   transition: all 0.15s ease-out;
 }
 .lookup-search-btn:hover:not(:disabled) {
-  background: #15220F;
-  box-shadow: 0 4px 12px -2px rgba(34, 51, 24, 0.25);
+  background: #08521C;
+  box-shadow: 0 4px 14px -2px rgba(11, 102, 35, 0.35);
 }
-.lookup-search-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.lookup-search-btn:disabled {
+  background: #D9DEDA;
+  color: #8A938D;
+  cursor: not-allowed;
+}
 
 .ticket-pass-card {
-  border: 1.5px solid var(--line, #DDDDB8);
-  border-radius: 18px;
+  border: 1px solid #DCE6D8;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 16px -4px rgba(34, 51, 24, 0.1);
+  box-shadow: 0 2px 10px -2px rgba(20, 35, 28, 0.05);
+  background: #FFFFFF;
 }
 
 .status-badge {
@@ -497,10 +689,10 @@ function statusClass(status: string): string {
   font-weight: 700;
   white-space: nowrap;
 }
-.status--confirmed { background: #EAF5E8; color: #1D6331; }
-.status--pending   { background: #FEF3D6; color: #9B5A03; }
-.status--held      { background: #EBF0FF; color: #2A4E9E; }
-.status--cancelled { background: #FEECEB; color: #8A1F24; }
+.status--confirmed { background: #E8F4D8; color: #0B6623; }
+.status--pending   { background: #FEF3D6; color: #D98216; }
+.status--held      { background: #FEF3D6; color: #D98216; }
+.status--cancelled { background: #FDE8E8; color: #D94A4A; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.75s linear infinite; }

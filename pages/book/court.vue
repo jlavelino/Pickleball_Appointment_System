@@ -1,53 +1,48 @@
 <template>
   <div class="flex flex-col min-h-full">
     <div class="flex-1 pb-4">
-      <!-- Step tracker pill -->
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cream-card border border-line text-[11.5px] font-bold text-ink-soft uppercase tracking-wider mb-2">
-        <span class="w-1.5 h-1.5 rounded-full bg-relish-dark"></span>
-        <span>Step 1 of 4 · Court Selection</span>
-      </div>
-
-      <!-- Title & Time slot info -->
-      <h1 class="font-display font-bold text-[28px] text-ink m-0 leading-tight">
+      <!-- Title -->
+      <h1 class="font-display font-bold text-[30px] text-[#14231C] m-0 leading-tight">
         Choose your court
       </h1>
 
-      <!-- Date & time banner -->
-      <div class="mt-2.5 mb-4 p-3 rounded-2xl bg-cream-card border border-line flex items-center justify-between gap-3 shadow-xs">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-8 h-8 rounded-xl bg-sold flex items-center justify-center text-relish-dark shrink-0">
-            <span class="mdi mdi-clock-outline text-[16px]"></span>
+      <!-- Selected Time Summary Card (Section 12) -->
+      <div class="mt-3.5 mb-4 p-3.5 rounded-2xl bg-white border border-[#DCE6D8] flex items-center justify-between gap-3 shadow-subtle">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-full bg-[#E8F4D8] text-[#0B6623] flex items-center justify-center shrink-0">
+            <span class="mdi mdi-clock-outline text-[18px]"></span>
           </div>
           <div class="min-w-0">
-            <div class="text-[13.5px] font-bold text-ink truncate leading-tight">
+            <div class="text-[14px] font-bold text-[#14231C] truncate leading-tight">
               {{ store.slotRangeLabel }}
             </div>
-            <div class="text-[12px] text-ink-soft font-medium">
+            <div class="text-[12px] text-[#66756D] font-medium mt-0.5">
               {{ store.dateLabel }} · {{ store.slotHours }} hr{{ store.slotHours > 1 ? 's' : '' }} session
             </div>
           </div>
         </div>
 
+        <!-- Subtle light-green secondary action, NOT orange -->
         <NuxtLink
-          to="/"
-          class="shrink-0 text-[11.5px] font-bold text-relish-dark hover:text-ink px-2.5 py-1 rounded-lg bg-sold/60 hover:bg-sold transition-colors"
+          to="/book"
+          class="shrink-0 btn-secondary text-[12px] font-bold py-1.5 px-3 rounded-full"
         >
           Change
         </NuxtLink>
       </div>
 
-      <!-- Multi-court helper toolbar -->
-      <div class="flex items-center justify-between mb-3.5 px-1">
-        <div class="text-[12px] font-semibold text-ink-soft uppercase tracking-wider">
+      <!-- Section Label: SELECT 1 OR MORE COURTS -->
+      <div class="flex items-center justify-between mb-3 px-1">
+        <div class="text-[11.5px] font-bold text-[#66756D] uppercase tracking-wider">
           {{ store.courtIds.length === 0 ? 'Select 1 or more courts' : `${store.courtIds.length} court${store.courtIds.length > 1 ? 's' : ''} selected` }}
         </div>
         <button
           v-if="store.courtIds.length > 0"
           type="button"
-          class="text-[12px] font-bold text-relish-dark hover:text-ink underline transition-colors cursor-pointer"
+          class="text-[12px] font-bold text-[#0B6623] hover:underline transition-all cursor-pointer"
           @click="store.clearCourts()"
         >
-          Reset
+          Reset selection
         </button>
       </div>
 
@@ -64,15 +59,12 @@
       />
     </div>
 
+    <!-- Bottom CTA (Section 17) -->
     <BottomCTA
       :label="continueButtonLabel"
       :disabled="store.courtIds.length === 0"
       @click="goNext"
-    >
-      <template #above>
-        <PriceTotalBar :show="store.courtIds.length > 0" />
-      </template>
-    </BottomCTA>
+    />
   </div>
 </template>
 
@@ -81,9 +73,8 @@ import { computed } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 import CourtCard from '~/components/booking/CourtCard.vue'
 import BottomCTA from '~/components/ui/BottomCta.vue'
-import PriceTotalBar from '~/components/ui/PriceTotalBar.vue'
 
-useHead({ title: 'Pick a court — PickleBook' })
+useHead({ title: 'PickleBook — Choose your court' })
 
 const store = useBookingStore()
 if (store.slotIndex === null && store.selectedSlots.length === 0) {
@@ -93,8 +84,11 @@ if (store.slotIndex === null && store.selectedSlots.length === 0) {
 const continueButtonLabel = computed(() => {
   const count = store.courtIds.length
   if (count === 0) return 'Select a court to continue'
-  if (count === 1) return `Continue with 1 court · ₱${store.courtTotal.toLocaleString()}`
-  return `Continue with ${count} courts · ₱${store.courtTotal.toLocaleString()}`
+  if (count === 1) {
+    const courtName = store.courts.find(c => String(c.id) === String(store.courtIds[0]))?.name || 'Court 1'
+    return `Continue with ${courtName} · ₱${store.courtTotal.toLocaleString()}`
+  }
+  return `Book ${count} Courts · ₱${store.courtTotal.toLocaleString()} total`
 })
 
 function selectCourt(id: string | number) {

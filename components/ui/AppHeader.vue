@@ -1,48 +1,88 @@
 <template>
   <header class="header-bar">
+    <!-- Home Header: Centered logo, search icon on right -->
+    <template v-if="isHomePage">
+      <!-- Left spacer to balance the right search icon -->
+      <div class="w-[42px] shrink-0"></div>
 
-    <!-- Back button -->
-    <button
-      type="button"
-      @click="handleBack"
-      aria-label="Go back"
-      class="back-btn"
-      :class="canGoBack ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-    >
-      <span class="mdi mdi-arrow-left text-[18px] back-icon"></span>
-    </button>
+      <!-- Logo centered -->
+      <NuxtLink to="/" class="logo-link flex-1 flex items-center justify-center" aria-label="PickleBook Home">
+        <div class="flex items-center gap-2.5">
+          <img
+            src="~/assets/images/pickle_logo.png"
+            alt="PickleBook Icon"
+            class="logo-icon"
+          />
+          <img
+            src="~/assets/images/pickle_name.png"
+            alt="PickleBook"
+            class="logo-name"
+          />
+        </div>
+      </NuxtLink>
 
-    <!-- Logo & Wordmark — centered -->
-    <NuxtLink to="/" class="logo-link">
-      <img
-        src="~/assets/images/pickle_logo.png"
-        alt="PickleBook icon"
-        class="logo-icon"
-        style="height:32px;width:auto;display:block;max-width:none;"
-      />
-      <img
-        src="~/assets/images/pickle_name.png"
-        alt="PickleBook"
-        class="logo-name"
-        style="height:22px;width:auto;display:block;max-width:none;"
-      />
-    </NuxtLink>
+      <!-- Right: Search icon -->
+      <div class="flex items-center gap-2">
+        <NuxtLink
+          to="/lookup"
+          aria-label="Search bookings"
+          class="btn-icon"
+          title="Search bookings"
+        >
+          <span class="mdi mdi-magnify text-[19px]"></span>
+        </NuxtLink>
+      </div>
+    </template>
 
-    <!-- Check booking link (right side) — only visible on the home page -->
-    <NuxtLink
-      to="/lookup"
-      aria-label="Check booking"
-      class="lookup-btn"
-      :class="isHomePage ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-    >
-      <span class="mdi mdi-magnify text-[17px]"></span>
-    </NuxtLink>
+    <!-- Booking Flow Subpages: Back button + Stepper -->
+    <template v-else-if="isBookingFlow">
+      <button
+        type="button"
+        @click="handleBack"
+        aria-label="Go back"
+        class="btn-icon"
+      >
+        <span class="mdi mdi-arrow-left text-[19px]"></span>
+      </button>
 
+      <div class="flex-1 px-2">
+        <BookingStepper :current-step="currentBookingStep" />
+      </div>
+
+      <!-- Balanced spacer -->
+      <div class="w-[42px] shrink-0"></div>
+    </template>
+
+    <!-- Other Pages (e.g. Lookup) -->
+    <template v-else>
+      <button
+        type="button"
+        @click="handleBack"
+        aria-label="Go back"
+        class="btn-icon"
+      >
+        <span class="mdi mdi-arrow-left text-[19px]"></span>
+      </button>
+      <NuxtLink to="/" class="logo-link mx-auto">
+        <img
+          src="~/assets/images/pickle_logo.png"
+          alt="PickleBook icon"
+          class="logo-icon"
+        />
+        <img
+          src="~/assets/images/pickle_name.png"
+          alt="PickleBook"
+          class="logo-name"
+        />
+      </NuxtLink>
+      <div class="w-[42px] shrink-0"></div>
+    </template>
   </header>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import BookingStepper from '~/components/ui/BookingStepper.vue'
 
 const route  = useRoute()
 const router = useRouter()
@@ -51,14 +91,25 @@ const isHomePage = computed(() => {
   return route.path === '/' || route.path === '/book'
 })
 
-const canGoBack = computed(() => {
-  const path = route.path
-  return path !== '/' && path !== '/book' && !path.includes('/confirmed')
+const isBookingFlow = computed(() => {
+  const p = route.path
+  return p.startsWith('/book/') && !p.includes('/confirmed')
+})
+
+const currentBookingStep = computed(() => {
+  const p = route.path
+  if (p === '/' || p === '/book' || p === '/book/index') return 1  // Date & Time
+  if (p.startsWith('/book/court')) return 2                          // Court
+  if (p.startsWith('/book/paddles')) return 3                        // Paddles
+  if (p.startsWith('/book/food')) return 4                           // Snacks
+  if (p.startsWith('/book/summary')) return 5                        // Review
+  if (p.startsWith('/book/details') || p.startsWith('/book/payment') || p.startsWith('/book/confirmed')) return 6
+  return 1
 })
 
 function handleBack() {
   if (route.path === '/lookup') {
-    if (window.history.length > 1) {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back()
     } else {
       router.push('/')
@@ -74,85 +125,26 @@ function handleBack() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 6px;
+  padding: 14px 20px 8px;
 }
 
 .logo-link {
   display: flex;
   align-items: center;
-  gap: 8px;
   text-decoration: none;
+  max-width: 190px;
 }
 
 .logo-icon {
-  height: 32px;
+  height: 34px;
   width: auto;
   object-fit: contain;
-  flex: none;
+  flex-shrink: 0;
 }
 
 .logo-name {
-  height: 20px;
+  height: 22px;
   width: auto;
   object-fit: contain;
-}
-
-.lookup-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--cream-card);
-  color: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  text-decoration: none;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(34, 51, 24, 0.08);
-}
-.lookup-btn:hover {
-  background: var(--sold);
-  border-color: rgba(34, 51, 24, 0.25);
-  color: var(--relish-dark);
-  box-shadow: 0 2px 6px rgba(34, 51, 24, 0.12);
-}
-
-.back-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--cream-card);
-  color: var(--ink);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(34, 51, 24, 0.08);
-  flex: none;
-  padding: 0;
-}
-
-.back-icon {
-  transform: translateX(-0.5px);
-  transition: transform 0.15s ease;
-}
-
-.back-btn:hover {
-  background: var(--sold);
-  border-color: rgba(34, 51, 24, 0.25);
-  color: var(--relish-dark);
-  box-shadow: 0 2px 6px rgba(34, 51, 24, 0.12);
-}
-
-.back-btn:hover .back-icon {
-  transform: translateX(-2px);
-}
-
-.back-btn:active {
-  transform: scale(0.92);
 }
 </style>

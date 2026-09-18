@@ -2,38 +2,42 @@
   <div class="flex flex-col min-h-full">
     <div class="flex-1">
       <!-- Page header -->
-      <div class="mt-1.5 mb-5">
-        <h1 class="font-display font-semibold text-[28px] m-0 leading-[1.15] mb-1">
+      <div class="mt-1 mb-4">
+        <h1 class="font-display font-bold text-[30px] text-[#14231C] m-0 leading-tight">
           Pay for your booking
         </h1>
-        <p class="text-ink-soft text-[14px] m-0 leading-[1.4]">
+        <p class="text-[#66756D] text-[14px] m-0 leading-relaxed mt-1">
           Choose your preferred payment method. You'll be redirected to a secure checkout.
         </p>
       </div>
 
       <!-- Order Summary Card -->
-      <div class="bg-gradient-to-r from-[#1E3314] via-[#2A481B] to-[#1E3314] rounded-2xl p-4 mb-5 text-white shadow-[0_6px_20px_-6px_rgba(34,51,24,0.4)]">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-[11px] font-bold tracking-[0.08em] uppercase text-lime/80">Order Summary</span>
-          <span class="text-[11px] text-white/60">{{ store.courtNamesLabel || 'Court Reserved' }}</span>
-        </div>
-        <div class="flex items-end justify-between">
-          <div>
-            <div class="text-white/70 text-[12.5px]">Total due</div>
-            <div class="font-display font-bold text-[32px] leading-tight text-white tracking-tight">
-              ₱{{ store.grandTotal.toLocaleString() }}
-            </div>
+      <div class="bg-[#14231C] rounded-2xl p-5 mb-5 text-white shadow-subtle border border-[#DCE6D8] relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-28 h-28 rounded-full bg-[#9ACD32]/10 -translate-y-1/2 translate-x-1/2 blur-lg pointer-events-none"></div>
+
+        <div class="relative">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[11px] font-bold tracking-[0.08em] uppercase text-[#9ACD32]">Order Summary</span>
+            <span class="text-[11.5px] text-white/70">{{ store.courtNamesLabel || 'Court Reserved' }}</span>
           </div>
-          <div class="text-right text-[12px] text-white/60 pb-1">
-            <div>{{ store.slotRangeLabel }}</div>
-            <div>{{ store.dateLabel }}</div>
+          <div class="flex items-end justify-between">
+            <div>
+              <div class="text-white/70 text-[12.5px]">Total due</div>
+              <div class="font-display font-bold text-[32px] leading-tight text-white tracking-tight mt-0.5">
+                ₱{{ store.grandTotal.toLocaleString() }}
+              </div>
+            </div>
+            <div class="text-right text-[12.5px] text-white/70 pb-1">
+              <div>{{ store.slotRangeLabel }}</div>
+              <div class="text-white/50 text-[11.5px] mt-0.5">{{ store.dateLabel }}</div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Payment Method Cards -->
-      <div class="mb-1">
-        <div class="text-[11px] font-bold tracking-wider uppercase text-ink-soft mb-2.5">Select payment method</div>
+      <div class="mb-2">
+        <div class="text-[11px] font-bold tracking-wider uppercase text-[#66756D] mb-2.5">Select payment method</div>
 
         <PaymentMethodCard
           method="gcash"
@@ -49,55 +53,55 @@
       </div>
 
       <!-- Trust / Security Indicators -->
-      <div class="flex items-center justify-center gap-4 py-3">
-        <div class="flex items-center gap-1.5 text-[11.5px] text-ink-soft">
-          <span class="mdi mdi-shield-lock text-[13px] text-lime-text"></span>
+      <div class="flex items-center justify-center gap-5 py-3">
+        <div class="flex items-center gap-1.5 text-[11.5px] text-[#66756D]">
+          <span class="mdi mdi-shield-lock text-[14px] text-[#0B6623]"></span>
           <span>256-bit SSL</span>
         </div>
-        <div class="flex items-center gap-1.5 text-[11.5px] text-ink-soft">
-          <span class="mdi mdi-check-decagram text-[13px] text-lime-text"></span>
+        <div class="flex items-center gap-1.5 text-[11.5px] text-[#66756D]">
+          <span class="mdi mdi-check-decagram text-[14px] text-[#0B6623]"></span>
           <span>PayMongo secure</span>
         </div>
-        <div class="flex items-center gap-1.5 text-[11.5px] text-ink-soft">
-          <span class="mdi mdi-clock-fast text-[13px] text-lime-text"></span>
+        <div class="flex items-center gap-1.5 text-[11.5px] text-[#66756D]">
+          <span class="mdi mdi-clock-fast text-[14px] text-[#0B6623]"></span>
           <span>Instant confirm</span>
         </div>
       </div>
 
-      <!-- Cancelled notice -->
+      <!-- Cancelled notice (Orange alert #D98216) -->
       <div
         v-if="wasCancelled"
-        class="mt-2 p-3.5 rounded-xl bg-[#FFF9E6] border border-[#FEE199] text-[#946200] text-[13px] leading-snug flex items-start gap-2.5"
+        class="mt-2 p-3.5 rounded-2xl bg-[#FFF4E5] border border-[#FEE199] text-[#D98216] text-[13px] leading-snug flex items-start gap-2.5"
       >
-        <span class="text-[15px] leading-none">ℹ️</span>
-        <div class="flex-1 font-medium">
+        <span class="mdi mdi-information-outline text-[18px] leading-none shrink-0 text-[#D98216]"></span>
+        <div class="flex-1 font-medium text-[#14231C]">
           Payment was cancelled on PayMongo. Your reservation hold is still active — select your payment method and try again.
         </div>
       </div>
 
-      <!-- Error alert -->
+      <!-- Error alert (Red alert #D94A4A) -->
       <div
         v-if="errorMessage"
-        class="mt-3 p-3.5 rounded-xl bg-[#FEECEB] border border-[#FDB8B4] text-[#CE2C31] text-[13px] leading-snug flex items-start gap-2.5"
+        class="mt-3 p-3.5 rounded-2xl bg-[#FDE8E8] border border-[#FDB8B4] text-[#D94A4A] text-[13px] leading-snug flex items-start gap-2.5"
       >
-        <span class="text-[15px] leading-none">⚠️</span>
-        <div class="flex-1 font-medium">{{ errorMessage }}</div>
+        <span class="mdi mdi-alert-circle-outline text-[18px] leading-none shrink-0 text-[#D94A4A]"></span>
+        <div class="flex-1 font-medium text-[#14231C]">{{ errorMessage }}</div>
       </div>
     </div>
 
     <!-- Pay CTA -->
     <BottomCTA
-      :label="paying ? redirectingText : `Pay ₱${store.grandTotal}`"
+      :label="paying ? redirectingText : `Pay ₱${store.grandTotal.toLocaleString()}`"
       :disabled="paying"
       @click="pay"
     >
       <template #above>
-        <div class="flex justify-between items-center mb-2">
-          <div class="flex items-center gap-1.5 text-ink-soft text-[13.5px]">
+        <div class="flex justify-between items-center mb-2 px-1">
+          <div class="flex items-center gap-1.5 text-[#66756D] text-[13.5px]">
             <span>Paying via</span>
-            <span class="font-semibold text-ink">{{ store.payMethod === 'gcash' ? 'GCash' : 'Maya' }}</span>
+            <span class="font-bold text-[#14231C]">{{ store.payMethod === 'gcash' ? 'GCash' : 'Maya' }}</span>
           </div>
-          <span class="text-ink font-bold text-[19px] font-display">₱{{ store.grandTotal.toLocaleString() }}</span>
+          <span class="text-[#0B6623] font-bold text-[19px] font-display">₱{{ store.grandTotal.toLocaleString() }}</span>
         </div>
       </template>
     </BottomCTA>
@@ -110,7 +114,7 @@ import { useBookingStore } from '~/stores/booking'
 import PaymentMethodCard from '~/components/booking/PaymentMethodCard.vue'
 import BottomCTA from '~/components/ui/BottomCta.vue'
 
-useHead({ title: 'Pay for your booking — DINK' })
+useHead({ title: 'Pay for your booking — PickleBook' })
 
 const route = useRoute()
 const store = useBookingStore()

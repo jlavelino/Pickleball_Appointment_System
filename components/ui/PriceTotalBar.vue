@@ -56,12 +56,13 @@ const breakdownText = computed(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--ink);
-  border-radius: 14px;
-  padding: 10px 16px;
+  background: #14231C;
+  border-radius: 16px;
+  border: 1px solid #DCE6D8;
+  padding: 10px 18px;
   margin-bottom: 10px;
   gap: 12px;
-  box-shadow: 0 4px 18px -4px rgba(34, 51, 24, 0.35);
+  box-shadow: 0 4px 18px -4px rgba(20, 35, 28, 0.25);
 }
 
 .price-bar__left {
@@ -72,17 +73,17 @@ const breakdownText = computed(() => {
 }
 
 .price-bar__label {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(245, 241, 222, 0.55);
+  color: #9ACD32;
 }
 
 .price-bar__breakdown {
   font-size: 12.5px;
   font-weight: 500;
-  color: rgba(245, 241, 222, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -91,21 +92,21 @@ const breakdownText = computed(() => {
 .price-bar__right {
   display: flex;
   align-items: baseline;
-  gap: 1px;
+  gap: 2px;
   flex-shrink: 0;
 }
 
 .price-bar__currency {
   font-size: 14px;
   font-weight: 700;
-  color: #96C33E;
+  color: #9ACD32;
 }
 
 .price-bar__amount {
-  font-family: 'Fraunces', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 24px;
   font-weight: 700;
-  color: var(--cream);
+  color: #FFFFFF;
   line-height: 1;
 }
 

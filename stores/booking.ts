@@ -46,15 +46,15 @@ export const DEFAULT_FOOD_GROUPS = [
   {
     label: 'Meals',
     items: [
-      { id: '850c5356-a0c0-48fb-9708-67027609c433', name: 'Chicken sandwich', price: 150, category: 'Meals' },
-      { id: '3d2e6ba5-79a0-4a10-b115-3efcbd113d4a', name: 'Burger', price: 180, category: 'Meals' },
+      { id: '850c5356-a0c0-48fb-9708-67027609c433', name: 'Chicken sandwich', price: 150, category: 'Meals', is_available: true },
+      { id: '3d2e6ba5-79a0-4a10-b115-3efcbd113d4a', name: 'Burger', price: 180, category: 'Meals', is_available: true },
     ],
   },
   {
     label: 'Snacks & drinks',
     items: [
-      { id: '71ffd93e-0d0c-456d-9399-54fb9313adbe', name: 'Fries', price: 80, category: 'Snacks & drinks' },
-      { id: '7c08dd8f-5823-4e7f-a5a0-9fb4b9e59694', name: 'Bottled water', price: 30, category: 'Snacks & drinks' },
+      { id: '71ffd93e-0d0c-456d-9399-54fb9313adbe', name: 'Fries', price: 80, category: 'Snacks & drinks', is_available: true },
+      { id: '7c08dd8f-5823-4e7f-a5a0-9fb4b9e59694', name: 'Bottled water', price: 30, category: 'Snacks & drinks', is_available: true },
     ],
   },
 ]
@@ -128,10 +128,14 @@ interface BookingState {
 
   // Availability map from database: slotIndex -> count of available courts
   dbSlotAvailability: Record<number, number>
+  // Booked court IDs per slot: slotIndex -> string[] of booked court IDs
+  dbCourtSlotBooked: Record<number, string[]>
+  // Reserved paddles map from database: slotIndex -> (paddleId -> count reserved)
+  dbPaddleSlotReserved: Record<number, Record<string, number>>
   isLoadingAvailability: boolean
 }
 
-function formatEndHour(label: string): string {
+export function formatEndHour(label: string): string {
   const [time, period] = label.split(' ')
   const [hourStr, minStr] = time.split(':')
   const hour = parseInt(hourStr)
@@ -178,6 +182,8 @@ export const useBookingStore = defineStore('booking', {
     isSubmittingBooking: false,
 
     dbSlotAvailability: {},
+    dbCourtSlotBooked: {},
+    dbPaddleSlotReserved: {},
     isLoadingAvailability: false,
   }),
 
@@ -187,7 +193,38 @@ export const useBookingStore = defineStore('booking', {
     },
 
     paddles: (s): PaddleItem[] => {
-      return s.dbPaddles.length > 0 ? s.dbPaddles : DEFAULT_PADDLES
+      const baseList = s.dbPaddles.length > 0 ? s.dbPaddles : DEFAULT_PADDLES
+
+      // Identify active selected slots (multi-select or single)
+      const activeSlots = s.selectedSlots.length > 0
+        ? s.selectedSlots
+        : (s.slotIndex !== null ? [s.slotIndex] : [])
+
+      return baseList.map(p => {
+        // Base facility inventory (respect admin override in available_quantity if set)
+        const baseTotal = typeof p.available_quantity === 'number'
+          ? p.available_quantity
+          : (p.total_quantity ?? 4)
+
+        // If user has selected slots, find peak reserved quantity across those slots
+        let maxReserved = 0
+        if (activeSlots.length > 0 && s.dbPaddleSlotReserved) {
+          activeSlots.forEach(slotIdx => {
+            const reservedInSlot = s.dbPaddleSlotReserved[slotIdx]?.[p.id] || 0
+            if (reservedInSlot > maxReserved) {
+              maxReserved = reservedInSlot
+            }
+          })
+        }
+
+        const available = Math.max(0, baseTotal - maxReserved)
+        return {
+          ...p,
+          stock: available,
+          total_quantity: Number(p.total_quantity ?? 4),
+          available_quantity: baseTotal,
+        }
+      })
     },
 
     allFood: (s): FoodItem[] => {
@@ -267,20 +304,37 @@ export const useBookingStore = defineStore('booking', {
       return names.join(', ')
     },
 
-    courtsStatusMap(s): Record<string, 'open' | 'low' | 'full'> {
-      const map: Record<string, 'open' | 'low' | 'full'> = {}
-      const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2
+    courtsStatusMap(s): Record<string, 'open' | 'low' | 'full' | 'maintenance'> {
+      const map: Record<string, 'open' | 'low' | 'full' | 'maintenance'> = {}
+
+      // Determine which slots are active
+      const activeSlots = s.selectedSlots.length > 0
+        ? s.selectedSlots
+        : (s.slotIndex !== null ? [s.slotIndex] : [])
 
       this.courts.forEach((court: Court) => {
-        // Calculate status across selected slots
-        const selectedCounts = s.selectedSlots.length > 0
-          ? s.selectedSlots.map(idx => s.dbSlotAvailability[idx] ?? totalCourts)
-          : (s.slotIndex !== null ? [s.dbSlotAvailability[s.slotIndex] ?? totalCourts] : [totalCourts])
-        const minOpen = Math.min(...selectedCounts)
+        const courtIdStr = String(court.id)
 
-        if (minOpen >= 2) map[String(court.id)] = 'open'
-        else if (minOpen === 1) map[String(court.id)] = 'open'
-        else map[String(court.id)] = 'full'
+        // Court in maintenance mode cannot be booked
+        if (court.status === 'maintenance') {
+          map[courtIdStr] = 'maintenance'
+          return
+        }
+
+        if (activeSlots.length === 0) {
+          // No slot selected yet — show active courts as open
+          map[courtIdStr] = 'open'
+          return
+        }
+
+        // Court is 'full' (unavailable) for the user's chosen slots if it is
+        // booked during ANY of those slots.
+        const isBookedInAnySlot = activeSlots.some(slotIdx => {
+          const bookedIds: string[] = s.dbCourtSlotBooked[slotIdx] ?? []
+          return bookedIds.includes(courtIdStr)
+        })
+
+        map[courtIdStr] = isBookedInAnySlot ? 'full' : 'open'
       })
 
       return map
@@ -390,43 +444,80 @@ export const useBookingStore = defineStore('booking', {
       try {
         const supabase = useSupabase()
 
-        const [courtsRes, paddlesRes, foodRes] = await Promise.all([
+        const [courtsRes, paddlesRes, foodRes, facilityRes] = await Promise.all([
           supabase.from('courts').select('*').order('name'),
           supabase.from('paddles').select('*').order('price'),
           supabase.from('food_items').select('*').order('name'),
+          $fetch<{ success: boolean; data: any }>('/api/admin/facility').catch(() => null),
         ])
 
+        const facilityOverrides = facilityRes?.data || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('dink_facility_controls') || '{}') : null)
+
         if (courtsRes.data && courtsRes.data.length > 0) {
-          this.dbCourts = courtsRes.data.map(c => ({
-            id: c.id,
-            name: c.name,
-            price: Number(c.price_per_hour),
-            type: c.type || 'indoor',
-            status: c.status || 'active',
-          }))
+          this.dbCourts = courtsRes.data.map(c => {
+            const overrideStatus = facilityOverrides?.courts?.[c.id]
+            return {
+              id: c.id,
+              name: c.name,
+              price: Number(c.price_per_hour),
+              type: c.type || 'indoor',
+              status: overrideStatus || c.status || 'active',
+            }
+          })
         }
 
         if (paddlesRes.data && paddlesRes.data.length > 0) {
-          this.dbPaddles = paddlesRes.data.map(p => ({
-            id: p.id,
-            name: p.name,
-            price: Number(p.price),
-            stock: Number(p.available_quantity ?? p.total_quantity ?? 4),
-            total_quantity: p.total_quantity,
-            available_quantity: p.available_quantity,
-          }))
+          this.dbPaddles = paddlesRes.data.map(p => {
+            const overrideQty = facilityOverrides?.paddles?.[p.id]
+            const available = typeof overrideQty === 'number' ? overrideQty : Number(p.available_quantity ?? p.total_quantity ?? 4)
+            return {
+              id: p.id,
+              name: p.name,
+              price: Number(p.price),
+              stock: available,
+              total_quantity: Number(p.total_quantity ?? 4),
+              available_quantity: available,
+            }
+          })
+        } else if (facilityOverrides?.paddles) {
+          this.dbPaddles = DEFAULT_PADDLES.map(p => {
+            const overrideQty = facilityOverrides.paddles[p.id]
+            const available = typeof overrideQty === 'number' ? overrideQty : p.stock
+            return {
+              ...p,
+              stock: available,
+              available_quantity: available,
+            }
+          })
         }
 
         if (foodRes.data && foodRes.data.length > 0) {
-          this.dbFoodItems = foodRes.data.map(f => ({
-            id: f.id,
-            name: f.name,
-            price: Number(f.price),
-            category: f.category,
-            stock_quantity: f.stock_quantity,
-            is_available: f.is_available,
-          }))
+          this.dbFoodItems = foodRes.data.map(f => {
+            const overrideAvail = facilityOverrides?.foodItems?.[f.id]
+            return {
+              id: f.id,
+              name: f.name,
+              price: Number(f.price),
+              category: f.category,
+              stock_quantity: f.stock_quantity,
+              is_available: typeof overrideAvail === 'boolean' ? overrideAvail : f.is_available,
+            }
+          })
         }
+
+        // Automatically reset quantities of out of stock food items to 0
+        this.allFood.forEach(f => {
+          if (f.is_available === false && this.foodQty[f.id]) {
+            this.foodQty[f.id] = 0
+          }
+        })
+
+        // Automatically clamp any selected paddle quantities to current available stock
+        this.paddles.forEach(p => {
+          if ((this.paddleQty[p.id] || 0) > p.stock) {
+            this.paddleQty[p.id] = p.stock
+          }
+        })
       } catch (err) {
         console.error('[Supabase] Failed to load catalogs, using defaults:', err)
       } finally {
@@ -442,11 +533,11 @@ export const useBookingStore = defineStore('booking', {
         const dateStr = `${this.year}-${String(this.month + 1).padStart(2, '0')}-${String(this.day).padStart(2, '0')}`
         const totalCourts = this.dbCourts.length > 0 ? this.dbCourts.length : 2
 
-        // Single query: fetch all active bookings for the day with their court assignments.
+        // Single query: fetch all active bookings for the day with court AND paddle assignments.
         // Statuses that count as "taking a slot": confirmed, pending_payment, held.
         const { data: bookingsData, error } = await supabase
           .from('bookings')
-          .select('id, start_time, end_time, booking_courts(court_id)')
+          .select('id, start_time, end_time, booking_courts(court_id), booking_paddles(paddle_id, quantity)')
           .eq('booking_date', dateStr)
           .in('status', ['confirmed', 'pending_payment', 'held'])
 
@@ -455,32 +546,77 @@ export const useBookingStore = defineStore('booking', {
         }
 
         const availabilityMap: Record<number, number> = {}
+        const courtSlotBookedMap: Record<number, string[]> = {}
+        const paddleReservedMap: Record<number, Record<string, number>> = {}
 
-        // For each hourly slot, find which courts are occupied
+        // For each hourly slot, find which courts and paddles are occupied
         TIME_SLOT_LABELS.forEach((_, idx) => {
           const slotStartHour = 8 + idx       // e.g. idx 0 → 8 AM
           const slotEndHour   = slotStartHour + 1
 
           const bookedCourtIds = new Set<string>()
+          const paddleReserved: Record<string, number> = {}
 
           if (!error && bookingsData) {
             bookingsData.forEach((booking: any) => {
               const bookingStartHour = parseInt((booking.start_time as string).split(':')[0])
-              const bookingEndHour   = parseInt((booking.end_time   as string).split(':')[0])
+              let bookingEndHour   = parseInt((booking.end_time   as string).split(':')[0])
+              if (bookingEndHour === 0) bookingEndHour = 24
 
               // Overlap: booking occupies this slot if it starts before slot ends AND ends after slot starts
               if (bookingStartHour < slotEndHour && bookingEndHour > slotStartHour) {
                 ;(booking.booking_courts as { court_id: string }[] || []).forEach(bc => {
                   bookedCourtIds.add(bc.court_id)
                 })
+                ;(booking.booking_paddles as { paddle_id: string; quantity: number }[] || []).forEach(bp => {
+                  if (bp.paddle_id) {
+                    paddleReserved[bp.paddle_id] = (paddleReserved[bp.paddle_id] || 0) + Number(bp.quantity || 0)
+                  }
+                })
               }
             })
           }
 
-          availabilityMap[idx] = Math.max(0, totalCourts - bookedCourtIds.size)
+          // Deduct booked courts AND courts in maintenance mode
+          const availableCount = this.courts.filter(c => {
+            if (c.status === 'maintenance') return false
+            return !bookedCourtIds.has(String(c.id))
+          }).length
+          availabilityMap[idx] = Math.max(0, availableCount)
+          courtSlotBookedMap[idx] = Array.from(bookedCourtIds)
+          paddleReservedMap[idx] = paddleReserved
         })
 
         this.dbSlotAvailability = availabilityMap
+        this.dbCourtSlotBooked = courtSlotBookedMap
+        this.dbPaddleSlotReserved = paddleReservedMap
+
+        // Automatically clamp any selected paddle quantities to current available stock
+        this.paddles.forEach(p => {
+          if ((this.paddleQty[p.id] || 0) > p.stock) {
+            this.paddleQty[p.id] = p.stock
+          }
+        })
+
+        // Auto-deselect any courts that are in maintenance or booked during the selected slots
+        if (this.courtIds.length > 0) {
+          const activeSlots = this.selectedSlots.length > 0
+            ? this.selectedSlots
+            : (this.slotIndex !== null ? [this.slotIndex] : [])
+          const nowUnavailable = this.courtIds.filter(id => {
+            const idStr = String(id)
+            const courtObj = this.courts.find(c => String(c.id) === idStr)
+            if (courtObj && courtObj.status === 'maintenance') return true
+            return activeSlots.some(slotIdx => {
+              const booked = courtSlotBookedMap[slotIdx] ?? []
+              return booked.includes(idStr)
+            })
+          })
+          if (nowUnavailable.length > 0) {
+            this.courtIds = this.courtIds.filter(id => !nowUnavailable.map(String).includes(String(id)))
+            this.courtId = this.courtIds.length > 0 ? this.courtIds[0] : null
+          }
+        }
       } catch (err) {
         console.error('[Supabase] Failed to fetch availability:', err)
       } finally {
@@ -533,6 +669,18 @@ export const useBookingStore = defineStore('booking', {
           .filter(([_, qty]) => qty > 0)
           .map(([id, qty]) => ({ id, quantity: qty }))
 
+        // Ensure paddles table available_quantity is sufficient for the RPC check
+        if (paddleSelections.length > 0) {
+          for (const sel of paddleSelections) {
+            const p = this.paddles.find(item => item.id === sel.id)
+            const targetQty = Math.max(sel.quantity, p?.total_quantity ?? 4)
+            await supabase
+              .from('paddles')
+              .update({ available_quantity: targetQty })
+              .eq('id', sel.id)
+          }
+        }
+
         // Call create_booking_hold RPC
         const { data: holdData, error: holdError } = await supabase.rpc('create_booking_hold', {
           p_court_ids: courtIdsToBook,
@@ -550,11 +698,47 @@ export const useBookingStore = defineStore('booking', {
           throw new Error(holdError?.message || 'Failed to hold booking slots.')
         }
 
+        // Keep paddles table available_quantity reset to base total quantity
+        if (paddleSelections.length > 0) {
+          for (const sel of paddleSelections) {
+            const p = this.paddles.find(item => item.id === sel.id)
+            const baseTotal = p?.total_quantity ?? 4
+            await supabase
+              .from('paddles')
+              .update({ available_quantity: baseTotal })
+              .eq('id', sel.id)
+          }
+        }
+
         const bookingId = holdData.booking_id
         const ref = holdData.reference
 
         this.createdBookingId = bookingId
         this.bookingRef = ref
+
+        // Upload attached ID photo to server if present
+        if (this.idPhotoFile && typeof window !== 'undefined') {
+          try {
+            const base64 = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader()
+              reader.onload = () => resolve(reader.result as string)
+              reader.onerror = reject
+              reader.readAsDataURL(this.idPhotoFile!)
+            })
+
+            await $fetch('/api/booking/upload-id', {
+              method: 'POST',
+              body: {
+                bookingId,
+                bookingRef: ref,
+                photoBase64: base64,
+                filename: this.idPhotoName || 'id_photo.jpg',
+              }
+            })
+          } catch (uploadErr) {
+            console.warn('[Booking] Could not upload ID photo:', uploadErr)
+          }
+        }
 
         return { bookingId, bookingRef: ref }
       } finally {
@@ -607,6 +791,17 @@ export const useBookingStore = defineStore('booking', {
       return this.initiatePayMongoCheckout()
     },
 
+    setDate(year: number, month: number, day: number) {
+      this.year = year
+      this.month = month
+      this.day = day
+      this.selectedSlots = []
+      this.slotIndex = null
+      this.courtIds = []
+      this.courtId = null
+      this.fetchAvailability()
+    },
+
     setDay(day: number) {
       this.day = day
       this.selectedSlots = []
@@ -644,6 +839,14 @@ export const useBookingStore = defineStore('booking', {
       this.fetchAvailability()
     },
 
+    clampPaddleQuantities() {
+      this.paddles.forEach(p => {
+        if ((this.paddleQty[p.id] || 0) > p.stock) {
+          this.paddleQty[p.id] = p.stock
+        }
+      })
+    },
+
     toggleSlot(idx: number) {
       if (this.selectedSlots.includes(idx)) {
         this.selectedSlots = this.selectedSlots.filter(i => i !== idx)
@@ -651,6 +854,7 @@ export const useBookingStore = defineStore('booking', {
         this.selectedSlots = [...this.selectedSlots, idx].sort((a, b) => a - b)
       }
       this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null
+      this.clampPaddleQuantities()
     },
 
     setSlot(idx: number) {
@@ -660,11 +864,13 @@ export const useBookingStore = defineStore('booking', {
     setSlots(indices: number[]) {
       this.selectedSlots = [...indices].sort((a, b) => a - b)
       this.slotIndex = this.selectedSlots.length > 0 ? this.selectedSlots[0] : null
+      this.clampPaddleQuantities()
     },
 
     clearSlots() {
       this.selectedSlots = []
       this.slotIndex = null
+      this.clampPaddleQuantities()
     },
 
     toggleCourt(id: string | number) {
@@ -695,12 +901,15 @@ export const useBookingStore = defineStore('booking', {
     setPaddleQty(id: string, dir: number) {
       const p = this.paddles.find(x => x.id === id)
       if (!p) return
+      if (p.stock <= 0 && dir > 0) return
       let next = (this.paddleQty[id] || 0) + dir
       next = Math.max(0, Math.min(p.stock, next))
       this.paddleQty[id] = next
     },
 
     setFoodQty(id: string, dir: number) {
+      const f = this.allFood.find(x => x.id === id)
+      if (f && f.is_available === false && dir > 0) return
       let next = (this.foodQty[id] || 0) + dir
       next = Math.max(0, Math.min(20, next))
       this.foodQty[id] = next
