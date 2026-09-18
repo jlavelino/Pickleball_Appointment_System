@@ -1,39 +1,40 @@
 <template>
   <div class="flex flex-col min-h-full">
     <div class="flex-1">
-      <div class="mt-1.5 mb-5">
-        <h1 class="font-display font-semibold text-[28px] m-0 leading-[1.15] mb-1">
-          Your booking
-        </h1>
-        <p class="text-ink-soft text-[14px] m-0 leading-[1.4]">
-          Review everything before proceeding to payment
+      <!-- Page header -->
+      <div class="mb-1">
+        <h1 class="page-title">Your booking</h1>
+        <p class="page-subtitle">
+          Review everything before proceeding to player details
         </p>
       </div>
 
       <!-- Hold Timer -->
       <HoldTimer :seconds="store.holdSeconds" />
 
-      <!-- Court Hero Card -->
-      <div class="relative bg-gradient-to-br from-[#1E3314] via-[#2A481B] to-[#1E3314] rounded-2xl p-[18px] mb-4 shadow-[0_6px_20px_-6px_rgba(34,51,24,0.4)] overflow-hidden">
-        <!-- Background subtle texture -->
-        <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-lime/10 -translate-y-1/2 translate-x-1/2 blur-xl pointer-events-none"></div>
+      <!-- Court Hero Card (Dark Forest Green) -->
+      <div class="court-hero mb-4">
+        <!-- Decorative glow -->
+        <div class="court-hero__glow" aria-hidden="true"></div>
 
         <div class="relative">
-          <!-- Court Tag -->
-          <div class="flex items-center gap-2 mb-2.5">
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-lime/20 border border-lime/30 text-lime text-[11px] font-bold tracking-wide uppercase">
-              <span class="w-1.5 h-1.5 rounded-full bg-lime animate-pulse"></span>
+          <!-- Pill badge -->
+          <div class="flex items-center gap-2 mb-3">
+            <span class="court-reserved-badge">
+              <span class="court-reserved-badge__dot"></span>
               Court Reserved
             </span>
           </div>
 
-          <div class="font-display font-bold text-[22px] text-white leading-tight mb-0.5">
+          <!-- Court name -->
+          <div class="court-hero__name">
             {{ store.courtNamesLabel || store.selectedCourt?.name || 'Court' }}
           </div>
 
-          <div class="text-white/70 text-[14px] flex items-center gap-1.5">
-            <span class="mdi mdi-clock-outline text-[13px] text-white/70 flex-shrink-0"></span>
-            {{ store.slotRangeLabel }} · {{ store.dateLabel }}
+          <!-- Slot & date -->
+          <div class="court-hero__details">
+            <span class="mdi mdi-clock-outline text-[14px] text-[#9ACD32] shrink-0"></span>
+            <span>{{ store.slotRangeLabel }} · {{ store.dateLabel }}</span>
           </div>
 
           <!-- Multi-court badges -->
@@ -41,7 +42,7 @@
             <span
               v-for="c in store.selectedCourts"
               :key="c.id"
-              class="px-2.5 py-1 rounded-lg text-[12px] font-semibold bg-white/15 text-white/90 border border-white/20"
+              class="court-badge"
             >
               {{ c.name }} · ₱{{ c.price }}/hr
             </span>
@@ -49,70 +50,72 @@
         </div>
       </div>
 
-      <!-- Line items breakdown -->
-      <div class="bg-cream-card border border-line rounded-card shadow-[0_2px_12px_-4px_rgba(34,51,24,0.08)] overflow-hidden mb-4">
-        <div class="px-[18px] py-3 border-b border-line bg-cream/40">
-          <span class="text-[11px] font-bold tracking-wider uppercase text-ink-soft">Order breakdown</span>
+      <!-- Order Breakdown Card -->
+      <div class="order-card mb-4">
+        <div class="order-card__header">
+          <span class="order-card__label">Order Breakdown</span>
         </div>
 
         <!-- Court rental -->
-        <div class="flex justify-between items-start px-[18px] py-3.5 border-b border-line/60">
+        <div class="order-row border-b border-[#DCE6D8]/60">
           <div>
-            <div class="text-[14.5px] font-medium text-ink">Court rental</div>
-            <div class="text-gray text-[12.5px] mt-0.5">
-              {{ store.courtIds.length > 0 ? store.courtIds.length : 1 }} {{ (store.courtIds.length > 1) ? 'courts' : 'court' }} × {{ store.slotHours }} {{ store.slotHours === 1 ? 'hour' : 'hours' }}
+            <div class="order-row__name">Court rental</div>
+            <div class="order-row__desc">
+              {{ store.courtIds.length > 0 ? store.courtIds.length : 1 }}
+              {{ (store.courtIds.length > 1) ? 'courts' : 'court' }} ×
+              {{ store.slotHours }} {{ store.slotHours === 1 ? 'hour' : 'hours' }}
             </div>
           </div>
-          <div class="font-semibold text-[15px] text-ink">₱{{ store.courtTotal.toLocaleString() }}</div>
+          <div class="order-row__price">₱{{ store.courtTotal.toLocaleString() }}</div>
         </div>
 
         <!-- Paddles if any -->
-        <div v-if="store.paddleCount > 0" class="flex justify-between items-start px-[18px] py-3.5 border-b border-line/60">
+        <div v-if="store.paddleCount > 0" class="order-row border-b border-[#DCE6D8]/60">
           <div>
-            <div class="text-[14.5px] font-medium text-ink">{{ mainPaddleLine.main }}</div>
-            <div class="text-gray text-[12.5px] mt-0.5">
+            <div class="order-row__name">{{ mainPaddleLine.main }}</div>
+            <div class="order-row__desc">
               <span v-if="mainPaddleLine.sub">{{ mainPaddleLine.sub }} · </span>
               <span>{{ store.slotHours }} {{ store.slotHours === 1 ? 'hour' : 'hours' }}</span>
             </div>
           </div>
-          <div class="font-semibold text-[15px] text-ink">₱{{ store.paddleTotal.toLocaleString() }}</div>
+          <div class="order-row__price">₱{{ store.paddleTotal.toLocaleString() }}</div>
         </div>
 
         <!-- Food if any -->
-        <div v-if="store.foodCount > 0" class="flex justify-between items-start px-[18px] py-3.5 border-b border-line/60">
+        <div v-if="store.foodCount > 0" class="order-row border-b border-[#DCE6D8]/60">
           <div>
-            <div class="text-[14.5px] font-medium text-ink">{{ mainFoodLine.main }}</div>
-            <div v-if="mainFoodLine.sub" class="text-gray text-[12.5px] mt-0.5">{{ mainFoodLine.sub }}</div>
+            <div class="order-row__name">{{ mainFoodLine.main }}</div>
+            <div v-if="mainFoodLine.sub" class="order-row__desc">{{ mainFoodLine.sub }}</div>
           </div>
-          <div class="font-semibold text-[15px] text-ink">₱{{ store.foodTotal.toLocaleString() }}</div>
+          <div class="order-row__price">₱{{ store.foodTotal.toLocaleString() }}</div>
         </div>
 
         <!-- Grand total -->
-        <div class="flex justify-between items-center px-[18px] py-4 bg-cream/30">
-          <div class="font-semibold text-[16px] text-ink font-display">Total</div>
-          <div class="font-bold text-[24px] text-ink font-display">₱{{ store.grandTotal.toLocaleString() }}</div>
+        <div class="order-total-row">
+          <div class="order-total-row__label">Total</div>
+          <div class="order-total-row__amount">₱{{ store.grandTotal.toLocaleString() }}</div>
         </div>
       </div>
 
-      <!-- Summary Checklist -->
-      <div class="flex flex-col gap-1.5 mb-1">
-        <div class="flex items-center gap-2 text-[12.5px] text-ink-soft">
-          <div class="w-4 h-4 rounded-full bg-lime-soft text-lime-text flex items-center justify-center text-[9px] font-bold flex-shrink-0">✓</div>
+      <!-- Benefits checklist -->
+      <div class="benefits-list mb-2">
+        <div class="benefit-item">
+          <div class="benefit-item__check">✓</div>
           <span>No hidden fees — price is final</span>
         </div>
-        <div class="flex items-center gap-2 text-[12.5px] text-ink-soft">
-          <div class="w-4 h-4 rounded-full bg-lime-soft text-lime-text flex items-center justify-center text-[9px] font-bold flex-shrink-0">✓</div>
+        <div class="benefit-item">
+          <div class="benefit-item__check">✓</div>
           <span>Court instantly confirmed after payment</span>
         </div>
-        <div class="flex items-center gap-2 text-[12.5px] text-ink-soft">
-          <div class="w-4 h-4 rounded-full bg-lime-soft text-lime-text flex items-center justify-center text-[9px] font-bold flex-shrink-0">✓</div>
-          <span>Digital match pass sent immediately</span>
+        <div class="benefit-item">
+          <div class="benefit-item__check">✓</div>
+          <span>Digital match pass issued immediately</span>
         </div>
       </div>
     </div>
 
     <BottomCTA
-      label="Proceed to payment"
+      label="Proceed to Player Details"
       @click="goNext"
     />
   </div>
@@ -165,3 +168,206 @@ function goNext() {
   navigateTo('/book/details')
 }
 </script>
+
+<style scoped>
+/* ── Page Header ──────────────────────────────── */
+.page-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: #14231C;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.page-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #66756D;
+  margin: 6px 0 16px;
+  line-height: 1.5;
+}
+
+/* ── Court Hero ───────────────────────────────── */
+.court-hero {
+  position: relative;
+  background: #14231C;
+  border-radius: 22px;
+  padding: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(154, 205, 50, 0.15);
+  box-shadow: 0 8px 28px -6px rgba(20, 35, 28, 0.35);
+}
+
+.court-hero__glow {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(154, 205, 50, 0.12);
+  filter: blur(32px);
+  pointer-events: none;
+}
+
+.court-reserved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #E8F4D8;
+  color: #0B6623;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+}
+
+.court-reserved-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0B6623;
+  flex-shrink: 0;
+}
+
+.court-hero__name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.court-hero__details {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.80);
+}
+
+.court-badge {
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Order Card ──────────────────────────────── */
+.order-card {
+  background: #FFFFFF;
+  border: 1.5px solid #DCE6D8;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px -2px rgba(20, 35, 28, 0.05);
+}
+
+.order-card__header {
+  padding: 12px 18px;
+  border-bottom: 1px solid #DCE6D8;
+  background: #FAF9F1;
+}
+
+.order-card__label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #66756D;
+}
+
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 18px;
+}
+
+.order-row__name {
+  font-family: 'Inter', sans-serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #14231C;
+}
+
+.order-row__desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: #66756D;
+  margin-top: 2px;
+}
+
+.order-row__price {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0B6623;
+  flex-shrink: 0;
+}
+
+/* ── Total Row ───────────────────────────────── */
+.order-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: #F6FAF2;
+}
+
+.order-total-row__label {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #14231C;
+}
+
+.order-total-row__amount {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0B6623;
+  line-height: 1;
+}
+
+/* ── Benefits List ───────────────────────────── */
+.benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 2px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: #66756D;
+}
+
+.benefit-item__check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #E8F4D8;
+  color: #0B6623;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+</style>

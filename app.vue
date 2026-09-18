@@ -1,11 +1,11 @@
 <template>
-  <div v-if="isAdminRoute" class="min-h-screen font-sans text-ink bg-[#F5F1DE]">
+  <div v-if="isAdminRoute" class="min-h-screen font-sans text-[#14231C] bg-[#FAF9F1]">
     <NuxtPage />
   </div>
-  <div v-else class="min-h-screen flex justify-center py-8 px-3 font-sans text-ink">
+  <div v-else class="min-h-screen flex justify-center py-6 px-2 sm:px-4 font-sans text-[#14231C]">
     <div class="app-shell flex flex-col">
       <AppHeader />
-      <main class="flex-1 px-[22px] pt-[14px] pb-0 overflow-y-auto no-scrollbar">
+      <main class="flex-1 px-5 pt-3 pb-0 overflow-y-auto no-scrollbar">
         <NuxtPage />
       </main>
     </div>
@@ -21,7 +21,7 @@ const route = useRoute()
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 
 useHead({
-  title: 'DINK — Book a court',
+  title: 'PickleBook — Premium Court Booking',
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
   ],
@@ -33,4 +33,3 @@ onMounted(() => {
   store.fetchAvailability()
 })
 </script>
-

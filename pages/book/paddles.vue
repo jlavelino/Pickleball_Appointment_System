@@ -1,27 +1,23 @@
 <template>
   <div class="flex flex-col min-h-full">
     <div class="flex-1 pb-4">
-      <!-- Step tracker pill -->
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cream-card border border-line text-[11.5px] font-bold text-ink-soft uppercase tracking-wider mb-2">
-        <span class="w-1.5 h-1.5 rounded-full bg-relish-dark"></span>
-        <span>Step 2 of 4 · Gear Rental</span>
+      <!-- Page header -->
+      <div class="mb-5">
+        <h1 class="page-title">Rent paddles</h1>
+        <p class="page-subtitle">
+          Tournament-grade composite paddles provided on-site.
+          Skip if you have your own gear.
+        </p>
       </div>
 
-      <h1 class="font-display font-bold text-[28px] text-ink m-0 leading-tight">
-        Rent paddles
-      </h1>
-      <p class="text-ink-soft text-[14px] m-0 mb-4 leading-relaxed">
-        Tournament-grade composite paddles provided on-site. Skip if you have your own gear.
-      </p>
-
-      <!-- Trust info pill banner -->
-      <div class="p-3 rounded-2xl bg-cream-card border border-line flex items-center gap-3 mb-4 shadow-xs">
-        <div class="w-8 h-8 rounded-xl bg-sold flex items-center justify-center text-relish-dark shrink-0">
-          <span class="mdi mdi-shield-check-outline text-[16px]"></span>
+      <!-- Trust info banner -->
+      <div class="info-banner mb-5">
+        <div class="info-banner__icon">
+          <span class="mdi mdi-shield-check-outline text-[18px] text-[#0B6623]"></span>
         </div>
-        <div class="text-[12.5px] text-ink-soft leading-snug">
+        <p class="info-banner__text">
           Paddles are sanitized and inspected before every match session.
-        </div>
+        </p>
       </div>
 
       <!-- Paddle list -->
@@ -73,10 +69,61 @@ const continueLabel = computed(() => {
   if (store.paddleCount > 0) {
     return `Continue (${store.paddleCount} paddle${store.paddleCount > 1 ? 's' : ''} added)`
   }
-  return 'Skip paddles · Bring own'
+  return 'Skip paddles · Continue'
 })
 
 function goNext() {
   navigateTo('/book/food')
 }
 </script>
+
+<style scoped>
+.page-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: #14231C;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.page-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #66756D;
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+/* ── Info Banner ──────────────────────────────── */
+.info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #FFFFFF;
+  border: 1px solid #DCE6D8;
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px -2px rgba(20, 35, 28, 0.04);
+}
+
+.info-banner__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #E8F4D8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.info-banner__text {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: #66756D;
+  line-height: 1.45;
+  margin: 0;
+  padding-top: 6px;
+}
+</style>

@@ -446,28 +446,28 @@ function statusClass(status: string): string {
   width: 100%;
   padding: 11px 40px;
   border-radius: 12px;
-  border: 1.5px solid var(--line, #DDDDB8);
+  border: 1px solid #DCE6D8;
   background: #FFFFFF;
-  color: var(--ink, #223318);
+  color: #14231C;
   font-size: 14px;
   outline: none;
   box-sizing: border-box;
   transition: all 0.15s ease-out;
 }
 .lookup-input:focus {
-  border-color: var(--ink, #223318);
-  box-shadow: 0 0 0 3px rgba(34, 51, 24, 0.08);
+  border-color: #0B6623;
+  box-shadow: 0 0 0 3px rgba(11, 102, 35, 0.1);
 }
-.lookup-input::placeholder { color: rgba(34, 51, 24, 0.4); }
+.lookup-input::placeholder { color: #8A938D; }
 
 .lookup-search-btn {
   width: 100%;
-  padding: 12px;
-  border-radius: 12px;
+  height: 48px;
+  border-radius: 14px;
   border: none;
-  background: var(--ink, #223318);
+  background: #0B6623;
   color: #FFFFFF;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 700;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
@@ -478,16 +478,21 @@ function statusClass(status: string): string {
   transition: all 0.15s ease-out;
 }
 .lookup-search-btn:hover:not(:disabled) {
-  background: #15220F;
-  box-shadow: 0 4px 12px -2px rgba(34, 51, 24, 0.25);
+  background: #08521C;
+  box-shadow: 0 4px 14px -2px rgba(11, 102, 35, 0.35);
 }
-.lookup-search-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.lookup-search-btn:disabled {
+  background: #D9DEDA;
+  color: #8A938D;
+  cursor: not-allowed;
+}
 
 .ticket-pass-card {
-  border: 1.5px solid var(--line, #DDDDB8);
-  border-radius: 18px;
+  border: 1px solid #DCE6D8;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 16px -4px rgba(34, 51, 24, 0.1);
+  box-shadow: 0 2px 10px -2px rgba(20, 35, 28, 0.05);
+  background: #FFFFFF;
 }
 
 .status-badge {
@@ -497,10 +502,10 @@ function statusClass(status: string): string {
   font-weight: 700;
   white-space: nowrap;
 }
-.status--confirmed { background: #EAF5E8; color: #1D6331; }
-.status--pending   { background: #FEF3D6; color: #9B5A03; }
-.status--held      { background: #EBF0FF; color: #2A4E9E; }
-.status--cancelled { background: #FEECEB; color: #8A1F24; }
+.status--confirmed { background: #E8F4D8; color: #0B6623; }
+.status--pending   { background: #FEF3D6; color: #D98216; }
+.status--held      { background: #FEF3D6; color: #D98216; }
+.status--cancelled { background: #FDE8E8; color: #D94A4A; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.75s linear infinite; }

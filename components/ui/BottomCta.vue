@@ -1,6 +1,6 @@
 <template>
   <footer class="bottom-cta">
-    <!-- soft fade so content visually "disappears" under the bar -->
+    <!-- Soft gradient fade so content disappears cleanly above sticky bar -->
     <div class="bottom-cta__fade" aria-hidden="true" />
 
     <div class="bottom-cta__inner">
@@ -33,36 +33,34 @@ defineEmits<{
 
 <style scoped>
 .bottom-cta {
-  /* Stick to bottom of the nearest positioned ancestor (app-shell) */
   position: sticky;
   bottom: 0;
   z-index: 20;
-  /* No horizontal padding here — handled by __inner */
-  pointer-events: none; /* let the fade be non-interactive */
+  pointer-events: none;
 }
 
 .bottom-cta__fade {
-  height: 32px;
-  background: linear-gradient(to bottom, transparent, var(--cream));
+  height: 20px;
+  background: linear-gradient(to bottom, transparent, #FAF9F1);
   pointer-events: none;
 }
 
 .bottom-cta__inner {
-  background: var(--cream);
-  padding: 4px 22px 22px;
+  background: #FAF9F1;
+  padding: 4px 20px calc(18px + env(safe-area-inset-bottom, 0px));
   pointer-events: all;
-  border-top: 1px solid rgba(34, 51, 24, 0.08);
 }
 
-/* ── Primary button ── */
+/* ── Primary button (Forest green #0B6623, 18-20px radius, 54px height) ── */
 .bottom-cta__btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   border: none;
-  border-radius: 14px;
-  padding: 17px 20px;
+  border-radius: 18px;
+  height: 54px;
+  padding: 0 22px;
   font-family: 'Inter', sans-serif;
   font-size: 15.5px;
   font-weight: 700;
@@ -72,30 +70,32 @@ defineEmits<{
 }
 
 .bottom-cta__btn--primary {
-  background: var(--ink);          /* #223318  — deep forest green, very legible */
-  color: #F5F1DE;                  /* cream text — max contrast */
-  box-shadow: 0 4px 18px -4px rgba(34, 51, 24, 0.45);
+  background: #0B6623;
+  color: #FFFFFF;
+  box-shadow: 0 4px 18px -4px rgba(11, 102, 35, 0.45);
 }
 
 .bottom-cta__btn--primary:hover:not(:disabled) {
-  background: #2e4a1a;             /* slightly lighter shade */
-  box-shadow: 0 6px 22px -4px rgba(34, 51, 24, 0.55);
+  background: #08521C;
+  box-shadow: 0 6px 22px -4px rgba(11, 102, 35, 0.55);
 }
 
 .bottom-cta__btn--primary:disabled {
-  opacity: 0.38;
+  background: #D9DEDA;
+  color: #8A938D;
   cursor: not-allowed;
   box-shadow: none;
+  opacity: 1;
 }
 
 .bottom-cta__btn--ghost {
   background: transparent;
-  color: var(--ink);
-  border: 2px solid var(--ink);
+  color: #0B6623;
+  border: 1.5px solid #0B6623;
   box-shadow: none;
 }
 
 .bottom-cta__btn--ghost:hover:not(:disabled) {
-  background: rgba(34, 51, 24, 0.06);
+  background: #E8F4D8;
 }
 </style>

@@ -791,6 +791,17 @@ export const useBookingStore = defineStore('booking', {
       return this.initiatePayMongoCheckout()
     },
 
+    setDate(year: number, month: number, day: number) {
+      this.year = year
+      this.month = month
+      this.day = day
+      this.selectedSlots = []
+      this.slotIndex = null
+      this.courtIds = []
+      this.courtId = null
+      this.fetchAvailability()
+    },
+
     setDay(day: number) {
       this.day = day
       this.selectedSlots = []

@@ -1,126 +1,104 @@
 <template>
   <div class="flex flex-col min-h-full">
     <div class="flex-1 pb-4">
-      <!-- Step tracker pill -->
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cream-card border border-line text-[11.5px] font-bold text-ink-soft uppercase tracking-wider mb-2">
-        <span class="w-1.5 h-1.5 rounded-full bg-relish-dark"></span>
-        <span>Step 4 of 4 · Booker Details</span>
+      <!-- Page header -->
+      <div class="mb-1">
+        <h1 class="page-title">Player registration</h1>
+        <p class="page-subtitle">
+          {{ store.dateLabel }} · {{ store.slotRangeLabel }}
+        </p>
       </div>
 
-      <h1 class="font-display font-bold text-[28px] text-ink m-0 leading-tight">
-        Player registration
-      </h1>
-      <p class="text-ink-soft text-[14px] m-0 mb-3.5 leading-relaxed">
-        {{ store.dateLabel }} · {{ store.slotRangeLabel }}
-      </p>
+      <!-- Hold Timer -->
+      <HoldTimer :seconds="store.holdSeconds" />
 
-      <!-- Hold timer card -->
-      <div class="mb-4">
-        <HoldTimer :seconds="store.holdSeconds" />
-      </div>
-
-      <!-- Section 1: Primary Booker Card -->
-      <div class="form-section-card mb-4">
-        <div class="flex items-center gap-2 mb-3.5">
-          <div class="w-7 h-7 rounded-lg bg-ink text-cream flex items-center justify-center text-[12px] font-bold">
-            1
-          </div>
+      <!-- ── Section 01: Primary Booker ─────────── -->
+      <div class="form-section mb-4">
+        <div class="section-heading">
+          <div class="section-number section-number--dark">01</div>
           <div>
-            <h2 class="text-[14px] font-bold text-ink uppercase tracking-wider m-0">
-              Primary Booker
-            </h2>
-            <p class="text-[11.5px] text-ink-soft m-0">The match pass will be issued under this name</p>
+            <h2 class="section-title">Primary Booker</h2>
+            <p class="section-desc">The match pass will be issued under this name</p>
           </div>
         </div>
 
         <!-- Full Name -->
         <div class="field-group">
           <label class="field-label" for="booker-name">
-            Full name <span class="text-red-500">*</span>
+            Full name <span class="required-star">*</span>
           </label>
-          <div class="relative">
-            <input
-              id="booker-name"
-              v-model="store.bookerName"
-              type="text"
-              class="field-input"
-              placeholder="e.g. Juan Dela Cruz"
-              autocomplete="name"
-            />
-          </div>
+          <input
+            id="booker-name"
+            v-model="store.bookerName"
+            type="text"
+            class="field-input"
+            placeholder="e.g. Juan Dela Cruz"
+            autocomplete="name"
+          />
         </div>
 
         <!-- Mobile Number -->
         <div class="field-group">
           <label class="field-label" for="booker-mobile">
-            Mobile number <span class="text-red-500">*</span>
+            Mobile number <span class="required-star">*</span>
           </label>
-          <div class="relative">
-            <input
-              id="booker-mobile"
-              v-model="store.bookerMobile"
-              type="tel"
-              class="field-input font-mono"
-              placeholder="09xx xxx xxxx"
-              autocomplete="tel"
-              inputmode="numeric"
-            />
-          </div>
+          <input
+            id="booker-mobile"
+            v-model="store.bookerMobile"
+            type="tel"
+            class="field-input font-mono"
+            placeholder="09xx xxx xxxx"
+            autocomplete="tel"
+            inputmode="numeric"
+          />
           <p class="field-hint">Used for SMS confirmation and emergency court updates.</p>
         </div>
 
         <!-- Facebook Account -->
         <div class="field-group mb-0">
           <label class="field-label" for="booker-fb">
-            Facebook account / Messenger <span class="text-red-500">*</span>
+            Facebook account / Messenger <span class="required-star">*</span>
           </label>
-          <div class="relative">
-            <input
-              id="booker-fb"
-              v-model="store.bookerFacebook"
-              type="text"
-              class="field-input"
-              placeholder="Your profile name or profile URL"
-            />
-          </div>
+          <input
+            id="booker-fb"
+            v-model="store.bookerFacebook"
+            type="text"
+            class="field-input"
+            placeholder="Your profile name or profile URL"
+          />
           <p class="field-hint">Required by venue administration for booking coordination.</p>
         </div>
       </div>
 
-      <!-- Section 2: Playing Squad / Co-Players Card -->
-      <div class="form-section-card mb-4">
-        <div class="flex items-start gap-2.5 mb-3.5">
-          <div class="w-7 h-7 rounded-lg bg-sold text-relish-dark flex items-center justify-center text-[12px] font-bold shrink-0 mt-0.5">
-            2
-          </div>
+      <!-- ── Section 02: Co-Players ─────────────── -->
+      <div class="form-section mb-4">
+        <div class="section-heading">
+          <div class="section-number section-number--light">02</div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2">
-              <h2 class="text-[14px] font-bold text-ink uppercase tracking-wider m-0">
-                Co-Players / Squad
-              </h2>
+              <h2 class="section-title">Co-Players / Squad</h2>
               <span
                 v-if="store.players.length > 0"
-                class="shrink-0 whitespace-nowrap text-[11px] font-bold text-relish-dark px-2 py-0.5 rounded-full bg-sold"
+                class="players-badge"
               >
                 {{ store.players.length }} added
               </span>
             </div>
-            <p class="text-[11.5px] text-ink-soft m-0 mt-0.5">Optional list of players joining your session</p>
+            <p class="section-desc">Optional list of players joining your session</p>
           </div>
         </div>
 
+        <!-- Player list -->
         <div
           v-for="(player, idx) in store.players"
           :key="idx"
-          class="flex items-center gap-2 mb-2.5"
+          class="player-row"
         >
-          <div class="w-6 text-center font-mono text-[12px] font-bold text-ink-soft">
-            #{{ idx + 1 }}
-          </div>
+          <span class="player-index">#{{ idx + 1 }}</span>
           <input
             v-model="player.name"
             type="text"
-            class="field-input flex-1 !py-2.5 !text-[14px]"
+            class="field-input flex-1"
             :placeholder="`Player ${idx + 1} name`"
           />
           <button
@@ -129,92 +107,82 @@
             aria-label="Remove player"
             @click="removePlayer(idx)"
           >
-            <span class="mdi mdi-close text-[16px]"></span>
+            <span class="mdi mdi-close text-[15px]"></span>
           </button>
         </div>
 
+        <!-- Add player button -->
         <button
           type="button"
           class="add-player-btn"
           @click="addPlayer"
         >
-          <span class="mdi mdi-plus text-[16px]"></span>
+          <span class="mdi mdi-plus text-[15px]"></span>
           Add another player
         </button>
       </div>
 
-      <!-- Section 3: Facility Gate Pass & Valid ID Upload -->
-      <div class="form-section-card mb-2">
-        <div class="flex items-center gap-2 mb-3.5">
-          <div class="w-7 h-7 rounded-lg bg-ink text-cream flex items-center justify-center text-[12px] font-bold">
-            3
-          </div>
+      <!-- ── Section 03: Government ID ─────────── -->
+      <div class="form-section mb-2">
+        <div class="section-heading">
+          <div class="section-number section-number--dark">03</div>
           <div>
-            <h2 class="text-[14px] font-bold text-ink uppercase tracking-wider m-0">
-              Valid Government ID <span class="text-red-500">*</span>
+            <h2 class="section-title">
+              Valid Government ID <span class="required-star">*</span>
             </h2>
-            <p class="text-[11.5px] text-ink-soft m-0">Required for venue security check-in</p>
+            <p class="section-desc">Required for venue security check-in</p>
           </div>
         </div>
 
         <label
-          class="id-upload-zone"
-          :class="{ 'id-upload-zone--has-file': store.idPhotoName }"
           for="booker-id"
+          class="id-upload-zone group"
+          :class="{ 'id-upload-zone--has-file': !!store.idPhotoName }"
         >
-          <!-- Empty State -->
-          <div v-if="!store.idPhotoName" class="flex flex-col items-center gap-2 text-center py-2">
-            <div class="w-12 h-12 rounded-2xl bg-sold flex items-center justify-center text-relish-dark shadow-xs">
-              <span class="mdi mdi-card-account-details-outline text-[26px]"></span>
-            </div>
-            <div>
-              <div class="text-[14px] font-bold text-ink">Tap to upload ID photo</div>
-              <div class="text-[12px] text-ink-soft mt-0.5">Driver's License, Passport, UMID, National ID, etc.</div>
-            </div>
-            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-relish-dark px-2.5 py-1 rounded-full bg-sold">
-              Supports JPG, PNG · Max 10MB
-            </span>
-          </div>
+          <input
+            id="booker-id"
+            type="file"
+            accept="image/*,.pdf"
+            class="sr-only"
+            @change="handleIdFile"
+          />
 
-          <!-- File Uploaded State -->
-          <div v-else class="flex items-center justify-between w-full gap-3 p-1">
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 shrink-0">
-                <span class="mdi mdi-check text-[20px]"></span>
+          <!-- File uploaded state -->
+          <div v-if="store.idPhotoName" class="flex items-center justify-between w-full gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-10 h-10 rounded-full bg-[#E8F4D8] flex items-center justify-center text-[#0B6623] shrink-0">
+                <span class="mdi mdi-check-circle text-[22px]"></span>
               </div>
               <div class="min-w-0">
-                <div class="text-[13.5px] font-bold text-ink truncate">ID attached successfully</div>
-                <div class="text-[11.5px] text-ink-soft font-mono truncate max-w-[200px]">{{ store.idPhotoName }}</div>
+                <div class="text-[13.5px] font-bold text-[#14231C] truncate">
+                  {{ store.idPhotoName }}
+                </div>
+                <div class="text-[11.5px] text-[#0B6623] font-medium">Ready for verification</div>
               </div>
             </div>
-
             <button
               type="button"
-              class="shrink-0 text-[12px] font-bold text-red-600 hover:text-red-700 underline px-2 py-1"
+              class="text-[12px] font-bold text-[#D94A4A] hover:underline shrink-0"
               @click.prevent="clearId"
             >
-              Replace
+              Remove
             </button>
           </div>
+
+          <!-- Empty state -->
+          <div v-else class="text-center py-3">
+            <div class="w-12 h-12 rounded-full bg-[#E8F4D8] text-[#0B6623] flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition-transform">
+              <span class="mdi mdi-cloud-upload-outline text-[24px]"></span>
+            </div>
+            <div class="text-[13.5px] font-bold text-[#14231C]">Tap to upload valid ID</div>
+            <div class="text-[11.5px] text-[#66756D] mt-1">JPG, PNG, or PDF up to 10MB</div>
+          </div>
         </label>
-
-        <input
-          id="booker-id"
-          type="file"
-          accept="image/*"
-          class="sr-only"
-          @change="handleIdFile"
-        />
-
-        <div class="flex items-center gap-1.5 mt-2.5 text-[11px] text-ink-soft">
-          <span class="mdi mdi-lock-outline text-[14px] text-relish-dark shrink-0"></span>
-          <span>IDs are securely processed and verified solely for gate admission.</span>
-        </div>
       </div>
     </div>
 
     <BottomCTA
-      label="Proceed to Payment"
+      :label="canProceed ? 'Proceed to Payment' : 'Complete details to continue'"
       :disabled="!canProceed"
       @click="goNext"
     />
@@ -222,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 import HoldTimer from '~/components/ui/HoldTimer.vue'
 import BottomCTA from '~/components/ui/BottomCta.vue'
@@ -231,20 +199,14 @@ useHead({ title: 'Player details — PickleBook' })
 
 const store = useBookingStore()
 
-if (store.courtId === null && store.courtIds.length === 0) {
-  navigateTo('/book/court')
-}
-
-onMounted(() => {
-  store.startHold()
+const canProceed = computed(() => {
+  return (
+    store.bookerName.trim().length >= 2 &&
+    store.bookerMobile.trim().length >= 7 &&
+    store.bookerFacebook.trim().length >= 2 &&
+    !!store.idPhotoName
+  )
 })
-
-const canProceed = computed(() =>
-  store.bookerName.trim().length > 0 &&
-  store.bookerMobile.trim().length >= 10 &&
-  store.bookerFacebook.trim().length > 0 &&
-  store.idPhotoName !== null
-)
 
 function addPlayer() {
   store.players.push({ name: '', mobile: '' })
@@ -277,14 +239,83 @@ function goNext() {
 </script>
 
 <style scoped>
-.form-section-card {
-  background: var(--cream-card, #FDFCF5);
-  border: 1.5px solid var(--line, #DDDDB8);
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 2px 8px -3px rgba(34, 51, 24, 0.05);
+/* ── Page Header ──────────────────────────────── */
+.page-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: #14231C;
+  margin: 0;
+  line-height: 1.15;
 }
 
+.page-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #66756D;
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+/* ── Form Section Card ────────────────────────── */
+.form-section {
+  background: #FFFFFF;
+  border: 1.5px solid #DCE6D8;
+  border-radius: 20px;
+  padding: 18px 18px;
+  box-shadow: 0 2px 10px -2px rgba(20, 35, 28, 0.04);
+}
+
+/* ── Section Heading ─────────────────────────── */
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: 'Inter', sans-serif;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.section-number--dark {
+  background: #14231C;
+  color: #FFFFFF;
+}
+
+.section-number--light {
+  background: #E8F4D8;
+  color: #0B6623;
+}
+
+.section-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #14231C;
+  margin: 0;
+}
+
+.section-desc {
+  font-size: 11.5px;
+  color: #66756D;
+  margin: 2px 0 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Fields ──────────────────────────────────── */
 .field-group {
   margin-bottom: 14px;
 }
@@ -293,101 +324,148 @@ function goNext() {
   display: block;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ink, #223318);
-  margin-bottom: 5px;
+  color: #14231C;
+  margin-bottom: 6px;
+  font-family: 'Inter', sans-serif;
+}
+
+.required-star {
+  color: #D94A4A;
 }
 
 .field-input {
   width: 100%;
   box-sizing: border-box;
   background: #FFFFFF;
-  border: 1.5px solid var(--line, #DDDDB8);
+  border: 1.5px solid #DCE6D8;
   border-radius: 12px;
-  padding: 11px 14px;
+  padding: 12px 14px;
   font-family: 'Inter', sans-serif;
-  font-size: 14.5px;
-  color: var(--ink, #223318);
+  font-size: 14px;
+  color: #14231C;
   outline: none;
-  transition: all 0.15s ease-out;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  height: 50px;
 }
+
 .field-input::placeholder {
-  color: rgba(34, 51, 24, 0.35);
+  color: #9AA39E;
 }
+
 .field-input:focus {
-  border-color: var(--ink, #223318);
-  box-shadow: 0 0 0 3px rgba(34, 51, 24, 0.08);
+  border-color: #0B6623;
+  box-shadow: 0 0 0 3px rgba(11, 102, 35, 0.1);
 }
 
 .field-hint {
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   font-size: 11.5px;
-  color: var(--ink-soft, #5A6650);
-  line-height: 1.35;
+  color: #66756D;
+  line-height: 1.4;
+  font-family: 'Inter', sans-serif;
 }
 
+/* ── Players Badge ───────────────────────────── */
+.players-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0B6623;
+  background: #E8F4D8;
+  padding: 2px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Player Row ──────────────────────────────── */
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.player-index {
+  width: 24px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #66756D;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ── Add Player Button ───────────────────────── */
 .add-player-btn {
   width: 100%;
-  border: 1.5px dashed var(--line, #DDDDB8);
+  border: 1.5px dashed #DCE6D8;
   border-radius: 12px;
   background: transparent;
-  padding: 10px;
+  padding: 11px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ink, #223318);
+  color: #0B6623;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.15s ease-out;
+  transition: all 0.15s ease;
   font-family: 'Inter', sans-serif;
 }
+
 .add-player-btn:hover {
-  border-color: var(--ink, #223318);
-  background: rgba(34, 51, 24, 0.04);
+  border-color: #0B6623;
+  background: #E8F4D8;
 }
 
+/* ── Remove Button ───────────────────────────── */
 .remove-btn {
   flex-shrink: 0;
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  border: 1px solid var(--line, #DDDDB8);
+  border: 1.5px solid #DCE6D8;
   background: #FFFFFF;
-  color: var(--ink-soft, #5A6650);
+  color: #66756D;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.12s ease-out;
-}
-.remove-btn:hover {
-  background: #FEECEB;
-  border-color: #E5484D;
-  color: #E5484D;
+  transition: all 0.12s ease;
 }
 
+.remove-btn:hover {
+  background: #FDE8E8;
+  border-color: #D94A4A;
+  color: #D94A4A;
+}
+
+/* ── ID Upload Zone ──────────────────────────── */
 .id-upload-zone {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   box-sizing: border-box;
-  min-height: 96px;
-  border: 2px dashed var(--line, #DDDDB8);
-  border-radius: 14px;
-  background: #FFFFFF;
+  min-height: 104px;
+  border: 2px dashed #DCE6D8;
+  border-radius: 16px;
+  background: #FAF9F1;
   cursor: pointer;
-  padding: 14px;
-  transition: all 0.15s ease-out;
+  padding: 16px;
+  transition: all 0.15s ease;
 }
+
 .id-upload-zone:hover {
-  border-color: var(--ink, #223318);
-  background: rgba(34, 51, 24, 0.02);
+  border-color: #0B6623;
+  background: #F4FAF0;
 }
+
 .id-upload-zone--has-file {
   border-style: solid;
-  border-color: #10B981;
-  background: #F0FDF4;
+  border-color: #0B6623;
+  background: #F6FAF2;
 }
 </style>
