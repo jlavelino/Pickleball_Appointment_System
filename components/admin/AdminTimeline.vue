@@ -1,66 +1,79 @@
 <template>
-  <div class="bg-white rounded-[24px] border border-line shadow-sm p-4 sm:p-6 overflow-hidden">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-line">
+  <div class="bg-white rounded-[20px] sm:rounded-[28px] border border-[#DCE6D8] shadow-subtle p-3.5 sm:p-7 overflow-hidden">
+    <!-- Header & Live Status Row -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-4 sm:mb-6 pb-3.5 sm:pb-4 border-b border-[#DCE6D8]">
       <div>
-        <h2 class="font-display font-bold text-[18px] text-ink m-0 flex items-center gap-2">
+        <h2 class="font-display font-bold text-[17px] sm:text-[20px] text-[#14231C] m-0 flex items-center gap-2">
           <span>Court Schedule Grid</span>
-          <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sold text-relish-dark font-sans">
+          <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full bg-[#E8F4D8] text-[#0B6623] border border-[#DCE6D8] font-sans">
             8:00 AM – 11:00 PM
           </span>
         </h2>
-        <p class="text-[12.5px] text-ink-soft m-0 mt-0.5">
-          Live court timeline for {{ selectedDateLabel }}
+        <p class="text-[12px] sm:text-[13px] text-[#66756D] m-0 mt-0.5 sm:mt-1">
+          Live court assignments and schedule for <strong class="text-[#14231C]">{{ selectedDateLabel }}</strong>
         </p>
       </div>
 
-      <!-- Legend -->
-      <div class="flex items-center gap-3 text-[11.5px] font-medium text-ink-soft flex-wrap">
-        <span class="flex items-center gap-1.5">
-          <span class="w-3 h-3 rounded-md bg-[#E8F3D6] border border-[#C5E19A]"></span>
-          Confirmed
+      <!-- Refined Legend -->
+      <div class="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11.5px] font-semibold text-[#66756D] flex-wrap">
+        <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#E8F4D8] text-[#0B6623] border border-[#DCE6D8]">
+          <span class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#0B6623]"></span>
+          <span>Confirmed</span>
         </span>
-        <span class="flex items-center gap-1.5">
-          <span class="w-3 h-3 rounded-md bg-[#D1FAE5] border border-[#6EE7B7]"></span>
-          Checked In
+        <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#D1FAE5] text-[#065F46] border border-[#A7F3D0]">
+          <span class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#059669]"></span>
+          <span>Checked In</span>
         </span>
-        <span class="flex items-center gap-1.5">
-          <span class="w-3 h-3 rounded-md bg-[#FEF3C7] border border-[#FDE68A]"></span>
-          Pending
+        <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#FFF4E5] text-[#9A3412] border border-[#FED7AA]">
+          <span class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#D98216]"></span>
+          <span>Hold</span>
         </span>
-        <span class="flex items-center gap-1.5">
-          <span class="w-3 h-3 rounded-md bg-cream border border-line"></span>
-          Available
+        <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#FAF9F1] text-[#66756D] border border-[#DCE6D8]">
+          <span class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full border border-[#66756D] border-dashed"></span>
+          <span>Available</span>
+        </span>
+        <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-[#FDE8E8] text-[#991B1B] border border-[#FECACA]">
+          <span class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#D94A4A]"></span>
+          <span>Maintenance</span>
         </span>
       </div>
     </div>
 
+    <!-- Mobile horizontal swipe hint -->
+    <div class="sm:hidden flex items-center justify-end gap-1 text-[11px] text-[#66756D] mb-2 px-1">
+      <span class="mdi mdi-arrow-left-right text-[12px] text-[#0B6623]"></span>
+      <span>Swipe horizontally to view courts</span>
+    </div>
+
     <!-- Timeline Grid Table -->
-    <div class="overflow-x-auto">
-      <div class="min-w-[620px]">
+    <div class="overflow-x-auto pb-2 no-scrollbar">
+      <div class="min-w-[500px] sm:min-w-[660px]">
         <!-- Court Columns Header -->
         <div
-          class="grid gap-2 mb-2 pb-2 text-center text-[13px] font-bold text-ink"
+          class="grid gap-2.5 mb-2.5 pb-2.5 text-center text-[13px] font-bold text-[#14231C]"
           :style="gridColumnsStyle"
         >
-          <div class="text-left text-ink-soft text-[11px] font-mono uppercase tracking-wider py-1 pl-1">
-            Time
+          <div class="text-left text-[#66756D] text-[11px] font-mono uppercase tracking-wider py-1 pl-1">
+            Time Slot
           </div>
           <div
             v-for="court in courtHeaders"
             :key="court.id"
-            class="p-2 rounded-xl bg-lime-soft/60 border border-lime/20 flex items-center justify-center gap-1.5"
+            class="p-3 rounded-2xl bg-[#E8F4D8]/60 border border-[#DCE6D8] flex items-center justify-between gap-2 shadow-2xs"
           >
-            <span class="font-display font-bold text-ink">{{ court.name }}</span>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full" :class="court.status === 'active' ? 'bg-[#0B6623]' : 'bg-[#D94A4A]'"></span>
+              <span class="font-display font-bold text-[#14231C] text-[15px]">{{ court.name }}</span>
+            </div>
             <span
               v-if="court.status === 'maintenance'"
-              class="text-[9.5px] uppercase font-bold text-amber-900 px-1.5 py-0.5 rounded bg-amber-100 border border-amber-300"
+              class="text-[9.5px] uppercase font-bold text-[#991B1B] px-2 py-0.5 rounded-full bg-[#FDE8E8] border border-[#FECACA]"
             >
               Maintenance
             </span>
             <span
               v-else
-              class="text-[10px] uppercase font-bold text-lime-text px-1.5 py-0.5 rounded bg-white/70 border border-lime/20"
+              class="text-[10px] uppercase font-bold text-[#0B6623] px-2 py-0.5 rounded-full bg-white border border-[#DCE6D8]"
             >
               {{ court.type.includes('covered') ? 'Covered' : 'Indoor' }}
             </span>
@@ -68,58 +81,65 @@
         </div>
 
         <!-- Hourly Rows -->
-        <div class="space-y-1.5">
+        <div class="space-y-2">
           <div
             v-for="hour in hours"
             :key="hour.startStr"
-            class="grid gap-2 items-center"
+            class="grid gap-2.5 items-center"
             :style="gridColumnsStyle"
           >
             <!-- Time label -->
-            <div class="text-left font-mono text-[11px] text-ink-soft pl-1 leading-tight">
-              <div class="font-bold text-ink">{{ hour.label }}</div>
-              <div class="text-[9px] text-ink-soft/70">to {{ hour.endLabel }}</div>
+            <div class="text-left font-mono text-[11.5px] text-[#66756D] pl-1 leading-tight">
+              <div class="font-bold text-[#14231C]">{{ hour.label }}</div>
+              <div class="text-[9.5px] text-[#66756D]/70">to {{ hour.endLabel }}</div>
             </div>
 
-            <!-- Court Slots (Dynamically matches courts from database) -->
+            <!-- Court Slots -->
             <div
               v-for="court in courtHeaders"
               :key="court.id"
-              class="h-14 rounded-xl border transition-all duration-150 relative overflow-hidden"
+              class="h-15 rounded-2xl border transition-all duration-150 relative overflow-hidden"
               :class="getSlotClass(court.id, hour.startStr)"
             >
               <!-- If slot has booking -->
               <div
                 v-if="getBookingForSlot(court.id, hour.startStr)"
-                class="w-full h-full p-2 flex flex-col justify-between cursor-pointer hover:opacity-90 active:scale-[0.99]"
+                class="w-full h-full p-2.5 flex flex-col justify-between cursor-pointer hover:opacity-95 active:scale-[0.99] transition-all"
                 @click="onSelectBooking(getBookingForSlot(court.id, hour.startStr)!)"
               >
-                <div class="flex items-center justify-between gap-1 leading-none">
-                  <span class="font-bold text-[12px] truncate">
+                <div class="flex items-center justify-between gap-1.5 leading-none">
+                  <span class="font-bold text-[12.5px] truncate">
                     {{ getBookingForSlot(court.id, hour.startStr)!.guest_name }}
                   </span>
                   <span
                     v-if="getBookingForSlot(court.id, hour.startStr)!.checked_in"
-                    class="text-[9.5px] font-extrabold uppercase px-1 py-0.2 rounded bg-emerald-600 text-white leading-tight shrink-0"
+                    class="text-[9.5px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#059669] text-white flex items-center gap-0.5 shrink-0 shadow-xs"
                   >
-                    IN
+                    <span class="mdi mdi-check text-[11px]"></span>
+                    <span>IN</span>
                   </span>
                   <span
                     v-else
-                    class="text-[9.5px] font-bold uppercase px-1 py-0.2 rounded shrink-0"
-                    :class="getBookingForSlot(court.id, hour.startStr)!.status === 'confirmed' ? 'bg-[#38591A] text-white' : 'bg-amber-600 text-white'"
+                    class="text-[9.5px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 shadow-xs"
+                    :class="getBookingForSlot(court.id, hour.startStr)!.status === 'confirmed'
+                      ? 'bg-[#0B6623] text-white'
+                      : 'bg-[#D98216] text-white'"
                   >
                     {{ getBookingForSlot(court.id, hour.startStr)!.status === 'confirmed' ? 'PAID' : 'HOLD' }}
                   </span>
                 </div>
 
-                <div class="flex items-center justify-between text-[10px] text-ink-soft/90 font-mono mt-0.5">
+                <div class="flex items-center justify-between text-[10.5px] text-[#66756D] font-mono mt-0.5">
                   <span class="truncate">{{ getBookingForSlot(court.id, hour.startStr)!.reference }}</span>
-                  <div class="flex items-center gap-1 shrink-0">
-                    <span class="text-[9px] font-sans font-bold text-relish-dark/90 bg-black/5 px-1 py-0.2 rounded">
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="text-[9.5px] font-sans font-bold text-[#0B6623] bg-[#0B6623]/10 px-1.5 py-0.2 rounded-md">
                       {{ formatBookingTimeSpan(getBookingForSlot(court.id, hour.startStr)!) }}
                     </span>
-                    <span v-if="getBookingForSlot(court.id, hour.startStr)!.paddles.length" class="mdi mdi-racquetball text-[11px] text-relish-dark" title="Paddles rented"></span>
+                    <span
+                      v-if="getBookingForSlot(court.id, hour.startStr)!.paddles.length"
+                      class="mdi mdi-racquetball text-[13px] text-[#0B6623]"
+                      title="Paddles rented"
+                    ></span>
                   </div>
                 </div>
               </div>
@@ -127,10 +147,12 @@
               <!-- Available / Open slot or Maintenance slot -->
               <div
                 v-else
-                class="w-full h-full flex items-center justify-center transition-all duration-150 text-[11px] font-medium rounded-xl"
-                :class="court.status === 'maintenance' ? 'bg-amber-50/50 text-amber-800/60 border border-dashed border-amber-200' : 'border-2 border-dashed border-transparent text-ink-soft/30 hover:text-lime-text hover:border-lime/40 hover:bg-lime-soft/30'"
+                class="w-full h-full flex items-center justify-center transition-all duration-150 text-[11.5px] font-semibold rounded-2xl"
+                :class="court.status === 'maintenance'
+                  ? 'bg-[#FDE8E8]/40 text-[#991B1B]/70 border border-dashed border-[#FECACA]'
+                  : 'bg-[#FAF9F1]/60 border border-dashed border-[#DCE6D8] text-[#66756D]/40 hover:text-[#0B6623] hover:border-[#0B6623]/40 hover:bg-[#E8F4D8]/40'"
               >
-                <span>{{ court.status === 'maintenance' ? 'Maintenance' : 'Open' }}</span>
+                <span>{{ court.status === 'maintenance' ? 'Maintenance' : 'Open Slot' }}</span>
               </div>
             </div>
           </div>
@@ -211,11 +233,9 @@ function getBookingForSlot(courtId: string, startStr: string): AdminBooking | un
   const slotHour = parseInt(startStr.split(':')[0])
 
   return props.bookings.find((b) => {
-    // Check court match
     const courtMatch = b.court_ids.includes(courtId) || b.court_names.toLowerCase().includes(courtName.toLowerCase())
     if (!courtMatch) return false
 
-    // Check time overlap
     const bStartH = parseInt(b.start_time.split(':')[0])
     let bEndH = parseInt(b.end_time.split(':')[0])
     if (bEndH === 0) bEndH = 24
@@ -227,18 +247,18 @@ function getBookingForSlot(courtId: string, startStr: string): AdminBooking | un
 function getSlotClass(courtId: string, startStr: string): string {
   const b = getBookingForSlot(courtId, startStr)
   if (!b) {
-    return 'bg-cream/40 border-line/40'
+    return 'bg-[#FAF9F1]/40 border-[#DCE6D8]'
   }
   if (b.checked_in) {
-    return 'bg-[#E1F7EC] border-[#86EFAC] text-emerald-950 shadow-2xs'
+    return 'bg-[#D1FAE5] border-[#6EE7B7] text-[#065F46] shadow-xs hover:border-[#059669]'
   }
   if (b.status === 'confirmed') {
-    return 'bg-[#EBF5DC] border-[#B7DD85] text-relish-dark shadow-2xs'
+    return 'bg-[#E8F4D8] border-[#B8DC9E] text-[#14231C] shadow-xs hover:border-[#0B6623]'
   }
   if (b.status === 'pending_payment') {
-    return 'bg-[#FEF8E7] border-[#FDE68A] text-amber-900 shadow-2xs'
+    return 'bg-[#FFF4E5] border-[#FED7AA] text-[#9A3412] shadow-xs hover:border-[#D98216]'
   }
-  return 'bg-red-50 border-red-200 text-red-900'
+  return 'bg-[#FDE8E8] border-[#FECACA] text-[#991B1B]'
 }
 
 function onSelectBooking(booking: AdminBooking) {
