@@ -6,5 +6,7 @@
   "1ba4080d-11e4-4a31-b02f-b3990ec94637": "/api/booking/id-photo/PB-20260915-88764_1789719069883.png",
   "PB-20260915-88764": "/api/booking/id-photo/PB-20260915-88764_1789719069883.png",
   "34618798-e6df-40b1-9f0f-56f22db008b2": "/api/booking/id-photo/PB-20260918-21946_1789740879038.png",
-  "PB-20260918-21946": "/api/booking/id-photo/PB-20260918-21946_1789740879038.png"
+  "PB-20260918-21946": "/api/booking/id-photo/PB-20260918-21946_1789740879038.png",
+  "f6cca185-af8d-4ed6-9403-be73c905ff8e": "https://unfevsmviabqvlffwzsc.supabase.co/storage/v1/object/public/id-photos/PB-20260918-23807_1789742330690.png",
+  "PB-20260918-23807": "https://unfevsmviabqvlffwzsc.supabase.co/storage/v1/object/public/id-photos/PB-20260918-23807_1789742330690.png"
 }

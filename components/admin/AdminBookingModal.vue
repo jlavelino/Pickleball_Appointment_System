@@ -89,7 +89,7 @@
           </div>
 
           <!-- Government ID Photo Preview & Inspector -->
-          <div v-if="booking.id_photo_url" class="mt-2 pt-2.5 border-t border-[#DCE6D8]/60">
+          <div v-if="displayPhotoUrl" class="mt-2 pt-2.5 border-t border-[#DCE6D8]/60">
             <div class="text-[11px] font-semibold text-[#66756D] mb-1.5 flex items-center justify-between">
               <span>Government-Issued ID</span>
               <span class="text-[11px] text-[#0B6623] font-bold cursor-pointer hover:underline flex items-center gap-0.5" @click="showFullId = true">
@@ -102,9 +102,10 @@
               @click="showFullId = true"
             >
               <img
-                :src="booking.id_photo_url"
+                :src="displayPhotoUrl"
                 alt="Government ID"
                 class="w-full h-full object-contain group-hover:scale-102 transition-transform"
+                @error="handleImageError"
               />
               <div class="absolute inset-0 bg-[#14231C]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[12px] font-bold gap-1.5 backdrop-blur-[2px]">
                 <span class="mdi mdi-magnify-plus text-[16px]"></span>
@@ -212,12 +213,12 @@
 
     <!-- Fullscreen Government ID Inspector Modal -->
     <div
-      v-if="showFullId && booking.id_photo_url"
+      v-if="showFullId && displayPhotoUrl"
       class="fixed inset-0 z-60 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 animate-fade-in"
       @click="showFullId = false"
     >
       <div class="relative max-w-3xl max-h-[85vh] overflow-hidden rounded-2xl border border-white/20 shadow-2xl bg-black" @click.stop>
-        <img :src="booking.id_photo_url" alt="Enlarged ID" class="w-full h-full object-contain max-h-[80vh]" />
+        <img :src="displayPhotoUrl" alt="Enlarged ID" class="w-full h-full object-contain max-h-[80vh]" />
         <button
           type="button"
           class="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition-colors"
@@ -234,7 +235,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { AdminBooking } from '~/composables/useAdminData'
 
 const props = defineProps<{
@@ -248,6 +249,20 @@ const emit = defineEmits<{
 }>()
 
 const showFullId = ref(false)
+const displayPhotoUrl = ref(props.booking.id_photo_url || '')
+
+watch(() => props.booking.id_photo_url, (newVal) => {
+  displayPhotoUrl.value = newVal || ''
+})
+
+function handleImageError() {
+  if (!displayPhotoUrl.value) return
+  // If remote Supabase public URL failed (e.g. private bucket or network error), fallback to internal proxy
+  const filename = displayPhotoUrl.value.split('/').pop()?.split('?')[0]
+  if (filename && !displayPhotoUrl.value.startsWith('/api/booking/id-photo/')) {
+    displayPhotoUrl.value = `/api/booking/id-photo/${filename}`
+  }
+}
 
 function onCheckIn() {
   emit('check-in', props.booking.id)

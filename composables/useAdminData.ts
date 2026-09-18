@@ -145,7 +145,7 @@ export function useAdminData() {
       guest_name: guestName,
       guest_mobile: firstGuest.mobile || '',
       guest_facebook: firstGuest.facebook_account || '',
-      id_photo_url: idPhotoMap.value[b.id] || idPhotoMap.value[b.reference] || firstGuest.id_photo_url || '',
+      id_photo_url: firstGuest.id_photo_url || idPhotoMap.value[b.id] || idPhotoMap.value[b.reference] || '',
       court_names: courtNames,
       court_ids: courtIds,
       court_rentals: courtList.map((c: any) => ({
