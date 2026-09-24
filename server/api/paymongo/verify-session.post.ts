@@ -143,6 +143,14 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    if (!isPaid && bookingId && (attrs.status === 'expired' || attrs.status === 'cancelled')) {
+      try {
+        await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId)
+      } catch (cancelErr) {
+        console.warn('[PayMongo verify-session] Could not update expired booking to cancelled:', cancelErr)
+      }
+    }
+
     return {
       success: true,
       paid: isPaid,

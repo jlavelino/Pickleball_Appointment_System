@@ -271,7 +271,11 @@ const dayConfirmedCount = computed(() => {
 })
 
 const dayPendingCount = computed(() => {
-  return dayBookings.value.filter((b) => b.status === 'pending_payment').length
+  return dayBookings.value.filter((b) => {
+    if (b.status !== 'pending_payment') return false
+    if (!b.created_at) return false
+    return Date.now() - new Date(b.created_at).getTime() <= 10 * 60 * 1000
+  }).length
 })
 
 const dayCheckedInCount = computed(() => {

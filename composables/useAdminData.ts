@@ -313,7 +313,34 @@ export function useAdminData() {
       const { data, error: err } = await query
       if (err) throw err
 
-      bookings.value = (data || []).map(mapRawBooking)
+      // Automatically identify stale pending holds (> 10 mins old) and mark them cancelled in Supabase
+      const HOLD_TIMEOUT_MS = 10 * 60 * 1000
+      const staleHoldIds = (data || [])
+        .filter((b: any) => {
+          if (b.status !== 'pending_payment' && b.status !== 'held') return false
+          if (!b.created_at) return false
+          return Date.now() - new Date(b.created_at).getTime() > HOLD_TIMEOUT_MS
+        })
+        .map((b: any) => b.id)
+
+      if (staleHoldIds.length > 0) {
+        supabase
+          .from('bookings')
+          .update({ status: 'cancelled' })
+          .in('id', staleHoldIds)
+          .then(() => {})
+      }
+
+      bookings.value = (data || []).map((b: any) => {
+        const isStale =
+          (b.status === 'pending_payment' || b.status === 'held') &&
+          b.created_at &&
+          Date.now() - new Date(b.created_at).getTime() > HOLD_TIMEOUT_MS
+        return mapRawBooking({
+          ...b,
+          status: isStale ? 'cancelled' : b.status,
+        })
+      })
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch bookings'
       console.error('Error fetching bookings:', err)

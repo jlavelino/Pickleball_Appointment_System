@@ -614,7 +614,7 @@ function formatTime(timeStr: string): string {
 function statusLabel(status: string): string {
   const map: Record<string, string> = {
     confirmed: 'Confirmed ✓', pending_payment: 'Pending',
-    held: 'On hold', cancelled: 'Cancelled',
+    held: 'On hold', cancelled: 'Cancelled', expired: 'Expired',
   }
   return map[status] ?? status
 }
@@ -622,7 +622,7 @@ function statusLabel(status: string): string {
 function statusClass(status: string): string {
   const map: Record<string, string> = {
     confirmed: 'status--confirmed', pending_payment: 'status--pending',
-    held: 'status--held', cancelled: 'status--cancelled',
+    held: 'status--held', cancelled: 'status--cancelled', expired: 'status--cancelled',
   }
   return map[status] ?? ''
 }

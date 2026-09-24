@@ -129,7 +129,7 @@
                         ? 'bg-[#0B6623] text-white'
                         : 'bg-[#D98216] text-white'"
                     >
-                      {{ getBookingForSlot(court.id, hour.startStr)!.status === 'confirmed' ? 'PAID' : 'HOLD' }}
+                      {{ getBookingForSlot(court.id, hour.startStr)!.status === 'confirmed' ? 'PAID' : `HOLD · ${getHoldMinutesRemaining(getBookingForSlot(court.id, hour.startStr)!)}m` }}
                     </span>
                   </div>
 
@@ -240,12 +240,35 @@ function formatBookingTimeSpan(b: AdminBooking): string {
   return `${formatH(b.start_time)}–${formatH(b.end_time)}`
 }
 
+const HOLD_TIMEOUT_MS = 10 * 60 * 1000 // 10-minute hold window
+
+function isBookingActive(b: AdminBooking): boolean {
+  if (b.status === 'confirmed') return true
+  if (b.status === 'cancelled' || b.status === 'expired') return false
+  if (b.status === 'pending_payment') {
+    if (!b.created_at) return false
+    const diff = Date.now() - new Date(b.created_at).getTime()
+    return diff <= HOLD_TIMEOUT_MS
+  }
+  return false
+}
+
+function getHoldMinutesRemaining(b: AdminBooking): number {
+  if (!b.created_at) return 0
+  const elapsed = Date.now() - new Date(b.created_at).getTime()
+  const remainingMs = Math.max(0, HOLD_TIMEOUT_MS - elapsed)
+  return Math.max(1, Math.ceil(remainingMs / (60 * 1000)))
+}
+
 function getBookingForSlot(courtId: string, startStr: string): AdminBooking | undefined {
   const courtObj = props.courts.find((c) => c.id === courtId)
   const courtName = courtObj ? courtObj.name : courtId === 'c1' ? 'Court 1' : courtId === 'c2' ? 'Court 2' : 'Court 3'
   const slotHour = parseInt(startStr.split(':')[0])
 
   return props.bookings.find((b) => {
+    // Only active bookings (confirmed or non-expired pending holds) occupy timeline slots
+    if (!isBookingActive(b)) return false
+
     const courtMatch = b.court_ids.includes(courtId) || b.court_names.toLowerCase().includes(courtName.toLowerCase())
     if (!courtMatch) return false
 

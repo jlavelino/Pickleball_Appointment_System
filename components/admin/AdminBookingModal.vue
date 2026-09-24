@@ -54,9 +54,11 @@
             class="text-[11px] font-bold uppercase px-2.5 py-1 rounded-full border shadow-2xs shrink-0"
             :class="booking.status === 'confirmed'
               ? 'bg-[#E8F4D8] border-[#B8DC9E] text-[#0B6623]'
-              : 'bg-[#FFF4E5] border-[#FED7AA] text-[#9A3412]'"
+              : booking.status === 'pending_payment'
+              ? 'bg-[#FFF4E5] border-[#FED7AA] text-[#9A3412]'
+              : 'bg-[#FDE8E8] border-[#FECACA] text-[#991B1B]'"
           >
-            {{ booking.status === 'confirmed' ? 'Paid & Confirmed' : booking.status }}
+            {{ booking.status === 'confirmed' ? 'Paid & Confirmed' : booking.status === 'pending_payment' ? 'Pending Hold' : 'Cancelled / Expired' }}
           </span>
         </div>
 
@@ -198,9 +200,9 @@
           <span>Guest Admitted · {{ booking.checked_in_at || 'Checked In' }}</span>
         </div>
 
-        <!-- Cancel Booking Button (if active) -->
+        <!-- Cancel Booking Button (if active or hold) -->
         <button
-          v-if="booking.status === 'confirmed'"
+          v-if="booking.status === 'confirmed' || booking.status === 'pending_payment'"
           type="button"
           class="w-full sm:w-auto py-2.5 sm:py-3 px-4 rounded-xl sm:rounded-2xl bg-white border border-[#FECACA] text-[#D94A4A] font-bold text-[12.5px] hover:bg-[#FDE8E8] active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
           @click="onCancelBooking"

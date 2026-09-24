@@ -256,12 +256,13 @@ const filterTabs = [
   { label: 'Confirmed', value: 'confirmed' },
   { label: 'Checked In', value: 'checked_in' },
   { label: 'Pending Hold', value: 'pending_payment' },
-  { label: 'Cancelled', value: 'cancelled' },
+  { label: 'Cancelled / Expired', value: 'cancelled' },
 ]
 
 function getTabCount(tabVal: string): number {
   if (tabVal === 'all') return props.bookings.length
   if (tabVal === 'checked_in') return props.bookings.filter((b) => b.checked_in).length
+  if (tabVal === 'cancelled') return props.bookings.filter((b) => b.status === 'cancelled' || b.status === 'expired').length
   return props.bookings.filter((b) => b.status === tabVal).length
 }
 
@@ -278,6 +279,8 @@ const filteredBookings = computed(() => {
   // Status filter
   if (currentFilter.value === 'checked_in') {
     list = list.filter((b) => b.checked_in)
+  } else if (currentFilter.value === 'cancelled') {
+    list = list.filter((b) => b.status === 'cancelled' || b.status === 'expired')
   } else if (currentFilter.value !== 'all') {
     list = list.filter((b) => b.status === currentFilter.value)
   }
@@ -302,7 +305,7 @@ const filteredBookings = computed(() => {
 function formatStatus(status: string): string {
   if (status === 'confirmed') return 'Confirmed'
   if (status === 'pending_payment') return 'Hold'
-  if (status === 'cancelled') return 'Cancelled'
+  if (status === 'cancelled' || status === 'expired') return 'Cancelled / Expired'
   return status
 }
 

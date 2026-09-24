@@ -551,16 +551,35 @@ export const useBookingStore = defineStore('booking', {
         const totalCourts = this.dbCourts.length > 0 ? this.dbCourts.length : 2
 
         // Single query: fetch all active bookings for the day with court AND paddle assignments.
-        // Statuses that count as "taking a slot": confirmed, pending_payment, held.
+        // Statuses checked: confirmed, pending_payment, held.
+        // Note: Holds only occupy a slot for up to 10 minutes. If no payment is made within 10 minutes,
+        // the hold is considered expired and the slot is freed up immediately for other players.
         const { data: bookingsData, error } = await supabase
           .from('bookings')
-          .select('id, start_time, end_time, booking_courts(court_id), booking_paddles(paddle_id, quantity)')
+          .select('id, start_time, end_time, created_at, status, booking_courts(court_id), booking_paddles(paddle_id, quantity)')
           .eq('booking_date', dateStr)
           .in('status', ['confirmed', 'pending_payment', 'held'])
 
         if (error) {
           console.error('[Supabase] fetchAvailability query error:', error)
         }
+
+        const HOLD_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes hold window
+        const activeBookings = (bookingsData || []).filter((booking: any) => {
+          if (booking.status === 'confirmed') return true
+          if (booking.status === 'pending_payment' || booking.status === 'held') {
+            if (!booking.created_at) return false
+            const createdAtTime = new Date(booking.created_at).getTime()
+            const isExpired = Date.now() - createdAtTime > HOLD_TIMEOUT_MS
+            if (isExpired) {
+              // Expired hold (> 10 mins) with no payment: free up slot and mark cancelled in DB
+              supabase.from('bookings').update({ status: 'cancelled' }).eq('id', booking.id).then(() => {})
+              return false
+            }
+            return true
+          }
+          return false
+        })
 
         const availabilityMap: Record<number, number> = {}
         const courtSlotBookedMap: Record<number, string[]> = {}
@@ -574,8 +593,8 @@ export const useBookingStore = defineStore('booking', {
           const bookedCourtIds = new Set<string>()
           const paddleReserved: Record<string, number> = {}
 
-          if (!error && bookingsData) {
-            bookingsData.forEach((booking: any) => {
+          if (!error && activeBookings.length > 0) {
+            activeBookings.forEach((booking: any) => {
               const bookingStartHour = parseInt((booking.start_time as string).split(':')[0])
               let bookingEndHour   = parseInt((booking.end_time   as string).split(':')[0])
               if (bookingEndHour === 0) bookingEndHour = 24
