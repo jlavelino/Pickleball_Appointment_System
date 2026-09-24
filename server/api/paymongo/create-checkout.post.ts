@@ -42,12 +42,12 @@ export default defineEventHandler(async (event) => {
   siteUrl = siteUrl.replace(/\/$/, '')
 
   // Map payment method types
-  // PayMongo uses 'gcash' and 'paymaya'
-  let methodTypes: string[] = ['gcash', 'paymaya']
+  // PayMongo supports 'gcash', 'paymaya', 'qrph', and 'card'
+  let methodTypes: string[] = ['gcash', 'paymaya', 'qrph', 'card']
   if (body.paymentMethod === 'gcash') {
-    methodTypes = ['gcash', 'paymaya']
+    methodTypes = ['gcash', 'qrph', 'paymaya', 'card']
   } else if (body.paymentMethod === 'maya') {
-    methodTypes = ['paymaya', 'gcash']
+    methodTypes = ['paymaya', 'qrph', 'gcash', 'card']
   }
 
   const amountInCentavos = Math.round(body.amount * 100)
