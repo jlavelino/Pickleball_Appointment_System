@@ -154,38 +154,41 @@ export function formatEndHour(label: string): string {
 }
 
 export const useBookingStore = defineStore('booking', {
-  state: (): BookingState => ({
-    year: 2026,
-    month: 8, // September
-    day: 15,
-    selectedSlots: [],
-    slotIndex: null,
-    courtIds: [],
-    courtId: null,
-    paddleQty: {},
-    foodQty: {},
-    payMethod: 'gcash',
-    holdSeconds: 10 * 60,
-    bookingRef: null,
-    createdBookingId: null,
-    bookerName: '',
-    bookerMobile: '',
-    bookerFacebook: '',
-    players: [],
-    idPhotoName: null,
-    idPhotoFile: null,
+  state: (): BookingState => {
+    const now = new Date()
+    return {
+      year: now.getFullYear(),
+      month: now.getMonth(),
+      day: now.getDate(),
+      selectedSlots: [],
+      slotIndex: null,
+      courtIds: [],
+      courtId: null,
+      paddleQty: {},
+      foodQty: {},
+      payMethod: 'gcash',
+      holdSeconds: 10 * 60,
+      bookingRef: null,
+      createdBookingId: null,
+      bookerName: '',
+      bookerMobile: '',
+      bookerFacebook: '',
+      players: [],
+      idPhotoName: null,
+      idPhotoFile: null,
 
-    dbCourts: DEFAULT_COURTS,
-    dbPaddles: DEFAULT_PADDLES,
-    dbFoodItems: DEFAULT_FOOD_GROUPS.flatMap(g => g.items),
-    isLoadingCatalog: false,
-    isSubmittingBooking: false,
+      dbCourts: DEFAULT_COURTS,
+      dbPaddles: DEFAULT_PADDLES,
+      dbFoodItems: DEFAULT_FOOD_GROUPS.flatMap(g => g.items),
+      isLoadingCatalog: false,
+      isSubmittingBooking: false,
 
-    dbSlotAvailability: {},
-    dbCourtSlotBooked: {},
-    dbPaddleSlotReserved: {},
-    isLoadingAvailability: false,
-  }),
+      dbSlotAvailability: {},
+      dbCourtSlotBooked: {},
+      dbPaddleSlotReserved: {},
+      isLoadingAvailability: false,
+    }
+  },
 
   getters: {
     courts: (s): Court[] => {
@@ -251,10 +254,24 @@ export const useBookingStore = defineStore('booking', {
 
     slots: (s): TimeSlot[] => {
       const totalCourts = s.dbCourts.length > 0 ? s.dbCourts.length : 2
+      const now = new Date()
+      const isSelectedDayToday = (
+        s.year === now.getFullYear() &&
+        s.month === now.getMonth() &&
+        s.day === now.getDate()
+      )
+      const currentHour = now.getHours()
+
       return TIME_SLOT_LABELS.map((label, i) => {
-        const count = s.dbSlotAvailability[i] !== undefined
-          ? s.dbSlotAvailability[i]
-          : totalCourts
+        // Slot index i = 0 corresponds to 8 AM (8 + i)
+        const slotHour = 8 + i
+        const isSlotPast = isSelectedDayToday && slotHour <= currentHour
+
+        const count = isSlotPast
+          ? 0
+          : (s.dbSlotAvailability[i] !== undefined
+            ? s.dbSlotAvailability[i]
+            : totalCourts)
         return { label, open: count }
       })
     },
@@ -631,6 +648,14 @@ export const useBookingStore = defineStore('booking', {
         const supabase = useSupabase()
         const dateStr = `${this.year}-${String(this.month + 1).padStart(2, '0')}-${String(this.day).padStart(2, '0')}`
 
+        // Validate date is not in the past
+        const now = new Date()
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const targetDate = new Date(this.year, this.month, this.day)
+        if (targetDate < todayMidnight) {
+          throw new Error('Cannot book dates in the past.')
+        }
+
         // Sort slot indices
         const sortedSlots = (this.selectedSlots.length > 0 ? this.selectedSlots : [this.slotIndex ?? 0]).sort((a, b) => a - b)
         const startSlotIdx = sortedSlots[0]
@@ -792,9 +817,19 @@ export const useBookingStore = defineStore('booking', {
     },
 
     setDate(year: number, month: number, day: number) {
-      this.year = year
-      this.month = month
-      this.day = day
+      const now = new Date()
+      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const targetDate = new Date(year, month, day)
+
+      if (targetDate < todayMidnight) {
+        this.year = now.getFullYear()
+        this.month = now.getMonth()
+        this.day = now.getDate()
+      } else {
+        this.year = year
+        this.month = month
+        this.day = day
+      }
       this.selectedSlots = []
       this.slotIndex = null
       this.courtIds = []
@@ -803,15 +838,17 @@ export const useBookingStore = defineStore('booking', {
     },
 
     setDay(day: number) {
-      this.day = day
-      this.selectedSlots = []
-      this.slotIndex = null
-      this.courtIds = []
-      this.courtId = null
-      this.fetchAvailability()
+      this.setDate(this.year, this.month, day)
     },
 
     prevMonth() {
+      const now = new Date()
+      const curY = now.getFullYear()
+      const curM = now.getMonth()
+      if (this.year < curY || (this.year === curY && this.month <= curM)) {
+        return
+      }
+
       this.month -= 1
       if (this.month < 0) {
         this.month = 11

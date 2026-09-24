@@ -136,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 import CalendarPicker from '~/components/booking/CalendarPicker.vue'
 import TimeSlotModal from '~/components/booking/TimeSlotModal.vue'
@@ -146,6 +146,15 @@ useHead({ title: 'PickleBook — Reserve a court' })
 
 const store = useBookingStore()
 const showModal = ref(false)
+
+onMounted(() => {
+  const now = new Date()
+  const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const selectedDate = new Date(store.year, store.month, store.day)
+  if (selectedDate < todayMidnight) {
+    store.setDate(now.getFullYear(), now.getMonth(), now.getDate())
+  }
+})
 
 const hasSelectedTimes = computed(() => {
   return store.selectedSlots.length > 0 || store.slotIndex !== null
