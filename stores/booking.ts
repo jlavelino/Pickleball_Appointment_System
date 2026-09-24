@@ -819,15 +819,87 @@ export const useBookingStore = defineStore('booking', {
         throw new Error('Failed to generate PayMongo checkout URL.')
       }
 
-      if (typeof window !== 'undefined' && response.sessionId && ref) {
+      if (typeof window !== 'undefined') {
         try {
-          sessionStorage.setItem(`paymongo_session_${ref}`, response.sessionId)
+          const holdPayload = {
+            bookingId,
+            bookingRef: ref,
+            sessionId: response.sessionId,
+            checkoutUrl: response.checkoutUrl,
+            grandTotal: this.grandTotal,
+            courtNamesLabel: this.courtNamesLabel,
+            slotRangeLabel: this.slotRangeLabel,
+            dateLabel: this.dateLabel,
+            courtIds: this.courtIds,
+            courtId: this.courtId,
+            slotIndex: this.slotIndex,
+            selectedSlots: this.selectedSlots,
+            payMethod: this.payMethod,
+            year: this.year,
+            month: this.month,
+            day: this.day,
+            createdAt: Date.now(),
+            expiresAt: Date.now() + 10 * 60 * 1000,
+          }
+          localStorage.setItem('dink_active_hold', JSON.stringify(holdPayload))
+          if (response.sessionId && ref) {
+            sessionStorage.setItem(`paymongo_session_${ref}`, response.sessionId)
+          }
         } catch (e) {
           // ignore storage error
         }
       }
 
       return response.checkoutUrl
+    },
+
+    restoreActiveHold() {
+      if (typeof window === 'undefined') return null
+      try {
+        const raw = localStorage.getItem('dink_active_hold')
+        if (!raw) return null
+        const data = JSON.parse(raw)
+        // Check if expired (> 10 mins)
+        if (data.expiresAt && Date.now() > data.expiresAt) {
+          localStorage.removeItem('dink_active_hold')
+          return null
+        }
+        if (data.bookingId) this.createdBookingId = data.bookingId
+        if (data.bookingRef) this.bookingRef = data.bookingRef
+        if (data.courtId) this.courtId = data.courtId
+        if (data.courtIds && data.courtIds.length) this.courtIds = data.courtIds
+        if (data.selectedSlots && data.selectedSlots.length) this.selectedSlots = data.selectedSlots
+        if (data.slotIndex != null) this.slotIndex = data.slotIndex
+        if (data.payMethod) this.payMethod = data.payMethod
+        if (data.year != null) this.year = data.year
+        if (data.month != null) this.month = data.month
+        if (data.day != null) this.day = data.day
+
+        return data
+      } catch {
+        return null
+      }
+    },
+
+    clearActiveHold() {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('dink_active_hold')
+      }
+      this.createdBookingId = null
+      this.bookingRef = null
+    },
+
+    async cancelCurrentHold() {
+      const bId = this.createdBookingId
+      this.clearActiveHold()
+      if (bId) {
+        try {
+          const supabase = useSupabase()
+          await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', bId)
+        } catch (err) {
+          console.warn('Could not cancel hold in DB:', err)
+        }
+      }
     },
 
     // Convenience alias

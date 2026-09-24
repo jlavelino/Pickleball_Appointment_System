@@ -196,24 +196,88 @@
               </span>
             </div>
 
-            <!-- Gate QR Access Actions -->
-            <div class="mt-3.5 pt-3.5 border-t border-[#DCE6D8] flex flex-col sm:flex-row gap-2">
-              <button
-                type="button"
-                class="flex-1 py-3 px-4 rounded-xl bg-[#0B6623] hover:bg-[#08521C] active:scale-[0.98] text-white font-bold text-[13.5px] shadow-[0_3px_12px_rgba(11,102,35,0.25)] transition-all cursor-pointer flex items-center justify-center gap-2"
-                @click="openQrModal(b)"
-              >
-                <span class="mdi mdi-qrcode-scan text-[18px] text-[#9ACD32]"></span>
-                <span>Access Gate QR Pass</span>
-              </button>
+            <!-- Active Hold Alert Banner -->
+            <div
+              v-if="isHoldActive(b)"
+              class="mt-3.5 p-3.5 rounded-xl bg-[#FFF4E5] border border-[#FED7AA] text-[#9A3412] text-[13px]"
+            >
+              <div class="flex items-center justify-between mb-1.5 font-bold">
+                <span class="flex items-center gap-1.5">
+                  <span class="mdi mdi-clock-alert-outline text-[16px] text-[#D98216]"></span>
+                  <span>Payment Pending · Hold Active</span>
+                </span>
+                <span class="text-[11.5px] bg-[#FED7AA]/60 px-2 py-0.5 rounded-md font-mono">
+                  {{ getRemainingMinutes(b) }}m left
+                </span>
+              </div>
+              <p class="m-0 text-[12.5px] text-[#7C2D12] leading-relaxed">
+                This court slot is temporarily reserved for you. Tap below to view your PayMongo QR code and complete payment.
+              </p>
+            </div>
 
-              <NuxtLink
-                :to="`/book/confirmed/${b.reference}`"
-                class="py-3 px-4 rounded-xl bg-[#FAF9F1] hover:bg-[#E8F4D8] border border-[#DCE6D8] text-[#14231C] hover:text-[#0B6623] font-bold text-[13px] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 no-underline shadow-2xs"
-              >
-                <span>Full Receipt</span>
-                <span class="mdi mdi-arrow-right text-[15px]"></span>
-              </NuxtLink>
+            <!-- Expired Hold Banner -->
+            <div
+              v-else-if="(b.status === 'pending_payment' || b.status === 'held') && !isHoldActive(b)"
+              class="mt-3.5 p-3 rounded-xl bg-[#FDE8E8] border border-[#FECACA] text-[#991B1B] text-[12.5px] flex items-center gap-2"
+            >
+              <span class="mdi mdi-alert-circle text-[16px] text-[#DC2626] shrink-0"></span>
+              <span>This reservation hold has expired and the court slot was released.</span>
+            </div>
+
+            <!-- Resume Error if any -->
+            <div
+              v-if="resumeError && resumingBookingRef === b.reference"
+              class="mt-2.5 p-2.5 rounded-lg bg-[#FDE8E8] text-[#991B1B] text-[12px]"
+            >
+              {{ resumeError }}
+            </div>
+
+            <!-- Actions based on status -->
+            <div class="mt-3.5 pt-3.5 border-t border-[#DCE6D8] flex flex-col sm:flex-row gap-2">
+              <!-- CASE 1: Active Hold: Complete Payment / Open QR Code -->
+              <template v-if="isHoldActive(b)">
+                <button
+                  type="button"
+                  class="flex-1 py-3 px-4 rounded-xl bg-[#0B6623] hover:bg-[#08521C] active:scale-[0.98] text-white font-bold text-[13.5px] shadow-[0_3px_12px_rgba(11,102,35,0.25)] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                  :disabled="resumingBookingRef === b.reference"
+                  @click="resumeCheckout(b)"
+                >
+                  <span v-if="resumingBookingRef === b.reference" class="mdi mdi-loading mdi-spin text-[18px]"></span>
+                  <span v-else class="mdi mdi-qrcode-scan text-[18px] text-[#9ACD32]"></span>
+                  <span>{{ resumingBookingRef === b.reference ? 'Opening PayMongo…' : 'Pay Now / View QR Code' }}</span>
+                </button>
+              </template>
+
+              <!-- CASE 2: Expired Hold or Cancelled -->
+              <template v-else-if="b.status === 'cancelled' || b.status === 'expired' || b.status === 'pending_payment'">
+                <NuxtLink
+                  to="/book"
+                  class="flex-1 py-3 px-4 rounded-xl bg-[#0B6623] hover:bg-[#08521C] text-white font-bold text-[13px] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 no-underline shadow-2xs"
+                >
+                  <span class="mdi mdi-calendar-plus text-[16px]"></span>
+                  <span>Book New Slot</span>
+                </NuxtLink>
+              </template>
+
+              <!-- CASE 3: Confirmed / Paid: Access Gate QR Pass & Full Receipt -->
+              <template v-else>
+                <button
+                  type="button"
+                  class="flex-1 py-3 px-4 rounded-xl bg-[#0B6623] hover:bg-[#08521C] active:scale-[0.98] text-white font-bold text-[13.5px] shadow-[0_3px_12px_rgba(11,102,35,0.25)] transition-all cursor-pointer flex items-center justify-center gap-2"
+                  @click="openQrModal(b)"
+                >
+                  <span class="mdi mdi-qrcode-scan text-[18px] text-[#9ACD32]"></span>
+                  <span>Access Gate QR Pass</span>
+                </button>
+
+                <NuxtLink
+                  :to="`/book/confirmed/${b.reference}`"
+                  class="py-3 px-4 rounded-xl bg-[#FAF9F1] hover:bg-[#E8F4D8] border border-[#DCE6D8] text-[#14231C] hover:text-[#0B6623] font-bold text-[13px] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 no-underline shadow-2xs"
+                >
+                  <span>Full Receipt</span>
+                  <span class="mdi mdi-arrow-right text-[15px]"></span>
+                </NuxtLink>
+              </template>
             </div>
           </div>
         </div>
@@ -382,6 +446,7 @@ interface BookingResult {
   food_total: number
   players: string[]
   payment_method: string | null
+  created_at?: string
 }
 
 const query    = ref('')
@@ -472,6 +537,7 @@ async function search() {
         id,
         reference,
         status,
+        created_at,
         booking_date,
         start_time,
         end_time,
@@ -584,6 +650,7 @@ async function search() {
           food_total: foodTotal,
           players: playerNames,
           payment_method: paymentMethod,
+          created_at: b.created_at,
         }
       })
 
@@ -593,6 +660,54 @@ async function search() {
     error.value = err?.message ?? 'Something went wrong. Please try again.'
   } finally {
     loading.value = false
+  }
+}
+
+function isHoldActive(b: BookingResult): boolean {
+  if (b.status !== 'pending_payment' && b.status !== 'held') return false
+  if (!b.created_at) return false
+  const diff = Date.now() - new Date(b.created_at).getTime()
+  return diff <= 10 * 60 * 1000
+}
+
+function getRemainingMinutes(b: BookingResult): number {
+  if (!b.created_at) return 0
+  const elapsed = Date.now() - new Date(b.created_at).getTime()
+  const remainingMs = Math.max(0, 10 * 60 * 1000 - elapsed)
+  return Math.max(1, Math.ceil(remainingMs / (60 * 1000)))
+}
+
+const resumingBookingRef = ref<string | null>(null)
+const resumeError = ref<string | null>(null)
+
+async function resumeCheckout(booking: BookingResult) {
+  resumingBookingRef.value = booking.reference
+  resumeError.value = null
+  try {
+    const res = await $fetch<{
+      success: boolean
+      checkoutUrl?: string
+      alreadyPaid?: boolean
+      message?: string
+    }>('/api/paymongo/resume-checkout', {
+      method: 'POST',
+      body: { bookingRef: booking.reference },
+    })
+
+    if (res?.alreadyPaid) {
+      navigateTo(`/book/confirmed/${booking.reference}`)
+      return
+    }
+
+    if (res?.checkoutUrl) {
+      window.location.href = res.checkoutUrl
+    } else {
+      throw new Error(res?.message || 'Could not retrieve payment checkout URL.')
+    }
+  } catch (err: any) {
+    resumeError.value = err?.data?.statusMessage || err?.message || 'Failed to resume payment session.'
+  } finally {
+    resumingBookingRef.value = null
   }
 }
 
