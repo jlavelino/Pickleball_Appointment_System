@@ -15,9 +15,11 @@
       <div class="flex items-center gap-2">
         <button
           type="button"
+          :disabled="isPrevMonthDisabled"
           @click="prevMonth"
           aria-label="Previous Month"
           class="cal-nav-btn"
+          :class="{ 'opacity-30 cursor-not-allowed pointer-events-none': isPrevMonthDisabled }"
         >
           <span class="mdi mdi-chevron-left text-[19px]"></span>
         </button>
@@ -105,13 +107,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useBookingStore } from '~/stores/booking'
 
 const emit = defineEmits<{ dateSelected: [] }>()
 const store = useBookingStore()
 
 const dows = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+
+function getTodayMidnight(): Date {
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate())
+}
 
 // Independent calendar view month & year so browsing other months does not overwrite selected booking date
 const viewYear = ref(store.year)
@@ -138,11 +145,9 @@ const daysInMonth = computed(() =>
   new Date(viewYear.value, viewMonth.value + 1, 0).getDate()
 )
 
-const today = new Date(2026, 8, 10) // Benchmark September 10, 2026
-
 function isPast(d: number): boolean {
   const cellDate = new Date(viewYear.value, viewMonth.value, d)
-  return cellDate < today
+  return cellDate < getTodayMidnight()
 }
 
 function isSelected(d: number): boolean {
@@ -156,7 +161,18 @@ function isFullyBooked(d: number): boolean {
   return false
 }
 
+const isPrevMonthDisabled = computed(() => {
+  const now = new Date()
+  const curY = now.getFullYear()
+  const curM = now.getMonth()
+  return (
+    viewYear.value < curY ||
+    (viewYear.value === curY && viewMonth.value <= curM)
+  )
+})
+
 function prevMonth() {
+  if (isPrevMonthDisabled.value) return
   viewMonth.value -= 1
   if (viewMonth.value < 0) {
     viewMonth.value = 11
@@ -173,9 +189,21 @@ function nextMonth() {
 }
 
 function selectDay(d: number) {
+  if (isPast(d)) return
   store.setDate(viewYear.value, viewMonth.value, d)
   emit('dateSelected')
 }
+
+onMounted(() => {
+  const todayMidnight = getTodayMidnight()
+  const selectedDate = new Date(store.year, store.month, store.day)
+  if (selectedDate < todayMidnight) {
+    const now = new Date()
+    store.setDate(now.getFullYear(), now.getMonth(), now.getDate())
+    viewYear.value = now.getFullYear()
+    viewMonth.value = now.getMonth()
+  }
+})
 </script>
 
 <style scoped>
@@ -239,7 +267,9 @@ function selectDay(d: number) {
 }
 
 .cal-day--past {
-  color: #C5C8C6;
-  cursor: not-allowed;
+  color: #C5C8C6 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  opacity: 0.35 !important;
 }
 </style>

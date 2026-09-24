@@ -1,26 +1,13 @@
 import { defineEventHandler, readBody } from 'h3'
-import fs from 'node:fs'
-import path from 'node:path'
+import { useServerSupabase } from '~~/server/utils/supabase'
 
-const uploadsDir = path.resolve(process.cwd(), 'server', 'data', 'id_photos')
-const mapFile = path.resolve(process.cwd(), 'server', 'data', 'id_photos.json')
-
-function getMap(): Record<string, string> {
-  try {
-    if (fs.existsSync(mapFile)) {
-      return JSON.parse(fs.readFileSync(mapFile, 'utf-8'))
-    }
-  } catch {}
-  return {}
-}
-
-function saveMap(map: Record<string, string>) {
-  try {
-    const dir = path.dirname(mapFile)
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(mapFile, JSON.stringify(map, null, 2), 'utf-8')
-  } catch (e) {
-    console.error('[Upload ID] Error saving id map:', e)
+function getMimeType(ext: string): string {
+  switch (ext.toLowerCase()) {
+    case 'png': return 'image/png'
+    case 'webp': return 'image/webp'
+    case 'gif': return 'image/gif'
+    case 'svg': return 'image/svg+xml'
+    default: return 'image/jpeg'
   }
 }
 
@@ -32,27 +19,54 @@ export default defineEventHandler(async (event) => {
     return { success: false, message: 'Missing photo data or booking identifiers' }
   }
 
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true })
-  }
-
   // Extract extension from filename or fallback to jpg
   const extMatch = (filename || '').match(/\.([a-zA-Z0-9]+)$/)
   const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg'
+  const mimeType = getMimeType(ext)
   const safeName = `${bookingRef || bookingId || 'id'}_${Date.now()}.${ext}`
-  const filePath = path.resolve(uploadsDir, safeName)
 
   // Remove data:image/...;base64, prefix if present
   const base64Data = photoBase64.replace(/^data:image\/\w+;base64,/, '')
   const buffer = Buffer.from(base64Data, 'base64')
-  fs.writeFileSync(filePath, buffer)
 
-  const url = `/api/booking/id-photo/${safeName}`
+  const supabase = useServerSupabase()
+  const storagePath = safeName
 
-  const map = getMap()
-  if (bookingId) map[bookingId] = url
-  if (bookingRef) map[bookingRef] = url
-  saveMap(map)
+  // Upload directly to Supabase Storage 'id-photos' bucket
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from('id-photos')
+    .upload(storagePath, buffer, {
+      contentType: mimeType,
+      upsert: true,
+    })
 
-  return { success: true, url, filename: safeName }
+  if (uploadError || !uploadData) {
+    console.error('[Upload ID] Supabase storage upload failed:', uploadError?.message)
+    return { success: false, message: uploadError?.message || 'Storage upload failed' }
+  }
+
+  // Get public URL from Supabase
+  const { data: pubData } = supabase.storage.from('id-photos').getPublicUrl(storagePath)
+  const publicUrl = pubData?.publicUrl || ''
+
+  // Update booking_guests in Supabase database
+  if (bookingId && publicUrl) {
+    const { error: dbError } = await supabase
+      .from('booking_guests')
+      .update({ id_photo_url: publicUrl })
+      .eq('booking_id', bookingId)
+
+    if (dbError) {
+      console.warn('[Upload ID] Warning: could not update booking_guests.id_photo_url:', dbError.message)
+    } else {
+      console.log(`[Upload ID] Updated booking_guests for booking ${bookingId} with Supabase URL`)
+    }
+  }
+
+  return {
+    success: true,
+    url: publicUrl,
+    filename: safeName,
+    storage: 'supabase',
+  }
 })
